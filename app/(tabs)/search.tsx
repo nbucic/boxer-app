@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import { ActivityIndicator, FlatList, Image, Text, View } from 'react-native'
 
 import { icons } from '@/constants/icons'
-import { images } from '@/constants/images'
 
 import { fetchMovies } from '@/services/api'
 import { updateSearchCount } from '@/services/appwrite'
@@ -43,8 +42,8 @@ const Search = () => {
   }, [movies])
 
   return (
-    <View className='flex-1 bg-primary'>
-      <Image source={images.bg} className='flex-1 absolute w-full z-0' resizeMode='cover' />
+    <View className='flex-1 bg-white'>
+      {/* <Image source={images.bg} className='flex-1 absolute w-full z-0' resizeMode='cover' /> */}
 
       <FlatList
         data={movies}

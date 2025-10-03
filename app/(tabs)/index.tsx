@@ -2,12 +2,11 @@ import MovieCard from "@/components/MovieCard";
 import SearchBar from "@/components/SearchBar";
 import TrendingCard from "@/components/TrendingCard";
 import { icons } from "@/constants/icons";
-import { images } from "@/constants/images";
 import { fetchMovies } from "@/services/api";
 import { getTrendingMovies } from "@/services/appwrite";
 import useFetch from "@/services/useFetch";
 import { useRouter } from "expo-router";
-import { ActivityIndicator, FlatList, Image, ScrollView, Text, View, TouchableOpacity } from "react-native";
+import { ActivityIndicator, FlatList, Image, Platform, ScrollView, Text, View } from "react-native";
 
 export default function Index() {
   const router = useRouter();
@@ -26,20 +25,16 @@ export default function Index() {
     query: ''
   }));
 
-  return (
-    <View className="flex-1 bg-primary">
-      <Image
-        source={images.bg}
-        className="absolute w-full z-0"
-        resizeMode="cover"
-      />
+  const web = Platform.OS === 'web';
 
+  return (
+    <View className="flex-1">
       <ScrollView
-        className="flex-1 px-5"
+        className="flex-1 px-2"
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ minHeight: '100%', paddingBottom: 10 }}
       >
-        <Image source={icons.logo} className="w-12 h-10 mt-20 mb-5 mx-auto" />
+        <Image source={icons.box64} className={`w-16 h-16 mx-auto ${web ? 'mt-5' : 'mt-20'} mb-5`} />
       
         {moviesLoading || trendingLoading ? (
           <ActivityIndicator
@@ -52,7 +47,7 @@ export default function Index() {
         ) : (
           <View className="flex-1 mt-5">
             <SearchBar
-              onPress={() => { router.push("/search") }}
+              onPress={() => { router.push("/movies/search") }}
               placeholder="Search for a movie"
             />
             {trendingMovies && (
@@ -97,12 +92,12 @@ export default function Index() {
         )
         }
       </ScrollView>
-      <TouchableOpacity
+      {/* <TouchableOpacity
         onPress={() => router.push("/add-movie")}
         className="absolute bottom-10 right-5 bg-secondary w-16 h-16 rounded-full justify-center items-center"
       >
         <Text className="text-white text-4xl">+</Text>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
     </View>
   );
 }

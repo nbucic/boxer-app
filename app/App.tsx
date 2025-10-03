@@ -1,11 +1,9 @@
 import {useEffect, useState} from "react";
 import {Session} from "@supabase/supabase-js";
 import {supabase} from "@/lib/supabase";
-import Auth from "@/app/(auth)/Auth";
-import {SafeAreaView} from "react-native-safe-area-context";
-import './global.css';
+import {View} from "react-native";
 
-export default function RootLayout() {
+export default function App() {
   const [session, setSession] = useState<Session | null>(null);
 
   useEffect(() => {
@@ -19,8 +17,8 @@ export default function RootLayout() {
   }, []);
 
   return (
-    <SafeAreaView>
-      {session?.user ? <></> : <Auth/>}
-    </SafeAreaView>
+    <View>
+
+    </View>
   )
 }
