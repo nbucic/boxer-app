@@ -2,7 +2,7 @@ import {useEffect, useState} from "react";
 import {Session} from "@supabase/supabase-js";
 import {supabase} from "@/lib/supabase";
 import Auth from "@/app/(auth)/Auth";
-import {SafeAreaView} from "react-native-safe-area-context";
+import {GluestackUIProvider} from '@/components/ui/gluestack-ui-provider';
 import './global.css';
 
 export default function RootLayout() {
@@ -12,15 +12,15 @@ export default function RootLayout() {
     supabase.auth.getSession().then(({data: {session}}) => {
       setSession(session);
     })
-
-    supabase.auth.onAuthStateChange((_event, session) => {
+    const {data: {subscription}} = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
     })
+    return () => subscription.unsubscribe();
   }, []);
 
   return (
-    <SafeAreaView>
+    <GluestackUIProvider>
       {session?.user ? <></> : <Auth/>}
-    </SafeAreaView>
+    </GluestackUIProvider>
   )
 }
