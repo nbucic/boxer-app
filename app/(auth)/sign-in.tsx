@@ -46,7 +46,7 @@ export default function SignIn() {
           <Text style={styles.buttonText}>Sign in</Text>
         </TouchableOpacity>
       </View>
-      <Link href="/register" style={styles.link}>Don't have an account? Register</Link>
+      <Link href="/register" style={styles.link}>Don&apos;t have an account? Register</Link>
     </View>
   );
 }

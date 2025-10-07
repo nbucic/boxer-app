@@ -1,16 +1,11 @@
-import { useEffect, useState } from 'react'
-import { ActivityIndicator, FlatList, Image, Text, View } from 'react-native'
-
-import { icons } from '@/constants/icons'
-
-import { fetchMovies } from '@/services/api'
-import { updateSearchCount } from '@/services/appwrite'
+import {useEffect, useState} from 'react'
+import {ActivityIndicator, FlatList, Image, Text, View} from 'react-native'
+import {fetchMovies} from '@/services/api'
 import useFetch from '@/services/useFetch'
-
 import MovieCard from '@/components/MovieCard'
 import SearchBar from '@/components/SearchBar'
 
-const Search = () => {
+export default function Search() {
   const [searchQuery, setSearchQuery] = useState('');
 
   const {
@@ -19,27 +14,22 @@ const Search = () => {
     error,
     refetch: loadMovies,
     reset,
-  } = useFetch(() => fetchMovies({ query: searchQuery }), false);
+  } = useFetch(() => fetchMovies({query: searchQuery}), false);
 
   useEffect(() => {
+      const timeoutId = setTimeout(async () => {
+        if (searchQuery.trim()) {
+          await loadMovies();
 
-    const timeoutId = setTimeout(async () => {
-      if (searchQuery.trim()) {
-        await loadMovies();
+        } else {
+          reset();
+        }
+      }, 500);
 
-      } else {
-        reset();
-      }
-    }, 500);
-
-    return () => clearTimeout(timeoutId);
-  }, [searchQuery]);
-
-  useEffect(() => {
-    if (movies?.length > 0 && movies?.[0]) {
-      updateSearchCount(searchQuery, movies[0]);
-    }
-  }, [movies])
+      return () => clearTimeout(timeoutId);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [searchQuery]);
 
   return (
     <View className='flex-1 bg-white'>
@@ -47,7 +37,7 @@ const Search = () => {
 
       <FlatList
         data={movies}
-        renderItem={({ item }) => <MovieCard {...item} />}
+        renderItem={({item}) => <MovieCard {...item} />}
         keyExtractor={(item) => item.id.toString()}
         className='px-5'
         numColumns={3}
@@ -62,7 +52,7 @@ const Search = () => {
         ListHeaderComponent={
           <>
             <View className='w-full flex-row justify-center mt-20 items-center'>
-              <Image source={icons.logo} className='w-12 h-10' />
+              <Image className='w-12 h-10'/>
             </View>
             <View className='my-5'>
               <SearchBar
@@ -72,7 +62,7 @@ const Search = () => {
               />
             </View>
             {loading && (
-              <ActivityIndicator size="large" color={"#0000ff"} className='my-3' />
+              <ActivityIndicator size="large" color={"#0000ff"} className='my-3'/>
             )}
             {error && (
               <Text className="text-red-500 px-5 my-3">
@@ -101,5 +91,3 @@ const Search = () => {
     </View>
   )
 }
-
-export default Search

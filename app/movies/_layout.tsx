@@ -2,7 +2,7 @@ import * as NavigationBar from 'expo-navigation-bar';
 import {Stack} from "expo-router";
 import React, {useEffect} from 'react';
 import {Platform, StatusBar} from "react-native";
-import {AuthProvider, useProtectedRoute} from '@/lib/auth';
+import {AuthProvider} from '@/lib/auth';
 import '../global.css';
 
 const Layout = () => {
