@@ -9,6 +9,7 @@ import {AlertCircleIcon, EyeIcon, EyeOffIcon} from "@/components/ui/icon";
 import {HStack} from "@/components/ui/hstack";
 import {Button, ButtonText} from "@/components/ui/button";
 import {Controller, FieldValues, useForm} from "react-hook-form";
+import {AuthWeakPasswordError} from "@supabase/auth-js";
 
 interface Props {
   email: string;
@@ -18,9 +19,7 @@ interface Props {
 export default function Auth() {
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [loading, setLoading] = useState(false);
-  // const [email, setEmail] = useState('');
-  // const [password, setPassword] = useState('');
-  const {control, handleSubmit, formState: {errors}} = useForm({
+  const {control, handleSubmit, formState: {errors}, setError} = useForm({
     defaultValues: {
       email: '',
       password: '',
@@ -56,9 +55,31 @@ export default function Auth() {
     });
 
     if (error) {
-      console.log({error});
-      Alert.alert('Error', error.message);
+      if (error instanceof AuthWeakPasswordError) {
+        let types: { [key: string]: string } = {};
+        error.reasons.map(reason => {
+          switch (reason) {
+            case 'characters':
+              types['pattern'] = 'Password must contain at least small letter, uppercase letter, number and special sign';
+              break;
+            case 'length':
+              types['minLength'] = 'Password should be at least 8 characters';
+              break;
+          }
+        })
+
+        if (types) {
+          setError('password', {
+            types
+          })
+        }
+
+        setLoading(false);
+        return;
+      }
     }
+
+    console.log({session});
 
     if (!session) {
       Alert.alert('Please check your inbox for email verification');
@@ -108,10 +129,6 @@ export default function Auth() {
             name={'password'}
             rules={{
               required: 'Password is required',
-              minLength: {
-                value: 8,
-                message: 'Password must be at least 8 characters',
-              },
             }}
             render={({field: {onChange, onBlur, value}}) => (
               <FormControl isInvalid={!!errors.password} size={'md'}>
@@ -129,10 +146,18 @@ export default function Auth() {
                       <InputIcon as={showPassword ? EyeIcon : EyeOffIcon}/>
                     </InputSlot>
                   </Input>
-                  <FormControlError>
-                    <FormControlErrorIcon as={AlertCircleIcon}/>
-                    <FormControlErrorText>{errors.password?.message}</FormControlErrorText>
-                  </FormControlError>
+                  {errors.password?.message && (
+                    <FormControlError>
+                      <FormControlErrorIcon as={AlertCircleIcon}/>
+                      <FormControlErrorText>{errors.password?.message}</FormControlErrorText>
+                    </FormControlError>
+                  )}
+                  {errors.password?.types && Object.entries(errors.password.types).map(([key, value]) => (
+                    <FormControlError key={key}>
+                      <FormControlErrorIcon as={AlertCircleIcon}/>
+                      <FormControlErrorText>{value}</FormControlErrorText>
+                    </FormControlError>
+                  ))}
                 </VStack>
               </FormControl>
             )}
