@@ -36,21 +36,21 @@ const TabIcon = ({ focused, icon, iconFocused, title }: TabIconProps) => {
 };
 
 export default function TabLayout() {
-    const [modalVisible, setAddNewThingsModalVisible] = useState(false);
+    // const [modalVisible, setAddNewThingsModalVisible] = useState(false);
     const router = useRouter();
 
-    const handleMenuPress = (href?: string) => {
-        setAddNewThingsModalVisible(false);
-        if (href) {
-            router.push(href as any);
-        }
-    };
+    // const handleMenuPress = (href?: string) => {
+    //     setAddNewThingsModalVisible(false);
+    //     if (href) {
+    //         router.push(href as any);
+    //     }
+    // };
 
-    const ModalElement = ({ href, text }: ModalElementProps) => (
-        <TouchableOpacity className='w-full items-center p-5' onPress={() => handleMenuPress(href)}>
-            <Text className='text-lg text-blue-600'>{text}</Text>
-        </TouchableOpacity>
-    )
+    // const ModalElement = ({ href, text }: ModalElementProps) => (
+    //     <TouchableOpacity className='w-full items-center p-5' onPress={() => handleMenuPress(href)}>
+    //         <Text className='text-lg text-blue-600'>{text}</Text>
+    //     </TouchableOpacity>
+    // )
 
     return (
         <>
@@ -74,36 +74,36 @@ export default function TabLayout() {
                     name="index"
                     options={{
                         title: "Home",
-                        headerShown: false,
+                        headerShown: true,
                         tabBarIcon: ({ focused }) => (
-                            <TabIcon focused={focused && !modalVisible} iconFocused={"home"} icon={"home-outline"} title="Home" />
+                            <TabIcon focused={focused} iconFocused={"home"} icon={"home-outline"} title="Home" />
                         ),
                     }}
                 />
                 {/* This is the fake tab for the '+' button */}
-                <Tabs.Screen
-                    name="add"
-                    options={{
-                        title: "Add",
-                        headerShown: false,
-                        tabBarIcon: ({ focused }) => (
-                            <TabIcon focused={modalVisible} iconFocused={"add-circle-outline"} icon={"add"} title="Add" />
-                        ),
-                    }}
-                    listeners={{
-                        tabPress: (e) => {
-                            e.preventDefault();
-                            setAddNewThingsModalVisible(true);
-                        },
-                    }}
-                />
+                {/*<Tabs.Screen*/}
+                {/*    name="add"*/}
+                {/*    options={{*/}
+                {/*        title: "Add",*/}
+                {/*        headerShown: false,*/}
+                {/*        tabBarIcon: ({ focused }) => (*/}
+                {/*            <TabIcon focused={modalVisible} iconFocused={"add-circle-outline"} icon={"add"} title="Add" />*/}
+                {/*        ),*/}
+                {/*    }}*/}
+                {/*    listeners={{*/}
+                {/*        tabPress: (e) => {*/}
+                {/*            e.preventDefault();*/}
+                {/*            setAddNewThingsModalVisible(true);*/}
+                {/*        },*/}
+                {/*    }}*/}
+                {/*/>*/}
                 <Tabs.Screen
                     name="search"
                     options={{
                         title: "Search",
                         headerShown: false,
                         tabBarIcon: ({ focused }) => (
-                            <TabIcon focused={focused && !modalVisible} iconFocused={"search"} icon={"search-outline"} title="Search" />
+                            <TabIcon focused={focused} iconFocused={"search"} icon={"search-outline"} title="Search" />
                         ),
                     }}
                 />
@@ -113,30 +113,30 @@ export default function TabLayout() {
                         title: 'Profile',
                         headerShown: false,
                         tabBarIcon: ({ focused }) => (
-                            <TabIcon focused={focused && !modalVisible} iconFocused={"person"} icon={"person-outline"} title="Profile" />
+                            <TabIcon focused={focused} iconFocused={"person"} icon={"person-outline"} title="Profile" />
                         ),
                     }}
                 />
             </Tabs>
 
-            <Modal
-                animationType="slide"
-                transparent={true}
-                visible={modalVisible}
-                onRequestClose={() => handleMenuPress()}
-            >
-                <Pressable
-                    className='flex flex-1 justify-end bg-transparent/10'
-                    onPress={() => handleMenuPress()}
-                >
-                    <View
-                        className='m-5 bg-white b-20 rounded-xl items-center shadow-md shadow-black'>
-                        <ModalElement href='/box/add' text='New box' />
-                        <ModalElement href='/new-comment' text='New comment' />
-                        <ModalElement href='/new-author' text='New author' />
-                    </View>
-                </Pressable>
-            </Modal>
+            {/*<Modal*/}
+            {/*    animationType="slide"*/}
+            {/*    transparent={true}*/}
+            {/*    visible={modalVisible}*/}
+            {/*    onRequestClose={() => handleMenuPress()}*/}
+            {/*>*/}
+            {/*    <Pressable*/}
+            {/*        className='flex flex-1 justify-end bg-transparent/10'*/}
+            {/*        onPress={() => handleMenuPress()}*/}
+            {/*    >*/}
+            {/*        <View*/}
+            {/*            className='m-5 bg-white b-20 rounded-xl items-center shadow-md shadow-black'>*/}
+            {/*            <ModalElement href='/box/add' text='New box' />*/}
+            {/*            <ModalElement href='/new-comment' text='New comment' />*/}
+            {/*            <ModalElement href='/new-author' text='New author' />*/}
+            {/*        </View>*/}
+            {/*    </Pressable>*/}
+            {/*</Modal>*/}
         </>
     );
 }

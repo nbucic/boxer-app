@@ -10,6 +10,7 @@ import {
 import { cssInterop } from 'nativewind';
 import type { VariantProps } from '@gluestack-ui/utils/nativewind-utils';
 import { PrimitiveIcon, UIIcon } from '@gluestack-ui/core/icon/creator';
+import {className} from "postcss-selector-parser";
 
 const SCOPE = 'FORM_CONTROL';
 
