@@ -4,6 +4,7 @@ import {supabase} from "@/lib/supabase";
 import Auth from "@/app/(auth)/Auth";
 import {GluestackUIProvider} from '@/components/ui/gluestack-ui-provider';
 import './global.css';
+import Index from "@/app/(tabs)";
 
 export default function RootLayout() {
   const [session, setSession] = useState<Session | null>(null);
@@ -20,7 +21,7 @@ export default function RootLayout() {
 
   return (
     <GluestackUIProvider>
-      {session?.user ? <></> : <Auth/>}
+      {session?.user ? <Index/> : <Auth/>}
     </GluestackUIProvider>
   )
 }
