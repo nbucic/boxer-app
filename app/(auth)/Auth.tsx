@@ -55,8 +55,6 @@ export default function Auth() {
       }
     });
 
-    debugger;
-
     if (error) {
       console.log({error});
       Alert.alert('Error', error.message);
