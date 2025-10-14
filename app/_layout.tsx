@@ -1,51 +1,46 @@
-import { useEffect, useState } from "react";
-import { Session } from "@supabase/supabase-js";
-import { supabase } from "@/lib/supabase";
+import { useEffect, useState } from 'react';
+import { Session } from '@supabase/supabase-js';
+import { supabase } from '@/lib/supabase';
 import { GluestackUIProvider } from '@/components/ui/gluestack-ui-provider';
 import './global.css';
-import { Stack, useRouter, useSegments } from "expo-router";
+import { Stack } from 'expo-router';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-// Custom hook to manage session and navigation
-function useProtectedRoute(session: Session | null) {
-    const segments = useSegments();
-    const router = useRouter();
-
-    useEffect(() => {
-        const inAuthGroup = segments[0] === '(auth)';
-
-        // Redirect to the main app if the user is signed in and is on a page in the auth group
-        if (session && inAuthGroup) {
-            router.replace('/(tabs)');
-        } else if (!session && !inAuthGroup) {
-            // Redirect to the auth page if the user is not signed in and not on a page in the auth group
-            router.replace('/(auth)/Auth');
-        }
-    }, [session, segments, router]);
-}
+const queryClient = new QueryClient();
 
 export default function RootLayout() {
-    const [session, setSession] = useState<Session | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
 
-    useEffect(() => {
-        supabase.auth.getSession().then(({ data: { session } }) => {
-            setSession(session);
-        });
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
 
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-            setSession(session);
-        });
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
 
-        return () => subscription.unsubscribe();
-    }, []);
+    return () => subscription.unsubscribe();
+  }, []);
 
-    useProtectedRoute(session);
-
-    return (
+  return (
+    <SafeAreaView style={{ flex: 1 }}>
+      <QueryClientProvider client={queryClient}>
         <GluestackUIProvider>
-            <Stack screenOptions={{ headerShown: false }}>
-                <Stack.Screen name="(tabs)" />
-                <Stack.Screen name="(auth)/Auth" />
-            </Stack>
+          <Stack screenOptions={{ headerShown: false }}>
+            <Stack.Protected guard={!!session}>
+              <Stack.Screen name="(tabs)" />
+            </Stack.Protected>
+
+            <Stack.Protected guard={!session}>
+              <Stack.Screen name="(auth)/auth" />
+            </Stack.Protected>
+          </Stack>
         </GluestackUIProvider>
-    );
+      </QueryClientProvider>
+    </SafeAreaView>
+  );
 }

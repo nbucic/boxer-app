@@ -1,15 +1,21 @@
-import {supabase} from "@/lib/supabase";
-import {Alert, View} from "react-native";
-import {useState} from "react";
-import {Input, InputField, InputIcon, InputSlot} from "@/components/ui/input";
-import {VStack} from "@/components/ui/vstack";
-import {FormControl, FormControlError, FormControlErrorIcon, FormControlErrorText} from "@/components/ui/form-control";
-import {Text} from "@/components/ui/text";
-import {AlertCircleIcon, EyeIcon, EyeOffIcon} from "@/components/ui/icon";
-import {HStack} from "@/components/ui/hstack";
-import {Button, ButtonText} from "@/components/ui/button";
-import {Controller, FieldValues, useForm} from "react-hook-form";
-import {AuthWeakPasswordError} from "@supabase/auth-js";
+import { supabase } from '@/lib/supabase';
+import { Alert, View } from 'react-native';
+import { useState } from 'react';
+import { Input, InputField, InputIcon, InputSlot } from '@/components/ui/input';
+import { VStack } from '@/components/ui/vstack';
+import {
+  FormControl,
+  FormControlError,
+  FormControlErrorIcon,
+  FormControlErrorText,
+} from '@/components/ui/form-control';
+import { Text } from '@/components/ui/text';
+import { AlertCircleIcon, EyeIcon, EyeOffIcon } from '@/components/ui/icon';
+import { HStack } from '@/components/ui/hstack';
+import { Button, ButtonText } from '@/components/ui/button';
+import { Controller, FieldValues, useForm } from 'react-hook-form';
+import { AuthWeakPasswordError } from '@supabase/auth-js';
+import { router } from 'expo-router';
 
 interface Props {
   email: string;
@@ -19,59 +25,66 @@ interface Props {
 export default function Auth() {
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [loading, setLoading] = useState(false);
-  const {control, handleSubmit, formState: {errors}, setError} = useForm({
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+    setError,
+  } = useForm({
     defaultValues: {
       email: '',
       password: '',
-    }
+    },
   });
 
   const handleShowingPassword = () => {
-    setShowPassword(state => (!state));
-  }
+    setShowPassword((state) => !state);
+  };
 
   const signInWithEmail = async (data: FieldValues) => {
     setLoading(true);
-    const {error} = await supabase.auth.signInWithPassword(data as Props);
+    const { error } = await supabase.auth.signInWithPassword(data as Props);
 
     if (error) {
-      console.log({error});
+      console.log({ error });
       Alert.alert('Error', error.message);
     }
 
     setLoading(false);
-  }
+    router.navigate('/(tabs)');
+  };
 
   const signUpWithEmail = async (data: FieldValues) => {
     setLoading(true);
     const {
-      data: {session},
+      data: { session },
       error,
     } = await supabase.auth.signUp({
-      ...data as Props,
+      ...(data as Props),
       options: {
-        emailRedirectTo: `exp://192.168.1.129:8081/--/auth/callback`
-      }
+        emailRedirectTo: `exp://192.168.1.129:8081/--/auth/callback`,
+      },
     });
 
     if (error) {
       if (error instanceof AuthWeakPasswordError) {
         let types: { [key: string]: string } = {};
-        error.reasons.map(reason => {
+        error.reasons.map((reason) => {
           switch (reason) {
             case 'characters':
-              types['pattern'] = 'Password must contain at least small letter, uppercase letter, number and special sign';
+              types['pattern'] =
+                'Password must contain at least small letter, uppercase letter, number and special sign';
               break;
             case 'length':
               types['minLength'] = 'Password should be at least 8 characters';
               break;
           }
-        })
+        });
 
         if (types) {
           setError('password', {
-            types
-          })
+            types,
+          });
         }
 
         setLoading(false);
@@ -79,14 +92,12 @@ export default function Auth() {
       }
     }
 
-    console.log({session});
-
     if (!session) {
       Alert.alert('Please check your inbox for email verification');
     }
 
     setLoading(false);
-  }
+  };
 
   return (
     <View className={'flex-1 justify-center'}>
@@ -102,7 +113,7 @@ export default function Auth() {
                 message: 'Email invalid',
               },
             }}
-            render={({field: {onChange, onBlur, value}}) => (
+            render={({ field: { onChange, onBlur, value } }) => (
               <FormControl isInvalid={!!errors.email} size={'md'}>
                 <VStack space={'xs'}>
                   <Text className={'text-typography-500'}>Email</Text>
@@ -117,8 +128,10 @@ export default function Auth() {
                     />
                   </Input>
                   <FormControlError>
-                    <FormControlErrorIcon as={AlertCircleIcon}/>
-                    <FormControlErrorText>{errors.email?.message}</FormControlErrorText>
+                    <FormControlErrorIcon as={AlertCircleIcon} />
+                    <FormControlErrorText>
+                      {errors.email?.message}
+                    </FormControlErrorText>
                   </FormControlError>
                 </VStack>
               </FormControl>
@@ -130,34 +143,43 @@ export default function Auth() {
             rules={{
               required: 'Password is required',
             }}
-            render={({field: {onChange, onBlur, value}}) => (
+            render={({ field: { onChange, onBlur, value } }) => (
               <FormControl isInvalid={!!errors.password} size={'md'}>
                 <VStack space={'xs'}>
                   <Text className={'text-typography-500'}>Password</Text>
                   <Input className={'text-center'}>
-                    <InputField type={showPassword ? 'text' : 'password'}
-                                placeholder={'password'}
-                                onBlur={onBlur}
-                                onChangeText={onChange}
-                                value={value}
-                                autoCapitalize={'none'}
+                    <InputField
+                      type={showPassword ? 'text' : 'password'}
+                      placeholder={'password'}
+                      onBlur={onBlur}
+                      onChangeText={onChange}
+                      value={value}
+                      autoCapitalize={'none'}
                     />
-                    <InputSlot className={'pr-3'} onPress={handleShowingPassword}>
-                      <InputIcon as={showPassword ? EyeIcon : EyeOffIcon}/>
+                    <InputSlot
+                      className={'pr-3'}
+                      onPress={handleShowingPassword}
+                    >
+                      <InputIcon as={showPassword ? EyeIcon : EyeOffIcon} />
                     </InputSlot>
                   </Input>
                   {errors.password?.message && (
                     <FormControlError>
-                      <FormControlErrorIcon as={AlertCircleIcon}/>
-                      <FormControlErrorText>{errors.password?.message}</FormControlErrorText>
+                      <FormControlErrorIcon as={AlertCircleIcon} />
+                      <FormControlErrorText>
+                        {errors.password?.message}
+                      </FormControlErrorText>
                     </FormControlError>
                   )}
-                  {errors.password?.types && Object.entries(errors.password.types).map(([key, value]) => (
-                    <FormControlError key={key}>
-                      <FormControlErrorIcon as={AlertCircleIcon}/>
-                      <FormControlErrorText>{value}</FormControlErrorText>
-                    </FormControlError>
-                  ))}
+                  {errors.password?.types &&
+                    Object.entries(errors.password.types).map(
+                      ([key, value]) => (
+                        <FormControlError key={key}>
+                          <FormControlErrorIcon as={AlertCircleIcon} />
+                          <FormControlErrorText>{value}</FormControlErrorText>
+                        </FormControlError>
+                      )
+                    )}
                 </VStack>
               </FormControl>
             )}
@@ -181,5 +203,5 @@ export default function Auth() {
         </VStack>
       </View>
     </View>
-  )
+  );
 }
