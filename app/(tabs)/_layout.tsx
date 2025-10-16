@@ -56,28 +56,28 @@ export default function TabLayout() {
           name="index"
           options={{
             title: 'Home',
-            headerShown: true,
+            headerShown: false,
             tabBarIcon: ({ focused }) => (
               <TabIcon
-                icon="home-outline"
-                iconFocused="home"
+                icon={'home-outline'}
+                iconFocused={'home'}
                 focused={focused}
-                title="Home"
+                title={'Home'}
               />
             ),
           }}
         />
         <Tabs.Screen
-          name="search"
+          name="locations"
           options={{
-            title: 'Search',
+            title: 'Locations',
             headerShown: false,
             tabBarIcon: ({ focused }) => (
               <TabIcon
-                icon="search-outline"
-                iconFocused="search"
+                icon={'location-outline'}
+                iconFocused={'location'}
                 focused={focused}
-                title="Search"
+                title={'Locations'}
               />
             ),
           }}
@@ -89,10 +89,10 @@ export default function TabLayout() {
             headerShown: false,
             tabBarIcon: ({ focused }) => (
               <TabIcon
-                icon="person-outline"
-                iconFocused="person"
+                icon={'person-outline'}
+                iconFocused={'person'}
                 focused={focused}
-                title="Profile"
+                title={'Profile'}
               />
             ),
           }}

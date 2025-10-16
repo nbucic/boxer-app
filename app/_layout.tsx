@@ -6,6 +6,7 @@ import './global.css';
 import { Stack } from 'expo-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 const queryClient = new QueryClient();
 
@@ -29,17 +30,19 @@ export default function RootLayout() {
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <QueryClientProvider client={queryClient}>
-        <GluestackUIProvider>
-          <Stack screenOptions={{ headerShown: false }}>
-            <Stack.Protected guard={!!session}>
-              <Stack.Screen name="(tabs)" />
-            </Stack.Protected>
+        <GestureHandlerRootView style={{ flex: 1 }}>
+          <GluestackUIProvider>
+            <Stack screenOptions={{ headerShown: false }}>
+              <Stack.Protected guard={!!session}>
+                <Stack.Screen name="(tabs)" />
+              </Stack.Protected>
 
-            <Stack.Protected guard={!session}>
-              <Stack.Screen name="(auth)/auth" />
-            </Stack.Protected>
-          </Stack>
-        </GluestackUIProvider>
+              <Stack.Protected guard={!session}>
+                <Stack.Screen name="(auth)/auth" />
+              </Stack.Protected>
+            </Stack>
+          </GluestackUIProvider>
+        </GestureHandlerRootView>
       </QueryClientProvider>
     </SafeAreaView>
   );
