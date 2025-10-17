@@ -90,7 +90,7 @@ export default function Profile() {
       reset({ ...data, new_avatar_asset: null });
       setAvatarPreview(data.avatar_url); // Set initial preview
     }
-  }, [data]);
+  }, [data, reset]);
 
   const handleImageChange = (image: ImagePickerAsset) => {
     setValue('new_avatar_asset', image, { shouldDirty: true });
@@ -146,16 +146,18 @@ export default function Profile() {
 
       <View className={'p-4 w-full'}>
         <VStack className={'gap-4'}>
-          <Controller
-            control={control}
-            name="new_avatar_asset"
-            render={() => (
-              <Avatar
-                avatarUrl={avatarPreview}
-                onImageChange={handleImageChange}
-              />
-            )}
-          />
+          <HStack className={'items-center justify-center gap-3'}>
+            <Controller
+              control={control}
+              name="new_avatar_asset"
+              render={() => (
+                <Avatar
+                  avatarUrl={avatarPreview}
+                  onImageChange={handleImageChange}
+                />
+              )}
+            />
+          </HStack>
 
           <Controller
             control={control}

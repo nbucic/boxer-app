@@ -1,14 +1,5 @@
 import { supabase } from '@/lib/supabase';
-
-export interface LocationFormData {
-  name: string;
-  description?: string;
-}
-
-export interface Location extends LocationFormData {
-  id: string;
-  user_id: string;
-}
+import { Location, LocationFormData } from '@/types/location';
 
 const TABLE_NAME = 'locations';
 export const createNewLocation = async (
@@ -32,8 +23,23 @@ export const createNewLocation = async (
   }
 };
 
-export const getLocationsForCurrentUser = async (): Promise<Location[]> => {
-  const { data, error } = await supabase.from(TABLE_NAME).select();
+export const getLocations = async ({
+  search,
+  limit,
+}: { search?: string; limit?: number } = {}): Promise<Location[]> => {
+  let query = supabase.from(TABLE_NAME).select();
+
+  if (search) {
+    query = query.or(`name.ilike.%${search}%,description.ilike.%${search}%`);
+  }
+
+  if (limit) {
+    query = query.limit(limit);
+  }
+
+  query = query.order('updated_at', { ascending: false });
+
+  const { data, error } = await query;
 
   if (error) {
     console.log('Get locations error: ', error);
