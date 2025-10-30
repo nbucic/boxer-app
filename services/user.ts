@@ -1,6 +1,7 @@
 import { supabase } from '@/lib/supabase';
 import { ImagePickerAsset } from 'expo-image-picker';
 import { Platform } from 'react-native';
+import { getAvatarStorageInformation } from '@/lib/helpers/supabase/storage';
 
 export interface User {
   id: string;
@@ -11,16 +12,6 @@ export interface User {
 
 export interface UpdateUserPayload extends User {
   new_avatar_asset?: ImagePickerAsset | null;
-}
-
-interface IAvatarStorageInformationRequest {
-  userId?: string;
-  extension?: string;
-}
-
-interface IAvatarStorageInformationResponse {
-  bucket: string;
-  path?: string;
 }
 
 export const getCurrentUser = async (): Promise<User> => {
@@ -124,22 +115,4 @@ export const updateCurrentUser = async (
       throw uploadError;
     }
   }
-};
-
-export const getAvatarStorageInformation = ({
-  userId,
-  extension,
-}: IAvatarStorageInformationRequest): IAvatarStorageInformationResponse => {
-  let response: IAvatarStorageInformationResponse = {
-    bucket: process.env.EXPO_PUBLIC_SUPABASE_STORAGE_AVATAR_BUCKET || '',
-  };
-
-  if (userId && extension) {
-    response = {
-      path: `${userId}/avatar.${extension}`,
-      ...response,
-    };
-  }
-
-  return response;
 };

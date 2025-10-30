@@ -21,10 +21,10 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   createNewLocation,
   getLocation,
-  LocationFormData,
   updateLocation,
 } from '@/services/location';
 import { useEffect } from 'react';
+import { LocationFormData } from '@/types/location';
 
 export default function EditLocation() {
   const { id: locationId } = useLocalSearchParams<{ id: string }>();
@@ -128,7 +128,7 @@ export default function EditLocation() {
                   placeholder={'Brief description'}
                   onBlur={onBlur}
                   onChangeText={onChange}
-                  value={value}
+                  value={value || ''}
                 />
               </Textarea>
             </FormControl>

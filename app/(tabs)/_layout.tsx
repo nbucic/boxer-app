@@ -68,6 +68,21 @@ export default function TabLayout() {
           }}
         />
         <Tabs.Screen
+          name={'boxes'}
+          options={{
+            title: 'Boxes',
+            headerShown: false,
+            tabBarIcon: ({ focused }: { focused: boolean }) => (
+              <TabIcon
+                icon={'cube-outline'}
+                iconFocused={'cube'}
+                focused={focused}
+                title={'Boxes'}
+              />
+            ),
+          }}
+        />
+        <Tabs.Screen
           name="locations"
           options={{
             title: 'Locations',

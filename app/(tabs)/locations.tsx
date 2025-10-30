@@ -1,38 +1,24 @@
-import {
-  ActivityIndicator,
-  Alert,
-  FlatList,
-  TouchableOpacity,
-  View,
-} from 'react-native';
-import { Text } from '@/components/ui/text';
-import Fab from '@/components/Fab';
-import { router, useFocusEffect } from 'expo-router';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import {
-  deleteLocation,
-  getLocationsForCurrentUser,
-  Location,
-} from '@/services/location';
-import { SwipeableMethods } from 'react-native-gesture-handler/ReanimatedSwipeable';
-import { EditIcon, Icon, TrashIcon } from '@/components/ui/icon';
-import { useCallback, useRef } from 'react';
 // noinspection JSDeprecatedSymbols,XmlDeprecatedElement
-import Swipeable from 'react-native-gesture-handler/Swipeable';
+import { ActivityIndicator, Alert, View } from 'react-native';
+import { Text } from '@/components/ui/text';
+import { router } from 'expo-router';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { deleteLocation, getLocations } from '@/services/location';
+import { SwipeableMethods } from 'react-native-gesture-handler/ReanimatedSwipeable';
+import { useRef } from 'react';
+import WithFab from '@/components/layout/withFab';
+import { ListHeader } from '@/components/list/ListHeader';
+import { ItemsList } from '@/components/box/ItemsList';
+import { Location } from '@/types/location';
+import { LocationCard } from '@/components/list/LocationCard';
 
 export default function Locations() {
   const queryClient = useQueryClient();
   const swipeableRefs = useRef<{ [key: string]: SwipeableMethods | null }>({});
-  const { data, status, error, isFetching, refetch } = useQuery({
+  const { data, status, error, isFetching, refetch, isRefetching } = useQuery({
     queryKey: ['locations'],
-    queryFn: getLocationsForCurrentUser,
+    queryFn: () => getLocations({}),
   });
-
-  useFocusEffect(
-    useCallback(() => {
-      void refetch();
-    }, [refetch])
-  );
 
   const deleteMutation = useMutation({
     mutationFn: deleteLocation,
@@ -62,105 +48,28 @@ export default function Locations() {
     );
   }
 
-  const RightAction = ({ onPress }: { onPress: () => void }) => {
-    return (
-      <TouchableOpacity
-        className={'bg-red-500 justify-center items-center w-20 h-20'}
-        onPress={onPress}
-      >
-        <View
-          style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
-        >
-          <Icon as={TrashIcon} />
-        </View>
-      </TouchableOpacity>
-    );
-  };
-
-  const LeftAction = ({ onPress }: { onPress: () => void }) => {
-    return (
-      <TouchableOpacity
-        className={'bg-blue-500 justify-center items-center w-20 h-20'}
-        onPress={onPress}
-      >
-        <View
-          style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
-        >
-          <Icon as={EditIcon} />
-        </View>
-      </TouchableOpacity>
-    );
-  };
-
-  const renderDeprecatedSwipeable = ({ item }: { item: Location }) => {
-    return (
-      <Swipeable
-        ref={(ref) => {
-          swipeableRefs.current[item.id] = ref;
-        }}
-        renderLeftActions={() => (
-          <LeftAction
-            onPress={() => {
-              // console.log('LEFT ACTION FIRED!');
-              // swipeableRefs.current[item.id]?.close();
-              router.push(`/modal/editLocation?id=${item.id}`);
-              swipeableRefs.current[item.id]?.close();
-            }}
-          />
-        )}
-        renderRightActions={() => (
-          <RightAction
-            onPress={() => {
-              // console.log('RIGHT ACTION FIRED!');
-              // swipeableRefs.current[item.id]?.close();
-              Alert.alert(
-                'Delete Location',
-                `Are you sure you want to delete ${item.name}?`,
-                [
-                  {
-                    text: 'Cancel',
-                    style: 'cancel',
-                    onPress: () => swipeableRefs.current[item.id]?.close(),
-                  },
-                  {
-                    text: 'Delete',
-                    style: 'destructive',
-                    onPress: () => {
-                      deleteMutation.mutate(item.id);
-                      swipeableRefs.current[item.id]?.close();
-                    },
-                  },
-                ]
-              );
-            }}
-          />
-        )}
-      >
-        <View className={'p-4 border-b border-outline-200 bg-background-0'}>
-          <Text className={'text-lg font-medium'}>{item.name}</Text>
-          {item.description && (
-            <Text className={'text-sm text-typography-500 text-right'}>
-              '{item.description}'
-            </Text>
-          )}
-        </View>
-      </Swipeable>
-    );
-  };
-
   return (
-    <View className={'flex-1'}>
-      <FlatList
-        contentContainerStyle={{ paddingBottom: 60 }}
-        data={data}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={renderDeprecatedSwipeable}
+    <WithFab onFabPress={() => router.push('/modal/editLocation')}>
+      <ItemsList
+        data={data || []}
+        renderItem={({ item }) => (
+          <LocationCard
+            item={item as Location}
+            onDelete={deleteMutation.mutate}
+            setRef={(ref) => (swipeableRefs.current[item.id] = ref)}
+            close={() => swipeableRefs.current[item.id]?.close()}
+          />
+        )}
         ListHeaderComponent={
-          <Text className={'text-3xl p-4 justify-center'}>Locations</Text>
+          <ListHeader
+            title="Locations"
+            refetch={refetch}
+            isRefetching={isRefetching}
+          />
         }
-        indicatorStyle={'black'}
+        isRefetching={isRefetching}
+        refetch={refetch}
       />
-      <Fab onPress={() => router.push('/modal/editLocation')} />
-    </View>
+    </WithFab>
   );
 }

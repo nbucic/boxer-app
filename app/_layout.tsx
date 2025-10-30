@@ -5,8 +5,9 @@ import { GluestackUIProvider } from '@/components/ui/gluestack-ui-provider';
 import './global.css';
 import { Stack } from 'expo-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { Platform, StatusBar } from 'react-native';
+import * as NavigationBar from 'expo-navigation-bar';
 
 const queryClient = new QueryClient();
 
@@ -27,23 +28,31 @@ export default function RootLayout() {
     return () => subscription.unsubscribe();
   }, []);
 
-  return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <QueryClientProvider client={queryClient}>
-        <GestureHandlerRootView style={{ flex: 1 }}>
-          <GluestackUIProvider>
-            <Stack screenOptions={{ headerShown: false }}>
-              <Stack.Protected guard={!!session}>
-                <Stack.Screen name="(tabs)" />
-              </Stack.Protected>
+  useEffect(() => {
+    if (Platform.OS === 'android') {
+      void NavigationBar.setVisibilityAsync('hidden');
+      void NavigationBar.setBehaviorAsync('inset-swipe');
+    }
+  }, []);
 
-              <Stack.Protected guard={!session}>
-                <Stack.Screen name="(auth)/auth" />
-              </Stack.Protected>
-            </Stack>
-          </GluestackUIProvider>
-        </GestureHandlerRootView>
-      </QueryClientProvider>
-    </SafeAreaView>
+  return (
+    <QueryClientProvider client={queryClient}>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <GluestackUIProvider>
+          <StatusBar hidden={true} />
+          <Stack screenOptions={{ headerShown: false }}>
+            <Stack.Protected guard={!!session}>
+              <Stack.Screen name={'(tabs)'} />
+              <Stack.Screen name={'modal/editBox'} />
+              <Stack.Screen name={'modal/editLocation'} />
+            </Stack.Protected>
+
+            <Stack.Protected guard={!session}>
+              <Stack.Screen name="(auth)/auth" />
+            </Stack.Protected>
+          </Stack>
+        </GluestackUIProvider>
+      </GestureHandlerRootView>
+    </QueryClientProvider>
   );
 }
