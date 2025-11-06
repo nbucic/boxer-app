@@ -5,6 +5,7 @@ type LocationBase = {
 
 export type Location = LocationBase & {
   id: string; //uuid
+  noBoxes: number;
 };
 
 export type LocationFormData = LocationBase;

@@ -1,14 +1,7 @@
 import { Heading } from '@/components/ui/heading';
 import { Button, ButtonText } from '@/components/ui/button';
 import { VStack } from '@/components/ui/vstack';
-import {
-  ActivityIndicator,
-  Alert,
-  KeyboardAvoidingView,
-  ScrollView,
-  TextInput,
-  View,
-} from 'react-native';
+import { ActivityIndicator, Alert, TextInput, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Controller, useForm } from 'react-hook-form';
 import { HStack } from '@/components/ui/hstack';
@@ -37,10 +30,15 @@ import {
 } from '@/components/form/LocationSearchSelect';
 import { Textarea, TextareaInput } from '@/components/ui/textarea';
 
-export default function EditBox() {
-  const { id: boxId, focus: focusElement } = useLocalSearchParams<{
+export default function EditBoxScreen() {
+  const {
+    id: boxId,
+    focus: focusElement,
+    locationId,
+  } = useLocalSearchParams<{
     id: string;
     focus?: 'location' | 'description';
+    locationId?: string;
   }>();
   const [publicImageUrl, setPublicImageUrl] = useState<string>();
   const queryClient = useQueryClient();
@@ -97,6 +95,8 @@ export default function EditBox() {
   useEffect(() => {
     if (existingBox) {
       reset(existingBox);
+    } else {
+      setValue('location_id', locationId, { shouldDirty: false });
     }
   }, [existingBox, reset]);
 
@@ -164,102 +164,93 @@ export default function EditBox() {
   }
 
   return (
-    <KeyboardAvoidingView behavior={'height'}>
-      <ScrollView
-        contentContainerClassName={'grow'}
-        keyboardShouldPersistTaps="handled"
-      >
-        <VStack className={'p-4 gap-4'}>
-          <Heading size={'lg'}>{isEditMode ? 'Edit' : 'New'} Box</Heading>
+    <View className={'p-4 w-full flex-1'}>
+      <VStack className={'gap-4 flex-1'}>
+        <Heading size={'lg'}>{isEditMode ? 'Edit' : 'New'} Box</Heading>
 
-          <HStack className={'items-center justify-center gap-3'}>
-            <Controller
-              control={control}
-              name={'new_box_asset'}
-              render={() => (
-                <Avatar
-                  avatarUrl={publicImageUrl}
-                  onImageChange={handleImageChange}
-                  type={'box'}
-                />
-              )}
+        <Controller
+          control={control}
+          name={'new_box_asset'}
+          render={() => (
+            <Avatar
+              avatarUrl={publicImageUrl}
+              onImageChange={handleImageChange}
+              type={'box'}
             />
-          </HStack>
+          )}
+        />
 
-          <Controller
-            control={control}
-            name={'name'}
-            rules={{ required: 'Name is required' }}
-            render={({ field: { onChange, onBlur, value } }) => (
-              <FormControl isInvalid={!!errors.name} size={'md'}>
-                <VStack space={'xs'}>
-                  <FormControlLabel className={'text-typography-500'}>
-                    <FormControlLabelText>Name the box</FormControlLabelText>
-                  </FormControlLabel>
-                  <Input>
-                    <InputField
-                      type={'text'}
-                      placeholder={'My precious Pokemon collection box'}
-                      onBlur={onBlur}
-                      onChangeText={onChange}
-                      value={value}
-                      autoCapitalize={'none'}
-                    />
-                  </Input>
-                  {errors.name && (
-                    <FormControlError>
-                      <FormControlErrorIcon as={AlertCircleIcon} />
-                      <FormControlErrorText>
-                        {errors.name?.message}
-                      </FormControlErrorText>
-                    </FormControlError>
-                  )}
-                </VStack>
-              </FormControl>
-            )}
-          />
-
-          <Controller
-            control={control}
-            name={'location_id'}
-            render={({ field: { onChange, value } }) => (
-              <FormControl size={'md'}>
-                <FormControlLabel>
-                  <FormControlLabelText>Location</FormControlLabelText>
+        <Controller
+          control={control}
+          name={'name'}
+          rules={{ required: 'Name is required' }}
+          render={({ field: { onChange, onBlur, value } }) => (
+            <FormControl isInvalid={!!errors.name} size={'md'}>
+              <VStack space={'xs'}>
+                <FormControlLabel className={'text-typography-500'}>
+                  <FormControlLabelText>Name the box</FormControlLabelText>
                 </FormControlLabel>
-                <LocationSearchSelect
-                  ref={locationInputRef}
-                  value={value}
-                  onSelect={onChange}
-                />
-              </FormControl>
-            )}
-          />
-
-          <Controller
-            control={control}
-            name={'description'}
-            render={({ field: { onChange, onBlur, value } }) => (
-              <FormControl size={'md'}>
-                <Text>Brief description</Text>
-                <Textarea>
-                  <TextareaInput
-                    ref={descriptionInputRef as any}
-                    placeholder={'Brief description'}
+                <Input>
+                  <InputField
+                    type={'text'}
+                    placeholder={'My precious Pokemon collection box'}
                     onBlur={onBlur}
                     onChangeText={onChange}
-                    value={value || ''}
+                    value={value}
+                    autoCapitalize={'none'}
                   />
-                </Textarea>
-              </FormControl>
-            )}
-          />
-        </VStack>
-      </ScrollView>
-      <HStack
-        space={'md'}
-        className={'justify-between p-4 border-t border-gray-200'}
-      >
+                </Input>
+                {errors.name && (
+                  <FormControlError>
+                    <FormControlErrorIcon as={AlertCircleIcon} />
+                    <FormControlErrorText>
+                      {errors.name?.message}
+                    </FormControlErrorText>
+                  </FormControlError>
+                )}
+              </VStack>
+            </FormControl>
+          )}
+        />
+
+        <Controller
+          control={control}
+          name={'location_id'}
+          render={({ field: { onChange, value } }) => (
+            <FormControl size={'md'}>
+              <FormControlLabel>
+                <FormControlLabelText>Location</FormControlLabelText>
+              </FormControlLabel>
+              <LocationSearchSelect
+                ref={locationInputRef}
+                value={value}
+                onSelect={onChange}
+                disabled={!!locationId}
+              />
+            </FormControl>
+          )}
+        />
+
+        <Controller
+          control={control}
+          name={'description'}
+          render={({ field: { onChange, onBlur, value } }) => (
+            <FormControl size={'md'}>
+              <Text>Brief description</Text>
+              <Textarea>
+                <TextareaInput
+                  ref={descriptionInputRef as any}
+                  placeholder={'Brief description'}
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  value={value || ''}
+                />
+              </Textarea>
+            </FormControl>
+          )}
+        />
+      </VStack>
+      <HStack space={'md'} className={'justify-between p-4'}>
         <Button
           variant={'outline'}
           onPress={() =>
@@ -272,17 +263,20 @@ export default function EditBox() {
           <ButtonText>Cancel</ButtonText>
         </Button>
         <Button
+          className={'accent-indicator-primary'}
+          action={`${!isDirty ? 'secondary' : 'primary'}`}
           onPress={handleSubmit(saveTheBox)}
           disabled={!isDirty || isPending}
-          action={`${!isDirty ? 'secondary' : 'primary'}`}
         >
           {isPending ? (
-            <ActivityIndicator />
+            <ButtonText>
+              {isEditMode ? 'Updating ...' : 'Creating ...'}
+            </ButtonText>
           ) : (
             <ButtonText>{isEditMode ? 'Update' : 'Create'}</ButtonText>
           )}
         </Button>
       </HStack>
-    </KeyboardAvoidingView>
+    </View>
   );
 }

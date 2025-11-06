@@ -1,4 +1,3 @@
-// noinspection JSDeprecatedSymbols,XmlDeprecatedElement
 import { ActivityIndicator, Alert, View } from 'react-native';
 import { Text } from '@/components/ui/text';
 import { Link, router } from 'expo-router';
@@ -15,6 +14,7 @@ import { EmptyList } from '@/components/list/EmptyList';
 import { InfoIcon } from 'lucide-react-native';
 import { Icon } from '@/components/ui/icon';
 import { HStack } from '@/components/ui/hstack';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 export default function Locations() {
   const queryClient = useQueryClient();
@@ -53,46 +53,48 @@ export default function Locations() {
   }
 
   return (
-    <WithFab onFabPress={() => router.push('/modal/editLocation')}>
-      <ItemsList
-        data={data || []}
-        renderItem={({ item }) => (
-          <LocationCard
-            item={item as Location}
-            onDelete={deleteMutation.mutate}
-            setRef={(ref) => (swipeableRefs.current[item.id] = ref)}
-            close={() => swipeableRefs.current[item.id]?.close()}
-          />
-        )}
-        ListHeaderComponent={
-          <ListHeader
-            title="Locations"
-            refetch={refetch}
-            isRefetching={isRefetching}
-          />
-        }
-        ListEmptyComponent={
-          <EmptyList
-            content={
-              <HStack space={'sm'}>
-                <Icon as={InfoIcon} />
-                <Text>
-                  No boxes yet!{' '}
-                  <Link
-                    href={'/modal/editBox'}
-                    className={'text-red-300 underline decoration-dashed'}
-                  >
-                    Add
-                  </Link>{' '}
-                  a new box{' '}
-                </Text>
-              </HStack>
-            }
-          />
-        }
-        isRefetching={isRefetching}
-        refetch={refetch}
-      />
+    <WithFab onFabPress={() => router.push('/location/create')}>
+      <GestureHandlerRootView>
+        <ItemsList
+          data={data || []}
+          renderItem={({ item }) => (
+            <LocationCard
+              item={item as Location}
+              onDelete={deleteMutation.mutate}
+              setRef={(ref) => (swipeableRefs.current[item.id] = ref)}
+              close={() => swipeableRefs.current[item.id]?.close()}
+            />
+          )}
+          ListHeaderComponent={
+            <ListHeader
+              title="Locations"
+              refetch={refetch}
+              isRefetching={isRefetching}
+            />
+          }
+          ListEmptyComponent={
+            <EmptyList
+              content={
+                <HStack space={'sm'}>
+                  <Icon as={InfoIcon} />
+                  <Text>
+                    No location yet!{' '}
+                    <Link
+                      href={'/location/create'}
+                      className={'text-red-300 underline decoration-dashed'}
+                    >
+                      Add
+                    </Link>{' '}
+                    a new box{' '}
+                  </Text>
+                </HStack>
+              }
+            />
+          }
+          isRefetching={isRefetching}
+          refetch={refetch}
+        />
+      </GestureHandlerRootView>
     </WithFab>
   );
 }

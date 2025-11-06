@@ -3,7 +3,7 @@ import { Text } from '@/components/ui/text';
 import { RefreshCwIcon } from 'lucide-react-native';
 import { HStack } from '@/components/ui/hstack';
 import { IconizedSwitch } from '@/components/iconizedSwitch';
-import { Layout } from '@/types/layout';
+import { Layout } from '@/types';
 
 interface ListHeaderProps {
   title: string;

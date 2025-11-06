@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { fetchAllBoxes } from '@/services/box';
 import { Text } from '@/components/ui/text';
 import { useCallback, useEffect, useState } from 'react';
-import { Layout } from '@/types/layout';
+import { Layout } from '@/types';
 import { ItemsList } from '@/components/box/ItemsList';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BoxCard } from '@/components/list/BoxCard';
@@ -16,6 +16,7 @@ import { EmptyList } from '@/components/list/EmptyList';
 import { InfoIcon } from 'lucide-react-native';
 import { Icon } from '@/components/ui/icon';
 import { HStack } from '@/components/ui/hstack';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 const LAYOUT_STORAGE_KEY = '@boxes_layout';
 
@@ -25,7 +26,7 @@ export default function Boxes() {
   const [shareModalBox, setShareModalBox] = useState<Box | null>(null);
   const { data, status, error, isFetching, refetch, isRefetching } = useQuery({
     queryKey: ['boxes'],
-    queryFn: fetchAllBoxes,
+    queryFn: () => fetchAllBoxes({}),
     placeholderData: (previousData) => previousData,
   });
 
@@ -89,55 +90,56 @@ export default function Boxes() {
   }
 
   return (
-    <WithFab onFabPress={() => router.push('/modal/editBox')}>
-      <ItemsList
-        data={data || []}
-        renderItem={({ item }) => (
-          <BoxCard
-            box={item as Box}
-            layout={layout}
-            onShare={handleOpenShareModal}
+    <WithFab onFabPress={() => router.push('/box/create')}>
+      <GestureHandlerRootView>
+        <ItemsList
+          data={data || []}
+          renderItem={({ item }) => (
+            <BoxCard
+              box={item as Box}
+              layout={layout}
+              onShare={handleOpenShareModal}
+            />
+          )}
+          ListHeaderComponent={
+            <ListHeader
+              title="Boxes"
+              layout={layout}
+              setLayout={setLayout}
+              refetch={refetch}
+              isRefetching={isRefetching}
+            />
+          }
+          ListEmptyComponent={
+            <EmptyList
+              content={
+                <HStack space={'sm'}>
+                  <Icon as={InfoIcon} />
+                  <Text>
+                    No boxes yet!{' '}
+                    <Link
+                      href={'/box/create'}
+                      className={'text-red-300 underline decoration-dashed'}
+                    >
+                      Add
+                    </Link>{' '}
+                    a new box{' '}
+                  </Text>
+                </HStack>
+              }
+            />
+          }
+          isRefetching={isRefetching}
+          refetch={refetch}
+        />
+        {shareModalBox && (
+          <ShareBox
+            box={shareModalBox}
+            isOpen={!!shareModalBox}
+            onClose={handleCloseShareModal}
           />
         )}
-        ListHeaderComponent={
-          <ListHeader
-            title="Boxes"
-            layout={layout}
-            setLayout={setLayout}
-            refetch={refetch}
-            isRefetching={isRefetching}
-          />
-        }
-        ListEmptyComponent={
-          // <EmptyList content="No boxes yet. Press the button to add a new one." />
-          <EmptyList
-            content={
-              <HStack space={'sm'}>
-                <Icon as={InfoIcon} />
-                <Text>
-                  No boxes yet!{' '}
-                  <Link
-                    href={'/modal/editBox'}
-                    className={'text-red-300 underline decoration-dashed'}
-                  >
-                    Add
-                  </Link>{' '}
-                  a new box{' '}
-                </Text>
-              </HStack>
-            }
-          />
-        }
-        isRefetching={isRefetching}
-        refetch={refetch}
-      />
-      {shareModalBox && (
-        <ShareBox
-          box={shareModalBox}
-          isOpen={!!shareModalBox}
-          onClose={handleCloseShareModal}
-        />
-      )}
+      </GestureHandlerRootView>
     </WithFab>
   );
 }

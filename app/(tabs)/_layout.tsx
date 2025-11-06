@@ -55,7 +55,6 @@ export default function TabLayout() {
         <Tabs.Screen
           name="index"
           options={{
-            title: 'Home',
             headerShown: false,
             tabBarIcon: ({ focused }) => (
               <TabIcon
@@ -70,7 +69,6 @@ export default function TabLayout() {
         <Tabs.Screen
           name={'boxes'}
           options={{
-            title: 'Boxes',
             headerShown: false,
             tabBarIcon: ({ focused }: { focused: boolean }) => (
               <TabIcon
@@ -85,7 +83,6 @@ export default function TabLayout() {
         <Tabs.Screen
           name="locations"
           options={{
-            title: 'Locations',
             headerShown: false,
             tabBarIcon: ({ focused }) => (
               <TabIcon
@@ -100,7 +97,6 @@ export default function TabLayout() {
         <Tabs.Screen
           name="profile"
           options={{
-            title: 'Profile',
             headerShown: false,
             tabBarIcon: ({ focused }) => (
               <TabIcon
@@ -108,6 +104,20 @@ export default function TabLayout() {
                 iconFocused={'person'}
                 focused={focused}
                 title={'Profile'}
+              />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name={'test'}
+          options={{
+            headerShown: false,
+            tabBarIcon: ({ focused }) => (
+              <TabIcon
+                focused={focused}
+                icon={'airplane-outline'}
+                iconFocused={'airplane'}
+                title={'Test'}
               />
             ),
           }}
