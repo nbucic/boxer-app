@@ -1,7 +1,7 @@
-import {View} from "react-native";
-import {Text} from "@/components/ui/text";
-import {Button, ButtonText} from "@/components/ui/button";
-import {supabase} from "@/lib/supabase";
+import { View } from 'react-native';
+import { Text } from '@/components/ui/text';
+import { Button, ButtonText } from '@/components/ui/button';
+import { supabase } from '@/lib/supabase';
 
 export default function Index() {
   return (

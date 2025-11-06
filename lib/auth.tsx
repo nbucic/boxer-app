@@ -1,7 +1,6 @@
-import React, {createContext, useContext, useEffect, useState} from 'react';
-import {Session, User} from '@supabase/supabase-js';
-import {supabase} from './supabase';
-import {useRouter, useSegments} from "expo-router";
+import React, { createContext, useEffect, useState } from 'react';
+import { Session, User } from '@supabase/supabase-js';
+import { supabase } from './supabase';
 
 interface AuthContextType {
   user: User | null;
@@ -13,18 +12,18 @@ const AuthContext = createContext<AuthContextType>({
   session: null,
 });
 
-export const AuthProvider = ({children}: { children: React.ReactNode }) => {
+export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
 
   useEffect(() => {
     (async () => {
-      const {data} = await supabase.auth.getSession();
+      const { data } = await supabase.auth.getSession();
       setSession(data.session);
       setUser(data.session?.user ?? null);
     })();
 
-    const {data: authListener} = supabase.auth.onAuthStateChange(
+    const { data: authListener } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
@@ -37,28 +36,8 @@ export const AuthProvider = ({children}: { children: React.ReactNode }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{user, session}}>
+    <AuthContext.Provider value={{ user, session }}>
       {children}
     </AuthContext.Provider>
   );
 };
-
-export const useAuth = () => {
-  return useContext(AuthContext);
-};
-
-export function useProtectedRoute() {
-  const {user} = useAuth();
-  const segments = useSegments();
-  const router = useRouter();
-
-  useEffect(() => {
-    const inAuthGroup = segments[0] === '(auth)';
-
-    if (!user && !inAuthGroup) {
-      router.replace('/sign-in');
-    } else if (user && inAuthGroup) {
-      router.replace('/');
-    }
-  }, [user, segments, router]);
-}

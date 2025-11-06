@@ -48,10 +48,17 @@ export const fetchAllBoxes = async (): Promise<Box[]> => {
   );
 };
 
-export const getBox = async (id: string): Promise<BoxFormData> => {
+export const getBox = async (id: string): Promise<Box> => {
   const { data, error } = await supabase
     .from(TABLE_NAME)
-    .select('name, description, location_id, image_url')
+    .select(
+      `
+    *,
+    location:locations (
+      id,
+      name
+    )`
+    )
     .eq('id', id)
     .single();
 
@@ -60,7 +67,25 @@ export const getBox = async (id: string): Promise<BoxFormData> => {
     throw error;
   }
 
-  return data;
+  if (data.image_url) {
+    const { data: singedUrlData, error: signedUrlError } =
+      await supabase.storage
+        .from(process.env.EXPO_PUBLIC_SUPABASE_STORAGE_BOXES_BUCKET!)
+        .createSignedUrl(data.image_url, 60 * 60 * 24 * 7);
+
+    if (signedUrlError) {
+      console.error(
+        'Error creating signed URL for',
+        data.image_url,
+        signedUrlError
+      );
+      return { ...data, publicImageUrl: null };
+    }
+
+    return { ...data, publicImageUrl: singedUrlData.signedUrl };
+  }
+
+  return { ...data, publicImageUrl: null };
 };
 
 export const createNewBox = async (data: BoxFormData): Promise<void> => {
