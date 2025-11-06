@@ -1,4 +1,3 @@
-import QRCode from 'react-native-qrcode-svg';
 import { useCallback, useRef } from 'react';
 import { Heading } from '@/components/ui/heading';
 import { HStack } from '@/components/ui/hstack';
@@ -19,6 +18,7 @@ import Svg from 'react-native-svg';
 import { File, Paths } from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import { XIcon } from 'lucide-react-native';
+import { QRCodeDisplay } from '@/components/QRCode/Display';
 
 export default function ShareBox({
   box,
@@ -158,13 +158,7 @@ export default function ShareBox({
           {/* Body */}
           <View className={'items-center justify-center p-5'}>
             <Text className={'text-2xl pb-4'}>{box.name}!</Text>
-            <QRCode
-              getRef={(c) => (qrCodeRef.current = c)}
-              value={`box-app://box/${box.id}`}
-              logo={require('@/assets/images/package-open.png')}
-              logoSize={24}
-              size={256}
-            />
+            <QRCodeDisplay box={box} ref={qrCodeRef} />
           </View>
 
           {/* Footer */}

@@ -16,6 +16,7 @@ import { Button, ButtonText } from '@/components/ui/button';
 import { Controller, FieldValues, useForm } from 'react-hook-form';
 import { AuthWeakPasswordError } from '@supabase/auth-js';
 import { router } from 'expo-router';
+import { getDeepLink } from '@/components/DeepLink';
 
 interface Props {
   email: string;
@@ -62,7 +63,7 @@ export default function Auth() {
     } = await supabase.auth.signUp({
       ...(data as Props),
       options: {
-        emailRedirectTo: `exp://192.168.1.129:8081/--/auth/callback`,
+        emailRedirectTo: getDeepLink(''),
       },
     });
 

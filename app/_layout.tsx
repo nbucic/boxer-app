@@ -45,6 +45,7 @@ export default function RootLayout() {
               <Stack.Screen name={'(tabs)'} />
               <Stack.Screen name={'modal/editBox'} />
               <Stack.Screen name={'modal/editLocation'} />
+              <Stack.Screen name={'box/[id]'} />
             </Stack.Protected>
 
             <Stack.Protected guard={!session}>

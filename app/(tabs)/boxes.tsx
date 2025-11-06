@@ -1,6 +1,6 @@
 import { ActivityIndicator, View } from 'react-native';
 import WithFab from '@/components/layout/withFab';
-import { router } from 'expo-router';
+import { Link, router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { fetchAllBoxes } from '@/services/box';
 import { Text } from '@/components/ui/text';
@@ -12,6 +12,10 @@ import { BoxCard } from '@/components/list/BoxCard';
 import { ListHeader } from '@/components/list/ListHeader';
 import { Box } from '@/types/box';
 import ShareBox from '@/components/box/ShareBox';
+import { EmptyList } from '@/components/list/EmptyList';
+import { InfoIcon } from 'lucide-react-native';
+import { Icon } from '@/components/ui/icon';
+import { HStack } from '@/components/ui/hstack';
 
 const LAYOUT_STORAGE_KEY = '@boxes_layout';
 
@@ -102,6 +106,26 @@ export default function Boxes() {
             setLayout={setLayout}
             refetch={refetch}
             isRefetching={isRefetching}
+          />
+        }
+        ListEmptyComponent={
+          // <EmptyList content="No boxes yet. Press the button to add a new one." />
+          <EmptyList
+            content={
+              <HStack space={'sm'}>
+                <Icon as={InfoIcon} />
+                <Text>
+                  No boxes yet!{' '}
+                  <Link
+                    href={'/modal/editBox'}
+                    className={'text-red-300 underline decoration-dashed'}
+                  >
+                    Add
+                  </Link>{' '}
+                  a new box{' '}
+                </Text>
+              </HStack>
+            }
           />
         }
         isRefetching={isRefetching}

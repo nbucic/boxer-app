@@ -1,7 +1,7 @@
 // noinspection JSDeprecatedSymbols,XmlDeprecatedElement
 import { ActivityIndicator, Alert, View } from 'react-native';
 import { Text } from '@/components/ui/text';
-import { router } from 'expo-router';
+import { Link, router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { deleteLocation, getLocations } from '@/services/location';
 import { SwipeableMethods } from 'react-native-gesture-handler/ReanimatedSwipeable';
@@ -11,6 +11,10 @@ import { ListHeader } from '@/components/list/ListHeader';
 import { ItemsList } from '@/components/box/ItemsList';
 import { Location } from '@/types/location';
 import { LocationCard } from '@/components/list/LocationCard';
+import { EmptyList } from '@/components/list/EmptyList';
+import { InfoIcon } from 'lucide-react-native';
+import { Icon } from '@/components/ui/icon';
+import { HStack } from '@/components/ui/hstack';
 
 export default function Locations() {
   const queryClient = useQueryClient();
@@ -65,6 +69,25 @@ export default function Locations() {
             title="Locations"
             refetch={refetch}
             isRefetching={isRefetching}
+          />
+        }
+        ListEmptyComponent={
+          <EmptyList
+            content={
+              <HStack space={'sm'}>
+                <Icon as={InfoIcon} />
+                <Text>
+                  No boxes yet!{' '}
+                  <Link
+                    href={'/modal/editBox'}
+                    className={'text-red-300 underline decoration-dashed'}
+                  >
+                    Add
+                  </Link>{' '}
+                  a new box{' '}
+                </Text>
+              </HStack>
+            }
           />
         }
         isRefetching={isRefetching}
