@@ -10,7 +10,7 @@ export const createNewLocation = async (
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error('USer does not exists');
+    throw new Error('User does not exists');
   }
 
   const { error } = await supabase

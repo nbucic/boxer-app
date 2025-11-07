@@ -1,4 +1,6 @@
-import { Alert, View } from 'react-native';
+// noinspection XmlDeprecatedElement,JSDeprecatedSymbols
+
+import { Alert, TouchableOpacity, View } from 'react-native';
 import { Text } from '@/components/ui/text';
 import { router } from 'expo-router';
 import { EditIcon, TrashIcon } from 'lucide-react-native';
@@ -20,6 +22,7 @@ export const LocationCard = ({
   setRef,
   close,
 }: LocationCardProps) => {
+  console.log(item);
   return (
     <Swipeable
       ref={setRef}
@@ -31,7 +34,7 @@ export const LocationCard = ({
               onPress: () => {
                 close();
                 setTimeout(() => {
-                  router.push(`/modal/editLocation?id=${item.id}`);
+                  router.push(`/location/${item.id}/edit`);
                 }, 100);
               },
               text: 'Edit',
@@ -74,32 +77,34 @@ export const LocationCard = ({
         />
       )}
     >
-      <View
-        className={
-          'p-2 border-b border-outline-200 bg-background-0 my-1 max-h-[100px]'
-        }
-      >
-        <Text
+      <TouchableOpacity onPress={() => router.push(`/location/${item.id}/`)}>
+        <View
           className={
-            'text-lg font-medium text-typography-900 whitespace-nowrap overflow-hidden overflow-ellipsis'
+            'p-2 border-b border-outline-200 bg-background-0 my-1 max-h-[100px]'
           }
-          numberOfLines={1}
-          ellipsizeMode={'tail'}
         >
-          {item.name}
-        </Text>
-        {item.description && (
           <Text
             className={
-              'text-sm text-typography-500 text-right whitespace-nowrap overflow-hidden overflow-ellipsis'
+              'text-lg font-medium text-typography-900 whitespace-nowrap overflow-hidden overflow-ellipsis'
             }
             numberOfLines={1}
             ellipsizeMode={'tail'}
           >
-            {item.description}
+            {item.name}
           </Text>
-        )}
-      </View>
+          {item.description && (
+            <Text
+              className={
+                'text-sm text-typography-500 text-right whitespace-nowrap overflow-hidden overflow-ellipsis'
+              }
+              numberOfLines={1}
+              ellipsizeMode={'tail'}
+            >
+              {item.description}
+            </Text>
+          )}
+        </View>
+      </TouchableOpacity>
     </Swipeable>
   );
 };

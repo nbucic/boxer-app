@@ -26,14 +26,15 @@ import {
 import { useEffect } from 'react';
 import { LocationFormData } from '@/types/location';
 
-export default function EditLocation() {
+export default function EditLocationScreen() {
   const { id: locationId } = useLocalSearchParams<{ id: string }>();
   const queryClient = useQueryClient();
   const isEditMode = !!locationId;
 
+  debugger;
   const { data: existingLocation, isFetching } = useQuery({
     queryKey: ['locations', locationId],
-    queryFn: () => getLocation(locationId),
+    queryFn: () => getLocation(locationId!),
     enabled: isEditMode,
   });
 
@@ -134,7 +135,7 @@ export default function EditLocation() {
             </FormControl>
           )}
         />
-        <HStack space={'md'} className={'justify-between mt-auto'}>
+        <HStack space={'md'} className={'justify-between p-4'}>
           <Button
             variant={'outline'}
             onPress={() =>

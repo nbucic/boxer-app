@@ -34,7 +34,7 @@ export default function InfoItem({
       ) : (
         <Link
           href={{
-            pathname: '/modal/editBox',
+            pathname: '/box/create',
             params: { id: box.id, focus },
           }}
           className={'border-dashed border-b text-red-300'}

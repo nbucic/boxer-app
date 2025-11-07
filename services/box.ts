@@ -5,8 +5,16 @@ import { Box, BoxFormData } from '@/types/box';
 
 const TABLE_NAME = 'boxes';
 
-export const fetchAllBoxes = async (): Promise<Box[]> => {
-  const { data, error } = await supabase
+type fetchBoxesFilterProp = {
+  location?: string;
+};
+
+export const fetchAllBoxes = async ({
+  filter,
+}: {
+  filter?: fetchBoxesFilterProp;
+}): Promise<Box[]> => {
+  let query = supabase
     .from(TABLE_NAME)
     .select(
       `
@@ -17,6 +25,12 @@ export const fetchAllBoxes = async (): Promise<Box[]> => {
     )`
     )
     .order('updated_at', { ascending: false });
+
+  if (filter?.location) {
+    query = query.eq('location_id', filter.location);
+  }
+
+  const { data, error } = await query;
 
   if (error) {
     console.log('Fetch all boxes error:', error);

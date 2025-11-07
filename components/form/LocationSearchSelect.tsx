@@ -22,6 +22,7 @@ const INITIAL_LOCATIONS_SHOWN = 5;
 interface Props {
   value?: string | null; // location_id
   onSelect: (locationId: string | null) => void;
+  disabled: boolean;
 }
 
 export interface LocationSearchSelectRef {
@@ -30,7 +31,7 @@ export interface LocationSearchSelectRef {
 }
 
 export const LocationSearchSelect = forwardRef<LocationSearchSelectRef, Props>(
-  ({ value, onSelect }, ref) => {
+  ({ value, onSelect, disabled = false }, ref) => {
     const [modalVisible, setModalVisible] = useState<boolean>(false);
     const [search, setSearch] = useState<string>('');
     const [debouncedSearch, setDebouncedSearch] = useState(search);
@@ -89,6 +90,7 @@ export const LocationSearchSelect = forwardRef<LocationSearchSelectRef, Props>(
           onPress={() => {
             setModalVisible(true);
           }}
+          disabled={disabled}
         >
           <Text
             className={
@@ -99,7 +101,7 @@ export const LocationSearchSelect = forwardRef<LocationSearchSelectRef, Props>(
           >
             {selectedLocation?.name || 'Select a location'}
           </Text>
-          <ChevronDownIcon size={20} />
+          {!disabled && <ChevronDownIcon size={20} />}
         </TouchableOpacity>
 
         <Modal
