@@ -1,25 +1,29 @@
 import { Alert, Platform } from 'react-native';
 
-type ShowAlertType =
+type BaseAlertProps = {
+  title: string;
+  message: string;
+};
+
+type AlertVariations =
   | {
-      title: string;
-      message: string;
+      onConfirm?: never;
+      onCancel?: never;
     }
   | {
-      title: string;
-      message: string;
+      onConfirm: () => void;
+      onCancel?: never;
+    }
+  | {
       onConfirm: () => void;
       onCancel: () => void;
-    }
-  | {
-      title: string;
-      message: string;
-      onConfirm: () => void;
     };
+
+type ShowAlertType = BaseAlertProps & AlertVariations;
 
 export const showAlert = (props: ShowAlertType) => {
   // Case 1: Both Confirm and Cancel are provided
-  if ('onConfirm' in props && 'onCancel' in props) {
+  if (props.onConfirm && props.onCancel) {
     switch (Platform.OS) {
       case 'web':
         if (window.confirm(`${props.title}\n\n${props.message}`)) {
@@ -44,7 +48,7 @@ export const showAlert = (props: ShowAlertType) => {
     }
   }
   // Case 2: Only Confirm is provided
-  else if ('onConfirm' in props) {
+  else if (props.onConfirm) {
     switch (Platform.OS) {
       case 'web':
         if (window.confirm(`${props.title}\n\n${props.message}`)) {
