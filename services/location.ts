@@ -1,7 +1,22 @@
 import { supabase } from '@/lib/supabase';
 import { Location, LocationFormData } from '@/types/location';
+import { PostgrestError } from '@supabase/supabase-js';
 
 const TABLE_NAME = 'locations';
+const handleErrorsAndReturnData = (
+  data: any | null,
+  error: PostgrestError | null,
+  message: string,
+  context?: any
+) => {
+  if (error) {
+    console.error(message, context ? { context, error } : error);
+    throw error;
+  }
+
+  return data;
+};
+
 export const createNewLocation = async (
   data: LocationFormData
 ): Promise<void> => {
@@ -17,10 +32,7 @@ export const createNewLocation = async (
     .from(TABLE_NAME)
     .insert({ ...data, user_id: user.id });
 
-  if (error) {
-    console.log('Location create error:', error);
-    throw error;
-  }
+  handleErrorsAndReturnData(null, error, 'Location create error:');
 };
 
 export const getLocations = async ({
@@ -41,12 +53,7 @@ export const getLocations = async ({
 
   const { data, error } = await query;
 
-  if (error) {
-    console.log('Get locations error: ', error);
-    throw error;
-  }
-
-  return data ?? [];
+  return handleErrorsAndReturnData(data ?? {}, error, 'Get locations error:');
 };
 
 export const getLocation = async (id: string): Promise<Location> => {
@@ -57,12 +64,12 @@ export const getLocation = async (id: string): Promise<Location> => {
     .limit(1)
     .single();
 
-  if (error || !data) {
-    console.log('Get location by ID error:', id, error);
-    throw error;
-  }
-
-  return data as any as Location;
+  return handleErrorsAndReturnData(
+    data,
+    error,
+    'Get location by ID error:',
+    id
+  );
 };
 
 export const updateLocation = async (
@@ -74,16 +81,25 @@ export const updateLocation = async (
     .update(formData)
     .eq('id', id);
 
-  if (error) {
-    console.log('Update location by ID error:', id, error);
-    throw error;
-  }
+  handleErrorsAndReturnData(null, error, 'Update location by ID error:', id);
+};
+
+export const isLocationEmpty = async (locationId: string): Promise<boolean> => {
+  const { count, error } = await supabase
+    .from('boxes')
+    .select('*', { count: 'exact', head: true })
+    .eq('location_id', locationId);
+
+  return handleErrorsAndReturnData(
+    count ? count === 0 : true,
+    error,
+    'Error counting boxes by location:',
+    locationId
+  );
 };
 
 export const deleteLocation = async (id: string): Promise<void> => {
   const { error } = await supabase.from(TABLE_NAME).delete().eq('id', id);
 
-  if (error) {
-    throw error;
-  }
+  handleErrorsAndReturnData(null, error, 'Delete location by ID error:', id);
 };

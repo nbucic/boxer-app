@@ -2,7 +2,11 @@ import { ActivityIndicator, Alert, View } from 'react-native';
 import { Text } from '@/components/ui/text';
 import { Link, router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { deleteLocation, getLocations } from '@/services/location';
+import {
+  deleteLocation,
+  getLocations,
+  isLocationEmpty,
+} from '@/services/location';
 import { SwipeableMethods } from 'react-native-gesture-handler/ReanimatedSwipeable';
 import { useRef } from 'react';
 import WithFab from '@/components/layout/withFab';
@@ -15,6 +19,7 @@ import { InfoIcon } from 'lucide-react-native';
 import { Icon } from '@/components/ui/icon';
 import { HStack } from '@/components/ui/hstack';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { showAlert } from '@/lib/helpers/alert';
 
 export default function Locations() {
   const queryClient = useQueryClient();
@@ -33,6 +38,27 @@ export default function Locations() {
       Alert.alert('Error', `Failed to delete location: ${e.message}`);
     },
   });
+
+  const handleDeleteAttempt = async (locationId: string) => {
+    try {
+      const locationEmpty = await isLocationEmpty(locationId);
+
+      if (!locationEmpty) {
+        showAlert({
+          title: 'Cannot Delete Location',
+          message:
+            'This location is still associated with one or more boxes. Please move or delete the boxes before deleting the location.',
+        });
+      } else {
+        deleteMutation.mutate(locationId);
+      }
+    } catch (e) {
+      showAlert({
+        title: 'Error',
+        message: 'An error occurred white checking for boxes.',
+      });
+    }
+  };
 
   if (isFetching) {
     return (
@@ -60,7 +86,7 @@ export default function Locations() {
           renderItem={({ item }) => (
             <LocationCard
               item={item as Location}
-              onDelete={deleteMutation.mutate}
+              onDelete={handleDeleteAttempt}
               setRef={(ref) => (swipeableRefs.current[item.id] = ref)}
               close={() => swipeableRefs.current[item.id]?.close()}
             />
