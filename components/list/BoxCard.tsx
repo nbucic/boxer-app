@@ -71,17 +71,17 @@ export const BoxCard = memo((props: BoxCardProps) => {
   );
 
   const handleDelete = () => {
-    showAlert(
-      'Delete Box',
-      `Are you sure you want to delete ${box.name}?`,
-      () => {
+    showAlert({
+      title: 'Delete Box',
+      message: `Are you sure you want to delete ${box.name}?`,
+      onConfirm: () => {
         deleteMutation.mutate(box.id);
         swipeableRefs.current[box.id]?.close();
       },
-      () => {
+      onCancel: () => {
         swipeableRefs.current[box.id]?.close();
-      }
-    );
+      },
+    });
   };
 
   const CardBack = () => (

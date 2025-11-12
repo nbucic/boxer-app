@@ -1,6 +1,6 @@
 // noinspection XmlDeprecatedElement,JSDeprecatedSymbols
 
-import { Alert, TouchableOpacity, View } from 'react-native';
+import { TouchableOpacity, View } from 'react-native';
 import { Text } from '@/components/ui/text';
 import { router } from 'expo-router';
 import { EditIcon, TrashIcon } from 'lucide-react-native';
@@ -8,6 +8,7 @@ import Swipeable from 'react-native-gesture-handler/Swipeable';
 import { Location } from '@/types/location';
 import { Action } from '@/components/swipeable/Action';
 import { SwipeableMethods } from 'react-native-gesture-handler/ReanimatedSwipeable';
+import { showAlert } from '@/lib/helpers/alert';
 
 type LocationCardProps = {
   item: Location;
@@ -22,7 +23,6 @@ export const LocationCard = ({
   setRef,
   close,
 }: LocationCardProps) => {
-  console.log(item);
   return (
     <Swipeable
       ref={setRef}
@@ -49,25 +49,15 @@ export const LocationCard = ({
           items={[
             {
               onPress: () => {
-                Alert.alert(
-                  'Delete Location',
-                  `Are you sure you want to delete ${item.name}?`,
-                  [
-                    {
-                      text: 'Cancel',
-                      style: 'cancel',
-                      onPress: close,
-                    },
-                    {
-                      text: 'Delete',
-                      style: 'destructive',
-                      onPress: () => {
-                        onDelete(item.id);
-                        close();
-                      },
-                    },
-                  ]
-                );
+                showAlert({
+                  title: 'Delete Location',
+                  message: `Are you sure you want to delete ${item.name}?`,
+                  onCancel: close,
+                  onConfirm: () => {
+                    onDelete(item.id);
+                    close();
+                  },
+                });
               },
               text: 'Delete',
               icon: TrashIcon,
