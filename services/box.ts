@@ -2,11 +2,24 @@ import { supabase } from '@/lib/supabase';
 import { Platform } from 'react-native';
 import { getBoxStorageInformation } from '@/lib/helpers/supabase/storage';
 import { Box, BoxFormData } from '@/types/box';
+import { PostgrestError } from '@supabase/supabase-js';
+import { StorageError } from '@supabase/storage-js';
 
 const TABLE_NAME = 'boxes';
 
 type fetchBoxesFilterProp = {
   location?: string;
+};
+
+const handleErrors = (
+  error: PostgrestError | StorageError | null,
+  message: string,
+  context?: any
+) => {
+  if (error) {
+    console.error(message, context ? { context, error } : error);
+    throw error;
+  }
 };
 
 export const fetchAllBoxes = async ({
@@ -32,10 +45,7 @@ export const fetchAllBoxes = async ({
 
   const { data, error } = await query;
 
-  if (error) {
-    console.log('Fetch all boxes error:', error);
-    throw error;
-  }
+  handleErrors(error, 'Fetch all boxes error:');
 
   return await Promise.all(
     (data ?? []).map(async (box: Box) => {
@@ -43,21 +53,9 @@ export const fetchAllBoxes = async ({
         return { ...box, publicImageUrl: null };
       }
 
-      const { data: signedUrlData, error: signedUrlError } =
-        await supabase.storage
-          .from(process.env.EXPO_PUBLIC_SUPABASE_STORAGE_BOXES_BUCKET!)
-          .createSignedUrl(box.image_url, 60 * 60 * 24 * 7);
+      let publicImageUrl = await getSignedUrlForImage({ url: box.image_url });
 
-      if (signedUrlError) {
-        console.error(
-          'Error creating signed URL for',
-          box.image_url,
-          signedUrlError
-        );
-        return { ...box, publicImageUrl: null };
-      }
-
-      return { ...box, publicImageUrl: signedUrlData.signedUrl };
+      return { ...box, publicImageUrl };
     })
   );
 };
@@ -76,48 +74,40 @@ export const getBox = async (id: string): Promise<Box> => {
     .eq('id', id)
     .single();
 
-  if (error) {
-    console.log('Get box error:', error);
-    throw error;
-  }
+  handleErrors(error, 'Get box error:');
 
-  if (data.image_url) {
-    const { data: singedUrlData, error: signedUrlError } =
-      await supabase.storage
-        .from(process.env.EXPO_PUBLIC_SUPABASE_STORAGE_BOXES_BUCKET!)
-        .createSignedUrl(data.image_url, 60 * 60 * 24 * 7);
-
-    if (signedUrlError) {
-      console.error(
-        'Error creating signed URL for',
-        data.image_url,
-        signedUrlError
-      );
-      return { ...data, publicImageUrl: null };
-    }
-
-    return { ...data, publicImageUrl: singedUrlData.signedUrl };
-  }
-
-  return { ...data, publicImageUrl: null };
+  return {
+    ...data,
+    publicImageUrl: await getSignedUrlForImage({ url: data.image_url }),
+  };
 };
 
-export const createNewBox = async (data: BoxFormData): Promise<void> => {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+export const createNewBox = async (formData: BoxFormData): Promise<void> => {
+  console.log(formData);
+  const { new_box_asset, ...data } = formData;
 
-  if (!user) {
-    throw new Error('User does not exist');
-  }
-
-  const { error } = await supabase
+  const { data: supabaseResponse, error: createError } = await supabase
     .from(TABLE_NAME)
-    .insert({ ...data, user_id: user.id });
+    .insert(data)
+    .select('id')
+    .single();
 
-  if (error) {
-    console.log('Create box error:', error);
-    throw error;
+  handleErrors(createError, 'Create box error:');
+
+  const boxId = supabaseResponse?.id;
+
+  if (boxId) {
+    const extractedData = await handleNewImageIfAny({
+      id: boxId,
+      data: formData,
+    });
+
+    const { error: upsertError } = await supabase
+      .from(TABLE_NAME)
+      .update({ image_url: extractedData?.image_url })
+      .eq('id', boxId);
+
+    handleErrors(upsertError, 'Updating the box with the image error:');
   }
 };
 
@@ -132,18 +122,13 @@ export const updateBox = async (
     .update(extractedData)
     .eq('id', id);
 
-  if (error) {
-    console.log('Update box error:', error);
-    throw error;
-  }
+  handleErrors(error, 'Update box error:');
 };
 
 export const deleteBox = async (id: string): Promise<void> => {
   const { error } = await supabase.from(TABLE_NAME).delete().eq('id', id);
 
-  if (error) {
-    throw error;
-  }
+  handleErrors(error, 'Cannot delete box:');
 };
 
 const handleNewImageIfAny = async ({
@@ -176,13 +161,30 @@ const handleNewImageIfAny = async ({
         upsert: true,
       });
 
-    if (uploadError) {
-      console.log({ uploadError });
-      throw uploadError;
-    }
+    handleErrors(uploadError, 'Image upload to the bucket error:');
 
-    extractedData.image_url = uploadData.path;
+    extractedData.image_url = uploadData?.path;
   }
 
   return extractedData;
+};
+
+const getSignedUrlForImage = async ({
+  url,
+}: {
+  url: string | null;
+}): Promise<string | null> => {
+  if (url === null) {
+    return null;
+  }
+
+  const { data: signedUrlData, error: signedUrlError } = await supabase.storage
+    .from(process.env.EXPO_PUBLIC_SUPABASE_STORAGE_BOXES_BUCKET!)
+    .createSignedUrl(url, 60 * 60 * 24 * 7, {
+      transform: { width: 500, height: 500 },
+    });
+
+  handleErrors(signedUrlError, 'Error creating signed URL for', url);
+
+  return signedUrlData?.signedUrl ?? null;
 };
