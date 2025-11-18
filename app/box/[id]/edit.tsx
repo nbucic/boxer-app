@@ -9,7 +9,6 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createNewBox, getBox, updateBox } from '@/services/box';
 import { BoxFormData } from '@/types/box';
 import { useEffect, useRef, useState } from 'react';
-import { supabase } from '@/lib/supabase';
 import Avatar from '@/components/Avatar';
 import { ImagePickerAsset } from 'expo-image-picker';
 import { Text } from '@/components/ui/text';
@@ -29,6 +28,7 @@ import {
   LocationSearchSelectRef,
 } from '@/components/form/LocationSearchSelect';
 import { Textarea, TextareaInput } from '@/components/ui/textarea';
+import { getSignedUrlForImage } from '@/lib/helpers/supabase/storage';
 
 export default function EditBoxScreen() {
   const {
@@ -40,7 +40,7 @@ export default function EditBoxScreen() {
     focus?: 'location' | 'description';
     locationId?: string;
   }>();
-  const [publicImageUrl, setPublicImageUrl] = useState<string>();
+  const [publicImageUrl, setPublicImageUrl] = useState<string | null>();
   const queryClient = useQueryClient();
   const isEditMode = !!boxId;
   const [hasErrors, setHasErrors] = useState<DefaultError | null>(null);
@@ -102,17 +102,11 @@ export default function EditBoxScreen() {
 
   // Effect to set the public image URL when existingBox data is available
   useEffect(() => {
-    const setBoxImageUrl = async () => {
-      if (existingBox?.image_url) {
-        const { data } = await supabase.storage.from('boxes').createSignedUrl(
-          existingBox.image_url,
-          60 * 60 * 24 * 7 // 7 days
-        );
-        setPublicImageUrl(data?.signedUrl);
+    getSignedUrlForImage({ url: existingBox?.image_url }).then(
+      (publicImageUrl) => {
+        setPublicImageUrl(publicImageUrl);
       }
-    };
-
-    void setBoxImageUrl();
+    );
   }, [existingBox?.image_url]);
 
   const handleImageChange = (image: ImagePickerAsset) => {

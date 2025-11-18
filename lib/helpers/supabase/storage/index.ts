@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase';
+import { handleErrors } from '@/lib/helpers/supabase';
 
 interface IAvatarStorageInformationRequest {
   userId?: string;
@@ -42,4 +43,25 @@ export const getAvatarStorageInformation = ({
   }
 
   return response;
+};
+export const getSignedUrlForImage = async ({
+  url,
+  bucket = 'boxes',
+}: {
+  url: string | null | undefined;
+  bucket?: 'boxes' | 'avatar';
+}): Promise<string | null> => {
+  if (url === null || url === undefined) {
+    return null;
+  }
+
+  const { data: signedUrlData, error: signedUrlError } = await supabase.storage
+    .from(bucket)
+    .createSignedUrl(url, 60 * 60 * 24 * 7, {
+      transform: { width: 500, height: 500 },
+    });
+
+  handleErrors(signedUrlError, 'Error creating signed URL for', url);
+
+  return signedUrlData?.signedUrl ?? null;
 };
