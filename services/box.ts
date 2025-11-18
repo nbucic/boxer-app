@@ -1,25 +1,16 @@
 import { supabase } from '@/lib/supabase';
 import { Platform } from 'react-native';
-import { getBoxStorageInformation } from '@/lib/helpers/supabase/storage';
+import {
+  getBoxStorageInformation,
+  getSignedUrlForImage,
+} from '@/lib/helpers/supabase/storage';
 import { Box, BoxFormData } from '@/types/box';
-import { PostgrestError } from '@supabase/supabase-js';
-import { StorageError } from '@supabase/storage-js';
+import { handleErrors } from '@/lib/helpers/supabase';
 
 const TABLE_NAME = 'boxes';
 
 type fetchBoxesFilterProp = {
   location?: string;
-};
-
-const handleErrors = (
-  error: PostgrestError | StorageError | null,
-  message: string,
-  context?: any
-) => {
-  if (error) {
-    console.error(message, context ? { context, error } : error);
-    throw error;
-  }
 };
 
 export const fetchAllBoxes = async ({
@@ -167,24 +158,4 @@ const handleNewImageIfAny = async ({
   }
 
   return extractedData;
-};
-
-const getSignedUrlForImage = async ({
-  url,
-}: {
-  url: string | null;
-}): Promise<string | null> => {
-  if (url === null) {
-    return null;
-  }
-
-  const { data: signedUrlData, error: signedUrlError } = await supabase.storage
-    .from(process.env.EXPO_PUBLIC_SUPABASE_STORAGE_BOXES_BUCKET!)
-    .createSignedUrl(url, 60 * 60 * 24 * 7, {
-      transform: { width: 500, height: 500 },
-    });
-
-  handleErrors(signedUrlError, 'Error creating signed URL for', url);
-
-  return signedUrlData?.signedUrl ?? null;
 };

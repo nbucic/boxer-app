@@ -1,7 +1,11 @@
 import { supabase } from '@/lib/supabase';
 import { ImagePickerAsset } from 'expo-image-picker';
 import { Platform } from 'react-native';
-import { getAvatarStorageInformation } from '@/lib/helpers/supabase/storage';
+import {
+  getAvatarStorageInformation,
+  getSignedUrlForImage,
+} from '@/lib/helpers/supabase/storage';
+import { handleErrors } from '@/lib/helpers/supabase';
 
 export interface User {
   id: string;
@@ -23,49 +27,22 @@ export const getCurrentUser = async (): Promise<User> => {
     throw new Error('No user on the session');
   }
 
-  const { data, error, status } = await supabase
+  const { data, error } = await supabase
     .from('profiles')
     .select(`full_name, avatar_url`)
     .eq('id', session.user.id)
     .single();
 
-  if (error && status !== 406) {
-    throw error;
-  }
-
-  // If an avatar_url (path) exists, download it and convert it to a base64 data URL
-  if (data && data.avatar_url) {
-    try {
-      const { bucket } = getAvatarStorageInformation({});
-      const { data: storageData, error: downloadError } = await supabase.storage
-        .from(bucket)
-        .download(data.avatar_url);
-
-      if (downloadError) {
-        throw downloadError;
-      }
-
-      // Overwrite the path-based avatar_url with the full data URL for rendering
-      data.avatar_url = await new Promise<string>((resolve, reject) => {
-        const fr = new FileReader();
-        fr.onload = () => {
-          resolve(fr.result as string);
-        };
-        fr.onerror = (_err) => {
-          reject(new Error('Failed to read avatar file.'));
-        };
-        fr.readAsDataURL(storageData);
-      });
-    } catch (e) {
-      data.avatar_url = null;
-    }
-  }
+  handleErrors(error, '');
 
   return {
     id: session.user.id,
     email: session.user.email || '',
     ...data,
-    avatar_url: data?.avatar_url || null,
+    avatar_url: await getSignedUrlForImage({
+      url: data?.avatar_url,
+      bucket: 'avatar',
+    }),
   };
 };
 

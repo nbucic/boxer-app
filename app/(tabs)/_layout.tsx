@@ -3,8 +3,6 @@ import { Tabs } from 'expo-router';
 import React from 'react';
 import { Text, View } from 'react-native';
 
-// import { Text } from '@/components/ui/text';
-
 interface TabIconProps {
   focused: boolean;
   icon: any;
@@ -35,94 +33,78 @@ const TabIcon = ({ focused, icon, iconFocused, title }: TabIconProps) => {
 
 export default function TabLayout() {
   return (
-    <>
-      <Tabs
-        screenOptions={{
-          tabBarShowLabel: false,
-          tabBarStyle: {
-            backgroundColor: '#d3d3d3',
-            marginHorizontal: 10,
-            marginBottom: 10,
-            height: 40,
-            position: 'absolute',
-            paddingBottom: 0,
-            overflow: 'hidden',
-            borderRadius: 5,
-            borderWidth: 1,
-          },
+    <Tabs
+      screenOptions={{
+        tabBarShowLabel: false,
+        tabBarStyle: {
+          backgroundColor: '#d3d3d3',
+          marginHorizontal: 10,
+          marginBottom: 10,
+          height: 40,
+          position: 'absolute',
+          paddingBottom: 0,
+          overflow: 'hidden',
+          borderRadius: 5,
+          borderWidth: 1,
+        },
+      }}
+    >
+      <Tabs.Screen
+        name="index"
+        options={{
+          headerShown: false,
+          tabBarIcon: ({ focused }) => (
+            <TabIcon
+              icon={'home-outline'}
+              iconFocused={'home'}
+              focused={focused}
+              title={'Home'}
+            />
+          ),
         }}
-      >
-        <Tabs.Screen
-          name="index"
-          options={{
-            headerShown: false,
-            tabBarIcon: ({ focused }) => (
-              <TabIcon
-                icon={'home-outline'}
-                iconFocused={'home'}
-                focused={focused}
-                title={'Home'}
-              />
-            ),
-          }}
-        />
-        <Tabs.Screen
-          name={'boxes'}
-          options={{
-            headerShown: false,
-            tabBarIcon: ({ focused }: { focused: boolean }) => (
-              <TabIcon
-                icon={'cube-outline'}
-                iconFocused={'cube'}
-                focused={focused}
-                title={'Boxes'}
-              />
-            ),
-          }}
-        />
-        <Tabs.Screen
-          name="locations"
-          options={{
-            headerShown: false,
-            tabBarIcon: ({ focused }) => (
-              <TabIcon
-                icon={'location-outline'}
-                iconFocused={'location'}
-                focused={focused}
-                title={'Locations'}
-              />
-            ),
-          }}
-        />
-        <Tabs.Screen
-          name="profile"
-          options={{
-            headerShown: false,
-            tabBarIcon: ({ focused }) => (
-              <TabIcon
-                icon={'person-outline'}
-                iconFocused={'person'}
-                focused={focused}
-                title={'Profile'}
-              />
-            ),
-          }}
-        />
-        <Tabs.Screen
-          name={'test'}
-          options={{
-            headerShown: false,
-            tabBarIcon: ({ focused }) => (
-              <TabIcon
-                focused={focused}
-                icon={'airplane-outline'}
-                iconFocused={'airplane'}
-                title={'Test'}
-              />
-            ),
-          }}
-        />
-      </Tabs>
-    </>
+      />
+      <Tabs.Screen
+        name={'boxes'}
+        options={{
+          headerShown: false,
+          tabBarIcon: ({ focused }: { focused: boolean }) => (
+            <TabIcon
+              icon={'cube-outline'}
+              iconFocused={'cube'}
+              focused={focused}
+              title={'Boxes'}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="locations"
+        options={{
+          headerShown: false,
+          tabBarIcon: ({ focused }) => (
+            <TabIcon
+              icon={'location-outline'}
+              iconFocused={'location'}
+              focused={focused}
+              title={'Locations'}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="profile"
+        options={{
+          headerShown: false,
+          tabBarIcon: ({ focused }) => (
+            <TabIcon
+              icon={'person-outline'}
+              iconFocused={'person'}
+              focused={focused}
+              title={'Profile'}
+            />
+          ),
+        }}
+      />
+    </Tabs>
   );
 }
