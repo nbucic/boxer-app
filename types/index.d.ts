@@ -1,2 +1,6 @@
 export type Layout = 'grid' | 'list';
-export type ListType = 'static' | 'swipeable';
+
+export type SelectSearchable = {
+  id: string;
+  name: string;
+};

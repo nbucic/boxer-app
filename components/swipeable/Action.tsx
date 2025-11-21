@@ -17,7 +17,7 @@ type ActionProps = {
 
 export const Action = ({ items }: ActionProps) => (
   <View className={'flex-row'}>
-    <HStack className={'border-b border-outline-200 my-1'}>
+    <HStack className={'dark:my-0 my-1 dark:border-b dark:border-outline-200'}>
       {items.map((item, index) => (
         <TouchableOpacity
           className={`${item.className} justify-center items-center w-20`}
@@ -25,8 +25,12 @@ export const Action = ({ items }: ActionProps) => (
           onPress={item.onPress}
         >
           <View className={'flex justify-center items-center gap-y-1'}>
-            <Icon as={item.icon} size={'custom'} className={'text-primary-0'} />
-            <Text size="xs" className={'text-primary-0'}>
+            <Icon
+              as={item.icon}
+              size={'custom'}
+              className={'text-typography-0'}
+            />
+            <Text size="xs" className={'text-typography-0'}>
               {item.text}
             </Text>
           </View>

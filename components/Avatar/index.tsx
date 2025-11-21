@@ -8,6 +8,7 @@ import {
 } from 'lucide-react-native';
 import { useState } from 'react';
 import * as ImagePicker from 'expo-image-picker';
+import { showAlert } from '@/lib/helpers/alert';
 
 type ImageProps = {
   uri?: string;
@@ -107,6 +108,16 @@ const Avatar = ({ type = 'avatar', avatarUrl, onImageChange }: Props) => {
 
   const pickImage = async () => {
     setIsUploading(true);
+    const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
+
+    if (!permissionResult.granted) {
+      showAlert({
+        title: 'Permission denied',
+        message: 'Permission to access camera roll is required.',
+      });
+      return;
+    }
+
     try {
       const result = await ImagePicker.launchCameraAsync({
         mediaTypes: 'images',
