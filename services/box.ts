@@ -6,6 +6,7 @@ import {
 } from '@/lib/helpers/supabase/storage';
 import { Box, BoxFormData } from '@/types/box';
 import { handleErrors } from '@/lib/helpers/supabase';
+import { createCommonSearchQuery } from '@/services/index';
 
 const TABLE_NAME = 'boxes';
 
@@ -73,8 +74,27 @@ export const getBox = async (id: string): Promise<Box> => {
   };
 };
 
+export const getBoxes = async ({
+  search,
+  limit,
+}: { search?: string; limit?: number } = {}): Promise<Box[]> => {
+  return createCommonSearchQuery(TABLE_NAME, search, limit);
+};
+
+export const getBoxWithoutLocation = async (id: string): Promise<Box> => {
+  const { data, error } = await supabase
+    .from(TABLE_NAME)
+    .select()
+    .eq('id', id)
+    .limit(1)
+    .single();
+
+  handleErrors(error, 'Get box without location:');
+
+  return data;
+};
+
 export const createNewBox = async (formData: BoxFormData): Promise<void> => {
-  console.log(formData);
   const { new_box_asset, ...data } = formData;
 
   const { data: supabaseResponse, error: createError } = await supabase

@@ -1,6 +1,7 @@
 import { supabase } from '@/lib/supabase';
 import { Location, LocationFormData } from '@/types/location';
 import { PostgrestError } from '@supabase/supabase-js';
+import { createCommonSearchQuery } from '@/services/index';
 
 const TABLE_NAME = 'locations';
 const handleErrorsAndReturnData = (
@@ -39,21 +40,7 @@ export const getLocations = async ({
   search,
   limit,
 }: { search?: string; limit?: number } = {}): Promise<Location[]> => {
-  let query = supabase.from(TABLE_NAME).select();
-
-  if (search) {
-    query = query.or(`name.ilike.%${search}%,description.ilike.%${search}%`);
-  }
-
-  if (limit) {
-    query = query.limit(limit);
-  }
-
-  query = query.order('updated_at', { ascending: false });
-
-  const { data, error } = await query;
-
-  return handleErrorsAndReturnData(data ?? {}, error, 'Get locations error:');
+  return createCommonSearchQuery(TABLE_NAME, search, limit);
 };
 
 export const getLocation = async (id: string): Promise<Location> => {

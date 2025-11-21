@@ -67,12 +67,12 @@ export const LocationCard = ({
         />
       )}
     >
-      <TouchableOpacity onPress={() => router.push(`/location/${item.id}/`)}>
-        <View
-          className={
-            'p-2 border-b border-outline-200 bg-background-0 my-1 max-h-[100px]'
-          }
-        >
+      <View
+        className={
+          'p-2 dark:border-b dark:border-x-0 dark:border-t-0  border border-outline-200 dark:bg-background-dark bg-background-0 dark:my-0 my-1 max-h-[100px]'
+        }
+      >
+        <TouchableOpacity onPress={() => router.push(`/location/${item.id}/`)}>
           <Text
             className={
               'text-lg font-medium text-typography-900 whitespace-nowrap overflow-hidden overflow-ellipsis'
@@ -93,8 +93,8 @@ export const LocationCard = ({
               {item.description}
             </Text>
           )}
-        </View>
-      </TouchableOpacity>
+        </TouchableOpacity>
+      </View>
     </Swipeable>
   );
 };

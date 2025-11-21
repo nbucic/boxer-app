@@ -31,7 +31,6 @@ export default function EditLocationScreen() {
   const queryClient = useQueryClient();
   const isEditMode = !!locationId;
 
-  debugger;
   const { data: existingLocation, isFetching } = useQuery({
     queryKey: ['locations', locationId],
     queryFn: () => getLocation(locationId!),

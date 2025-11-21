@@ -16,7 +16,7 @@ export function useInitialTheme() {
       const storedTheme = (await AsyncStorage.getItem(
         THEME_STORAGE_KEY
       )) as Theme | null;
-      debugger;
+
       if (storedTheme) {
         setTheme(storedTheme);
         setColorScheme(storedTheme);
@@ -27,6 +27,5 @@ export function useInitialTheme() {
     void loadTheme();
   }, [setColorScheme]);
 
-  console.info(`Using ${theme} theme - at initial theme`);
   return { theme, setTheme, isLoaded };
 }

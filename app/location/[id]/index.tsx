@@ -1,12 +1,14 @@
-import { router, Stack, useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { getLocation } from '@/services/location';
 import { ActivityIndicator, FlatList, Text, View } from 'react-native';
 import { VStack } from '@/components/ui/vstack';
 import { fetchAllBoxes } from '@/services/box';
 import { BoxCard } from '@/components/list/BoxCard';
-import { Box } from '@/types/box';
+import { Box } from '@/components/ui/box';
 import WithFab from '@/components/layout/withFab';
+import InfoItem from '@/components/box/InfoItem';
+import { ScrollTextIcon } from 'lucide-react-native';
 
 const LocationDetailsScreen = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -55,28 +57,28 @@ const LocationDetailsScreen = () => {
 
   return (
     <WithFab onFabPress={() => router.push(`/box/create?locationId=${id}`)}>
-      <VStack className="flex-1 p-4 gap-4">
-        <Stack.Screen
-          options={{
-            title: undefined,
-            headerShown: false,
-            gestureEnabled: true,
-            fullScreenGestureEnabled: true,
-            fullScreenGestureShadowEnabled: true,
-          }}
-        />
-        <Text className="text-3xl font-bold">{location.name}</Text>
-        <Text className="text-lg">{location.description}</Text>
-        {/* You can add more details about the box here */}
-        <Text className={'text-xl font-bold mt-5'}>
-          Boxes at this location:
-        </Text>
-        <FlatList
-          data={boxes}
-          renderItem={({ item }) => <BoxCard box={item} listType={'static'} />}
-          keyExtractor={(item) => (item as Box).id}
-        />
-      </VStack>
+      <Box className={'flex-1 bg-white dark:bg-black'}>
+        <VStack className="flex-1 p-4 gap-4">
+          <Text className="text-3xl font-bold text-gray-900 dark:text-white">
+            {location.name}
+          </Text>
+
+          {location.description && (
+            <InfoItem icon={ScrollTextIcon} text={location.description} />
+          )}
+          {/* You can add more details about the box here */}
+          <Text className={'text-xl font-bold text-gray-900 dark:text-white'}>
+            Boxes at this location:
+          </Text>
+          <FlatList
+            data={boxes}
+            renderItem={({ item }) => (
+              <BoxCard box={item} listType={'static'} />
+            )}
+            keyExtractor={(item) => item.id}
+          />
+        </VStack>
+      </Box>
     </WithFab>
   );
 };

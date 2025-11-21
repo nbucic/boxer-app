@@ -1,6 +1,6 @@
 // noinspection JSDeprecatedSymbols,XmlDeprecatedElement
 
-import { Alert, Image, Pressable, View } from 'react-native';
+import { Alert, Image, Pressable, TouchableOpacity, View } from 'react-native';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { deleteBox } from '@/services/box';
 import { HStack } from '@/components/ui/hstack';
@@ -28,6 +28,7 @@ import InfoItem from '@/components/box/InfoItem';
 import { NameItem } from '@/components/box/NameItem';
 import { Action } from '@/components/swipeable/Action';
 import { BackAction } from '@/components/BackAction';
+import { Layout } from '@/types';
 
 type BoxCardProps =
   // Scenario 1: layout is 'list' (or default), and listType is 'static'
@@ -42,7 +43,7 @@ type BoxCardProps =
   // In this case, onShare is required for the swipeable actions
   | {
       box: BoxType;
-      layout: 'list' | 'grid'; // Covers layout list and undefined (which defaults to list)
+      layout: Layout; // Covers layout list and undefined (which defaults to list)
       onShare: (box: BoxType) => void;
     };
 
@@ -162,41 +163,47 @@ export const BoxCard = memo((props: BoxCardProps) => {
 
     const internalBoxListView = (
       <View
-        className={`p-2 border-b border-outline-200 bg-background-0 my-1 max-h-[100px]`}
+        className={`p-2 dark:border-b light:border border-outline-200 dark:bg-background-dark bg-background-0 dark:my-0 my-1 max-h-[100px]`}
       >
-        <HStack space={'lg'} className={'items-center gap-2'}>
-          <View className={'h-full aspect-square flex-shrink-0'}>
-            {box.publicImageUrl ? (
-              <Image
-                source={{ uri: box.publicImageUrl }}
-                className={'w-full h-full rounded-lg'}
-                resizeMode={'cover'}
+        <TouchableOpacity onPress={() => router.navigate(`/box/${box.id}`)}>
+          <HStack space={'sm'} className={'items-center'}>
+            <View className={'h-full aspect-square flex-shrink-0'}>
+              {box.publicImageUrl ? (
+                <Image
+                  source={{ uri: box.publicImageUrl }}
+                  className={'w-full h-full rounded-lg'}
+                  resizeMode={'cover'}
+                />
+              ) : (
+                <View className={'w-full h-full rounded-lg bg-neutral-200'} />
+              )}
+            </View>
+            <VStack className={'flex-1 gap-0.5'}>
+              <NameItem
+                boxName={box.name}
+                containerClassName={'items-center gap-1'}
               />
-            ) : (
-              <View className={'w-full h-full rounded-lg bg-neutral-200'} />
-            )}
-          </View>
-          <VStack className={'flex-1 gap-0.5'}>
-            <NameItem
-              boxName={box.name}
-              containerClassName={'items-center gap-1'}
-            />
-            <InfoItem
-              box={box}
-              icon={MapPinnedIcon}
-              text={box.location?.name}
-              linkText={'Add location?'}
-              focus={'location'}
-            />
-            <InfoItem
-              box={box}
-              icon={ScrollTextIcon}
-              text={box.description}
-              linkText={'Add description?'}
-              focus={'description'}
-            />
-          </VStack>
-        </HStack>
+              <InfoItem
+                icon={MapPinnedIcon}
+                text={box.location?.name}
+                link={{
+                  pathname: '/box/create',
+                  params: { id: box.id, focus: 'location' },
+                }}
+                linkText={'Add location?'}
+              />
+              <InfoItem
+                icon={ScrollTextIcon}
+                text={box.description}
+                link={{
+                  pathname: '/box/create',
+                  params: { id: box.id, focus: 'description' },
+                }}
+                linkText={'Add description?'}
+              />
+            </VStack>
+          </HStack>
+        </TouchableOpacity>
       </View>
     );
 
@@ -277,24 +284,29 @@ export const BoxCard = memo((props: BoxCardProps) => {
                 containerClassName={
                   'absolute bottom-2 left-2 right-2 flex flex-row items-center gap-x-1 rounded-md px-2 py-1 bg-black/50'
                 }
+                clickable={`/box/${box.id}`}
                 iconColor={'white'}
                 isTextWhite={true}
               />
             </View>
             <VStack className={'gap-0.5 p-2'}>
               <InfoItem
-                box={box}
                 icon={MapPinnedIcon}
                 text={box.location?.name}
+                link={{
+                  pathname: '/box/create',
+                  params: { id: box.id, focus: 'location' },
+                }}
                 linkText={'Add location?'}
-                focus={'location'}
               />
               <InfoItem
-                box={box}
                 icon={ScrollTextIcon}
                 text={box.description}
+                link={{
+                  pathname: '/box/create',
+                  params: { id: box.id, focus: 'description' },
+                }}
                 linkText={'Add description?'}
-                focus={'description'}
               />
             </VStack>
           </VStack>

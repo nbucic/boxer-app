@@ -1,5 +1,8 @@
 import { supabase } from '@/lib/supabase';
 import { handleErrors } from '@/lib/helpers/supabase';
+import { Platform } from 'react-native';
+import { ImagePickerAsset } from 'expo-image-picker';
+import { StorageError } from '@supabase/storage-js';
 
 interface IAvatarStorageInformationRequest {
   userId?: string;
@@ -27,6 +30,15 @@ export const getBoxStorageInformation = async ({
     path: `${user?.id}/${id}.${extension}`,
   };
 };
+
+const getBucketPrefixPath = async () => {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  return `${user?.id}`;
+};
+
 export const getAvatarStorageInformation = ({
   userId,
   extension,
@@ -44,12 +56,13 @@ export const getAvatarStorageInformation = ({
 
   return response;
 };
+
 export const getSignedUrlForImage = async ({
   url,
   bucket = 'boxes',
 }: {
   url: string | null | undefined;
-  bucket?: 'boxes' | 'avatar';
+  bucket?: 'boxes' | 'tools' | 'avatar';
 }): Promise<string | null> => {
   if (url === null || url === undefined) {
     return null;
@@ -64,4 +77,41 @@ export const getSignedUrlForImage = async ({
   handleErrors(signedUrlError, 'Error creating signed URL for', url);
 
   return signedUrlData?.signedUrl ?? null;
+};
+
+export const handleImageUploadToTheBucket = async ({
+  id,
+  asset,
+  bucket,
+}: {
+  id: string;
+  asset: ImagePickerAsset;
+  bucket: string;
+}) => {
+  const arrayBuffer = await fetch(asset.uri).then((res) => res.arrayBuffer());
+
+  const extension =
+    Platform.OS === 'web'
+      ? (asset.mimeType?.split('/')[1] ?? 'jpeg')
+      : (asset.uri?.split('.').pop()?.toLowerCase() ?? 'jpeg');
+
+  const path = `${await getBucketPrefixPath()}/${id}.${extension}`;
+
+  const { data: uploadData, error: uploadError } = await supabase.storage
+    .from(bucket)
+    .upload(path as string, arrayBuffer, {
+      contentType: asset.mimeType ?? `image/${extension}`,
+      upsert: true,
+    });
+
+  if (uploadError) {
+    handleErrors(uploadError, 'Image upload to the bucket error:');
+    throw uploadError;
+  } else if (uploadData && uploadData.path) {
+    return uploadData.path;
+  } else {
+    const error = new StorageError('No path assigned');
+    handleErrors(error, 'Image upload to the bucket error:');
+    throw error;
+  }
 };
