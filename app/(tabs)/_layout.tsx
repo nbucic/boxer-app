@@ -105,6 +105,22 @@ export default function TabLayout() {
           ),
         }}
       />
+      {/*
+      <Tabs.Screen
+        name="test"
+        options={{
+          headerShown: false,
+          tabBarIcon: ({ focused }) => (
+            <TabIcon
+              icon={'aperture-outline'}
+              iconFocused={'aperture'}
+              focused={focused}
+              title={'Tensor'}
+            />
+          ),
+        }}
+      />
+*/}
     </Tabs>
   );
 }
