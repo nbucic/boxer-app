@@ -89,7 +89,7 @@ export default function ShareBox({
         }
       }
     });
-  }, [box.id]);
+  }, []);
 
   const handlePrint = useCallback(() => {
     const qrCode = qrCodeRef.current;

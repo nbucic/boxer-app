@@ -15,7 +15,7 @@ export const QRCodeDisplay = forwardRef<Svg, QrCodeDisplayProps>(
 
     console.log('Deep link:', deepLink);
 
-    useImperativeHandle(ref, () => qrCodeRef.current!, [qrCodeRef.current]);
+    useImperativeHandle(ref, () => qrCodeRef.current!, []);
 
     return (
       <QRCode

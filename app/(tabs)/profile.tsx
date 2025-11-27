@@ -8,37 +8,37 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { AlertCircleIcon, Icon } from '@/components/ui/icon';
-import { VStack } from '@/components/ui/vstack';
+import { AlertCircleIcon, Icon } from '../../../movie-app/components/ui/icon';
+import { VStack } from '../../../movie-app/components/ui/vstack';
 import { Controller, useForm } from 'react-hook-form';
 import {
   FormControl,
   FormControlError,
   FormControlErrorIcon,
   FormControlErrorText,
-} from '@/components/ui/form-control';
-import { Text } from '@/components/ui/text';
-import { Input, InputField } from '@/components/ui/input';
+} from '../../../movie-app/components/ui/form-control';
+import { Text } from '../../../movie-app/components/ui/text';
+import { Input, InputField } from '../../../movie-app/components/ui/input';
 import {
   getCurrentUser,
   updateCurrentUser,
   UpdateUserPayload,
   User,
-} from '@/services/user';
-import { HStack } from '@/components/ui/hstack';
-import { Button, ButtonText } from '@/components/ui/button';
+} from '../../../movie-app/services/user';
+import { HStack } from '../../../movie-app/components/ui/hstack';
+import { Button, ButtonText } from '../../../movie-app/components/ui/button';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useState } from 'react';
 import { ImagePickerAsset } from 'expo-image-picker';
-import Avatar from '@/components/Avatar';
+import Avatar from '../../../movie-app/components/Avatar';
 import { Moon, RefreshCwIcon, Smartphone, Sun } from 'lucide-react-native';
-import { Heading } from '@/components/ui/heading';
-import { Box } from '@/components/ui/box';
-import { Divider } from '@/components/ui/divider';
-import { supabase } from '@/lib/supabase';
+import { Heading } from '../../../movie-app/components/ui/heading';
+import { Box } from '../../../movie-app/components/ui/box';
+import { Divider } from '../../../movie-app/components/ui/divider';
+import { supabase } from '../../../movie-app/lib/supabase';
 import { useColorScheme } from 'nativewind';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Theme, THEME_STORAGE_KEY } from '@/hooks/useInitialTheme';
+import { Theme, THEME_STORAGE_KEY } from '../../../movie-app/hooks/useInitialTheme';
 
 // Extend the form's data type to include the new image asset.
 type ProfileFormData = User & {

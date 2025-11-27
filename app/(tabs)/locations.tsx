@@ -53,10 +53,10 @@ export default function Locations() {
       } else {
         deleteMutation.mutate(locationId);
       }
-    } catch (e) {
+    } catch (e: Error | any) {
       showAlert({
         title: 'Error',
-        message: 'An error occurred white checking for boxes.',
+        message: `An error occurred white checking for boxes - ${e.message}`,
       });
     }
   };

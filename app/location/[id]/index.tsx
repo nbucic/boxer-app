@@ -13,10 +13,6 @@ import { ScrollTextIcon } from 'lucide-react-native';
 const LocationDetailsScreen = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
 
-  if (!id) {
-    router.replace('/');
-    return null;
-  }
 
   const {
     data: location,
@@ -24,7 +20,7 @@ const LocationDetailsScreen = () => {
     error: locationError,
   } = useQuery({
     queryKey: ['location', id],
-    queryFn: () => getLocation(id),
+    queryFn: () => getLocation(id!),
     enabled: !!id,
   });
 
@@ -34,12 +30,17 @@ const LocationDetailsScreen = () => {
     error: boxesError,
   } = useQuery({
     queryKey: ['boxes', 'location', id],
-    queryFn: () => fetchAllBoxes({ filter: { location: id } }),
+    queryFn: () => fetchAllBoxes({ filter: { location: id! } }),
     enabled: !!id,
   });
 
   const isLoading = locationLoading || boxesLoading;
   const error = locationError || boxesError;
+
+  if (!id) {
+    router.replace('/');
+    return null;
+  }
 
   if (isLoading) {
     return <ActivityIndicator size={'large'} className={'flex-1'} />;

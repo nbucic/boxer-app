@@ -98,7 +98,7 @@ export default function EditBoxScreen() {
     } else {
       setValue('location_id', locationId, { shouldDirty: false });
     }
-  }, [existingBox, reset]);
+  }, [existingBox, reset, setValue, locationId]);
 
   // Effect to set the public image URL when existingBox data is available
   useEffect(() => {

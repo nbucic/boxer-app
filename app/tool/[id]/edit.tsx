@@ -89,7 +89,7 @@ export default function EditToolScreen() {
       setValue('box_id', boxId, { shouldDirty: false });
     }
     setValue('photo_added', !!existingTool);
-  }, [existingTool, boxId, reset()]);
+  }, [existingTool, boxId, reset, setValue);
 
   useEffect(() => {
     if (existingTool?.publicImageUrl) {

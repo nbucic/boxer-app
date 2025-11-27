@@ -1,14 +1,14 @@
 'use client';
 import React from 'react';
 import { createButton } from '@gluestack-ui/core/button/creator';
-import { tva } from '@gluestack-ui/utils/nativewind-utils';
 import {
+  tva,
   withStyleContext,
   useStyleContext,
+  VariantProps,
 } from '@gluestack-ui/utils/nativewind-utils';
 import { cssInterop } from 'nativewind';
 import { ActivityIndicator, Pressable, Text, View } from 'react-native';
-import type { VariantProps } from 'tailwind-variants';
 import { PrimitiveIcon, UIIcon } from '@gluestack-ui/core/icon/creator';
 
 const SCOPE = 'BUTTON';
@@ -257,11 +257,11 @@ const buttonGroupStyle = tva({
   base: '',
   variants: {
     space: {
-      'xs': 'gap-1',
-      'sm': 'gap-2',
-      'md': 'gap-3',
-      'lg': 'gap-4',
-      'xl': 'gap-5',
+      xs: 'gap-1',
+      sm: 'gap-2',
+      md: 'gap-3',
+      lg: 'gap-4',
+      xl: 'gap-5',
       '2xl': 'gap-6',
       '3xl': 'gap-7',
       '4xl': 'gap-8',
@@ -270,8 +270,8 @@ const buttonGroupStyle = tva({
       true: 'gap-0',
     },
     flexDirection: {
-      'row': 'flex-row',
-      'column': 'flex-col',
+      row: 'flex-row',
+      column: 'flex-col',
       'row-reverse': 'flex-row-reverse',
       'column-reverse': 'flex-col-reverse',
     },
