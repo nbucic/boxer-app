@@ -13,7 +13,6 @@ import { ScrollTextIcon } from 'lucide-react-native';
 const LocationDetailsScreen = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
 
-
   const {
     data: location,
     isLoading: locationLoading,

@@ -1,35 +1,38 @@
+import '@tensorflow/tfjs-react-native';
 import { Box } from '@/components/ui/box';
 import { Text } from '@/components/ui/text';
 import { Key, useEffect, useState } from 'react';
 import * as ImagePicker from 'expo-image-picker';
 import { ActivityIndicator, Button, Image, View } from 'react-native';
 import { showAlert } from '@/lib/helpers/alert';
+import * as tf from '@tensorflow/tfjs';
+import * as cocoSsd from '@tensorflow-models/coco-ssd';
 
-function TestScreen() {
+export function TensorScreen() {
   const [isTfReady, setIsTfReady] = useState(false);
   const [model, setModel] = useState<any>(null);
-  const [imageUri, setImageUri] = useState<string | null>(null);
+  const [imageUri, setImageUri] = useState(null);
   // const [predictions, setPredictions] = useState<DetectedObject[]>([]);
-  const [predictions, setPredictions] = useState<any>([]);
+  const [predictions, setPredictions] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
   //1. Initialize  TFJS and load the model
   useEffect(() => {
-    async function prepare() {
+    const prepare = async () => {
       try {
         // Initialize the TFJS backend for React Native
-        // await tf.ready();
+        await tf.ready();
         setIsTfReady(true);
         console.log('TensorFlow.js is ready!');
 
         // Load the COCO-SSD object detection model
-        // const loadedModel = await cocoSSD.load();
-        // setModel(loadedModel);
+        const loadedModel = await cocoSsd.load();
+        setModel(loadedModel);
         console.log('COCO-SSD Model loaded!');
       } catch (error) {
         console.error('Error initializing ML:', error);
       }
-    }
+    };
 
     void prepare();
   }, []);
@@ -38,8 +41,8 @@ function TestScreen() {
   const selectImage = async () => {
     try {
       // Clear previous results
-      setImageUri(null);
-      setPredictions([]);
+      // setImageUri(null);
+      // setPredictions([]);
 
       // Request permission and open the image picker
       const { status } =
@@ -63,7 +66,7 @@ function TestScreen() {
       if (pickerResult.canceled) return;
 
       const uri = pickerResult.assets[0].uri;
-      setImageUri(uri);
+      // setImageUri(uri);
 
       // Immediately start detection
       await detectObjects(uri);
@@ -76,7 +79,7 @@ function TestScreen() {
   const detectObjects = async (uri: string) => {
     if (!model) return;
 
-    setIsLoading(true);
+    // setIsLoading(true);
 
     try {
       // Fetch the image data as a byte array
@@ -87,14 +90,14 @@ function TestScreen() {
       // Run the detection model
       const newPredictions: [] = [];
       // const newPredictions: DetectedObject[] = await model.detect(imageTensor);
-      setPredictions(newPredictions);
+      // setPredictions(newPredictions);
 
       // Clean up the tensor from memory
       // tf.dispose(imageTensor);
     } catch (e) {
       console.error('Detection error:', e);
     } finally {
-      setIsLoading(false);
+      // setIsLoading(false);
     }
   };
 
@@ -153,5 +156,3 @@ function TestScreen() {
     </Box>
   );
 }
-
-export default TestScreen;

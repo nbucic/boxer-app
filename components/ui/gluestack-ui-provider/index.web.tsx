@@ -60,9 +60,9 @@ export function GluestackUIProvider({
     if (mode !== 'system') return;
     const media = window.matchMedia('(prefers-color-scheme: dark)');
 
-    media.addListener(handleMediaQuery);
+    media.addEventListener('change', handleMediaQuery);
 
-    return () => media.removeListener(handleMediaQuery);
+    return () => media.removeEventListener('change', handleMediaQuery);
   }, [handleMediaQuery]);
 
   useSafeLayoutEffect(() => {

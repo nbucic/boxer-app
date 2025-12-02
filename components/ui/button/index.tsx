@@ -5,7 +5,7 @@ import {
   tva,
   withStyleContext,
   useStyleContext,
-  VariantProps,
+  type VariantProps,
 } from '@gluestack-ui/utils/nativewind-utils';
 import { cssInterop } from 'nativewind';
 import { ActivityIndicator, Pressable, Text, View } from 'react-native';
@@ -257,11 +257,11 @@ const buttonGroupStyle = tva({
   base: '',
   variants: {
     space: {
-      xs: 'gap-1',
-      sm: 'gap-2',
-      md: 'gap-3',
-      lg: 'gap-4',
-      xl: 'gap-5',
+      'xs': 'gap-1',
+      'sm': 'gap-2',
+      'md': 'gap-3',
+      'lg': 'gap-4',
+      'xl': 'gap-5',
       '2xl': 'gap-6',
       '3xl': 'gap-7',
       '4xl': 'gap-8',
@@ -270,8 +270,8 @@ const buttonGroupStyle = tva({
       true: 'gap-0',
     },
     flexDirection: {
-      row: 'flex-row',
-      column: 'flex-col',
+      'row': 'flex-row',
+      'column': 'flex-col',
       'row-reverse': 'flex-row-reverse',
       'column-reverse': 'flex-col-reverse',
     },
@@ -285,7 +285,7 @@ type IButtonProps = Omit<
   VariantProps<typeof buttonStyle> & { className?: string };
 
 const Button = React.forwardRef<
-  React.ElementRef<typeof UIButton>,
+  React.ComponentRef<typeof UIButton>,
   IButtonProps
 >(
   (
@@ -307,7 +307,7 @@ type IButtonTextProps = React.ComponentPropsWithoutRef<typeof UIButton.Text> &
   VariantProps<typeof buttonTextStyle> & { className?: string };
 
 const ButtonText = React.forwardRef<
-  React.ElementRef<typeof UIButton.Text>,
+  React.ComponentRef<typeof UIButton.Text>,
   IButtonTextProps
 >(({ className, variant, size, action, ...props }, ref) => {
   const {
@@ -326,14 +326,9 @@ const ButtonText = React.forwardRef<
           size: parentSize,
           action: parentAction,
         },
-        variant: variant as 'link' | 'outline' | 'solid' | undefined,
+        variant,
         size,
-        action: action as
-          | 'primary'
-          | 'secondary'
-          | 'positive'
-          | 'negative'
-          | undefined,
+        action,
         class: className,
       })}
     />
@@ -351,7 +346,7 @@ type IButtonIcon = React.ComponentPropsWithoutRef<typeof UIButton.Icon> &
   };
 
 const ButtonIcon = React.forwardRef<
-  React.ElementRef<typeof UIButton.Icon>,
+  React.ComponentRef<typeof UIButton.Icon>,
   IButtonIcon
 >(({ className, size, ...props }, ref) => {
   const {
@@ -402,7 +397,7 @@ type IButtonGroupProps = React.ComponentPropsWithoutRef<typeof UIButton.Group> &
   VariantProps<typeof buttonGroupStyle>;
 
 const ButtonGroup = React.forwardRef<
-  React.ElementRef<typeof UIButton.Group>,
+  React.ComponentRef<typeof UIButton.Group>,
   IButtonGroupProps
 >(
   (
@@ -420,8 +415,8 @@ const ButtonGroup = React.forwardRef<
         className={buttonGroupStyle({
           class: className,
           space,
-          isAttached: isAttached as boolean,
-          flexDirection: flexDirection as any,
+          isAttached,
+          flexDirection,
         })}
         {...props}
         ref={ref}
