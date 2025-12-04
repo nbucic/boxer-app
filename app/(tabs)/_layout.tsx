@@ -57,6 +57,12 @@ export default function TabLayout() {
       iconFocused: 'person',
       title: 'Profile',
     },
+    {
+      name: 'tensor',
+      icon: 'aperture-outline',
+      iconFocused: 'aperture',
+      title: 'Tensor',
+    },
   ];
   return (
     <Tabs

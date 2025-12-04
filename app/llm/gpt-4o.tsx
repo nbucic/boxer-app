@@ -3,14 +3,10 @@ import { Box } from '@/components/ui/box';
 import { Text } from '@/components/ui/text';
 import { useEffect, useState } from 'react';
 import * as ImagePicker from 'expo-image-picker';
-import { ImagePickerOptions } from 'expo-image-picker';
-import { ActivityIndicator, Button, Image, View } from 'react-native';
+import { ImagePickerAsset, ImagePickerOptions } from 'expo-image-picker';
+import { ActivityIndicator, Button, Image, Platform, View } from 'react-native';
 import { showAlert } from '@/lib/helpers/alert';
-import * as tf from '@tensorflow/tfjs';
-import * as cocoSsd from '@tensorflow-models/coco-ssd';
-import * as mobileNet from '@tensorflow-models/mobilenet';
-import { DetectedObject, ObjectDetection } from '@tensorflow-models/coco-ssd';
-import { decodeJpeg } from '@tensorflow/tfjs-react-native';
+import { DetectedObject } from '@tensorflow-models/coco-ssd';
 import {
   Actionsheet,
   ActionsheetBackdrop,
@@ -20,51 +16,40 @@ import {
   ActionsheetItem,
   ActionsheetItemText,
 } from '@/components/ui/actionsheet';
-import { MobileNet } from '@tensorflow-models/mobilenet';
+import { VStack } from '@/components/ui/vstack';
 
 export default function TensorScreen() {
-  const [isTfReady, setIsTfReady] = useState(false);
-  const [model, setModel] = useState<MobileNet | null>(null);
-  // const [model, setModel] = useState<ObjectDetection | null>(null);
+  const [model, setModel] = useState();
   const [imageUri, setImageUri] = useState<string | null>(null);
-  const [predictions, setPredictions] = useState<
-    Array<{
-      className: string;
-      probability: number;
-    }>
-  >([]);
-  // const [predictions, setPredictions] = useState<DetectedObject[]>([]);
+  const [predictions, setPredictions] = useState<DetectedObject[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [modalVisible, setModalVisible] = useState<boolean>(false);
+  const [imageWidthAndHeight, setImageWidthAndHeight] = useState<
+    | {
+        width: number;
+        height: number;
+      }
+    | undefined
+  >(undefined);
 
   const imagePickerOptions: ImagePickerOptions = {
     mediaTypes: 'images',
     allowsEditing: false,
     aspect: [4, 3],
     quality: 1,
+    base64: true,
   };
+
+  const borderColors = ['blue', 'green', 'orange', 'pink', 'purple'];
+  const ratio = 3;
 
   //1. Initialize  TFJS and load the model
   useEffect(() => {
-    const prepare = async () => {
-      try {
-        // Initialize the TFJS backend for React Native
-        await tf.ready();
-        setIsTfReady(true);
-        console.log('TensorFlow.js ready!');
+    const prepare = async () => {};
 
-        // Load the COCO-SSD object detection model
-        const loadedModel = await mobileNet.load();
-        // const loadedModel = await cocoSsd.load();
-        setModel(loadedModel);
-        console.log('MobileNet Model loaded!');
-        // console.log('COCO-SSD Model loaded!');
-      } catch (error) {
-        console.error('Error initializing ML:', error);
-      }
-    };
-
-    void prepare();
+    void prepare().catch((error) => {
+      console.error('Error initializing ML:', error);
+    });
   }, []);
 
   //2.a) Select an image and convert it to a tensor
@@ -97,55 +82,51 @@ export default function TensorScreen() {
           : await ImagePicker.launchCameraAsync(imagePickerOptions);
 
       if (pickerResult.canceled) return;
-
       const uri = pickerResult.assets[0].uri;
       setImageUri(uri);
-      console.log('Imam sliku:', uri);
 
       // Immediately start detection
       console.log('Starting object detection ...');
-      await detectObjects();
+      await detectObjects(pickerResult.assets[0]);
     } catch (e) {
       console.error('Error selecting image:', e);
     }
   };
 
   //3. Perform object detection
-  const detectObjects = async () => {
-    if (!model || !imageUri) return;
-
-    setIsLoading(true);
+  const detectObjects = async (asset: ImagePickerAsset) => {
+    if (!asset) return;
 
     try {
-      console.log('Trying to detect some objects');
-      console.log('Fetching image', imageUri);
-      const response = await fetch(imageUri);
-      // const response = await fetch(imageUri, {}, { isBinary: true });
-      const rawImageData = await response.arrayBuffer();
-      const imageData = new Uint8Array(rawImageData);
-      const imageTensor = decodeJpeg(imageData);
+      const body = JSON.stringify({
+        requests: [
+          {
+            features: [{ type: 'LABEL_DETECTION', maxResults: 10 }],
+            image: {
+              content: asset.base64,
+            },
+          },
+        ],
+      });
 
-      const newPredictions = await model.classify(imageTensor, 5);
-      // const newPredictions = await model.detect(imageTensor);
-      console.log('Finished. Found', newPredictions.length, 'objects');
-      setPredictions(newPredictions);
+      const response = await fetch(
+        `https://vision.googleapis.com/v1/images:annotate?key=${process.env.EXPO_PUBLIC_GCP_API_KEY}`,
+        {
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+          },
+          method: 'POST',
+          body,
+        }
+      );
 
-      tf.dispose(imageTensor);
+      const responseJson = await response.json();
+      console.log(responseJson);
     } catch (e) {
-      console.error('Detection error:', e);
-    } finally {
-      setIsLoading(false);
+      console.error(e);
     }
   };
-
-  if (!isTfReady || !model) {
-    return (
-      <View className={'flex-1 justify-center items-center gap-2'}>
-        <ActivityIndicator size={'large'} />
-        <Text className={'dark:text-white '}>Loading ML Model...</Text>
-      </View>
-    );
-  }
 
   return (
     <Box
@@ -154,17 +135,51 @@ export default function TensorScreen() {
       <Text
         className={'text-base font-medium text-gray-900 dark:text-white mb-3'}
       >
-        Tensor
+        OpenAI
       </Text>
       <Button
         title={'Chose an image'}
-        onPress={() => setModalVisible(true)}
+        onPress={() =>
+          Platform.OS === 'web'
+            ? getAnImage({ type: 'gallery' })
+            : setModalVisible(true)
+        }
         disabled={isLoading}
       ></Button>
 
-      {imageUri && (
-        <View className={'mx-5 border border-red-500'}>
-          <Image source={{ uri: imageUri }} className={'w-[300] h-[225]'} />
+      {imageUri && imageWidthAndHeight && (
+        <View className={'relative'}>
+          {model &&
+            predictions &&
+            predictions.map((p, index) => {
+              return (
+                <View
+                  key={index}
+                  style={{
+                    zIndex: 1,
+                    elevation: 1,
+                    left: p.bbox[0] / ratio,
+                    top: p.bbox[1] / ratio,
+                    width: p.bbox[2] / ratio,
+                    height: p.bbox[3] / ratio,
+                    borderWidth: 2,
+                    borderColor: borderColors[index % 5],
+                    backgroundColor: 'transparent',
+                    position: 'absolute',
+                  }}
+                />
+              );
+            })}
+
+          <View style={{ zIndex: 0, elevation: 0 }}>
+            <Image
+              source={{ uri: imageUri }}
+              style={{
+                width: imageWidthAndHeight.width / ratio,
+                height: imageWidthAndHeight.height / ratio,
+              }}
+            />
+          </View>
         </View>
       )}
 
@@ -183,19 +198,25 @@ export default function TensorScreen() {
           >
             Detections:
           </Text>
-          {predictions.map(
-            (
-              p: {
-                className: string;
-                probability: number;
-              },
-              index
-            ) => (
-              <Text key={index} className={'text-sm'}>
-                - {p.className} ({Math.round(p.probability * 100)}%)
+          {predictions.map((p: DetectedObject, index) => (
+            <VStack space={'xs'} key={`v-${index}`}>
+              <Text key={index} className={'uppercase'}>
+                {p.class} ({Math.round(p.score * 100)}%):
               </Text>
-            )
-          )}
+              <Text key={`0-${index}`}>
+                {'\u2022'} LEFT: {p.bbox[0]}
+              </Text>
+              <Text key={`1-${index}`}>
+                {'\u2022'} TOP: {p.bbox[1]}
+              </Text>
+              <Text key={`2-${index}`}>
+                {'\u2022'} RIGHT: {p.bbox[2]}
+              </Text>
+              <Text key={`3-${index}`}>
+                {'\u2022'} BOTTOM: {p.bbox[3]}
+              </Text>
+            </VStack>
+          ))}
         </View>
       )}
 

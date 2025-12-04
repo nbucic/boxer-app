@@ -4,12 +4,10 @@ import { Text } from '@/components/ui/text';
 import { useEffect, useState } from 'react';
 import * as ImagePicker from 'expo-image-picker';
 import { ImagePickerOptions } from 'expo-image-picker';
-import { ActivityIndicator, Button, Image, View } from 'react-native';
+import { ActivityIndicator, Button, Image, Platform, View } from 'react-native';
 import { showAlert } from '@/lib/helpers/alert';
 import * as tf from '@tensorflow/tfjs';
-import * as cocoSsd from '@tensorflow-models/coco-ssd';
 import * as mobileNet from '@tensorflow-models/mobilenet';
-import { DetectedObject, ObjectDetection } from '@tensorflow-models/coco-ssd';
 import { decodeJpeg } from '@tensorflow/tfjs-react-native';
 import {
   Actionsheet,
@@ -25,7 +23,6 @@ import { MobileNet } from '@tensorflow-models/mobilenet';
 export default function TensorScreen() {
   const [isTfReady, setIsTfReady] = useState(false);
   const [model, setModel] = useState<MobileNet | null>(null);
-  // const [model, setModel] = useState<ObjectDetection | null>(null);
   const [imageUri, setImageUri] = useState<string | null>(null);
   const [predictions, setPredictions] = useState<
     Array<{
@@ -33,7 +30,6 @@ export default function TensorScreen() {
       probability: number;
     }>
   >([]);
-  // const [predictions, setPredictions] = useState<DetectedObject[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [modalVisible, setModalVisible] = useState<boolean>(false);
 
@@ -100,7 +96,6 @@ export default function TensorScreen() {
 
       const uri = pickerResult.assets[0].uri;
       setImageUri(uri);
-      console.log('Imam sliku:', uri);
 
       // Immediately start detection
       console.log('Starting object detection ...');
@@ -120,13 +115,11 @@ export default function TensorScreen() {
       console.log('Trying to detect some objects');
       console.log('Fetching image', imageUri);
       const response = await fetch(imageUri);
-      // const response = await fetch(imageUri, {}, { isBinary: true });
       const rawImageData = await response.arrayBuffer();
       const imageData = new Uint8Array(rawImageData);
       const imageTensor = decodeJpeg(imageData);
 
       const newPredictions = await model.classify(imageTensor, 5);
-      // const newPredictions = await model.detect(imageTensor);
       console.log('Finished. Found', newPredictions.length, 'objects');
       setPredictions(newPredictions);
 
@@ -158,7 +151,11 @@ export default function TensorScreen() {
       </Text>
       <Button
         title={'Chose an image'}
-        onPress={() => setModalVisible(true)}
+        onPress={() =>
+          Platform.OS === 'web'
+            ? getAnImage({ type: 'gallery' })
+            : setModalVisible(true)
+        }
         disabled={isLoading}
       ></Button>
 

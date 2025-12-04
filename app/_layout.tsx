@@ -5,11 +5,25 @@ import { Stack } from 'expo-router';
 import { AuthProvider, useAuth } from '@/context/AuthContext';
 import { ActivityIndicator, View } from 'react-native';
 import { useInitialTheme } from '@/hooks/useInitialTheme';
+import { useEffect, useState } from 'react';
 
 const queryClient = new QueryClient();
 
+type authScreen = '(auth)/auth';
+type testScreen = '(test)';
+
 const AppLayout = () => {
   const { session, isLoading } = useAuth();
+  const [unguardedUrl, setUnguardedUrl] = useState<authScreen | testScreen>(
+    '(auth)/auth'
+  );
+
+  useEffect(() => {
+    setUnguardedUrl(
+      process.env.EXPO_PUBLIC_FULL_TEST_MODE ? '(test)' : '(auth)/auth'
+    );
+  }, []);
+
   if (isLoading) {
     return (
       <View className={'flex-1 justify-center items-center'}>
@@ -34,7 +48,7 @@ const AppLayout = () => {
       </Stack.Protected>
 
       <Stack.Protected guard={!session}>
-        <Stack.Screen name={'(auth)/auth'} />
+        <Stack.Screen name={unguardedUrl} />
       </Stack.Protected>
     </Stack>
   );
