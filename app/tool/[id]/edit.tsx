@@ -1,15 +1,12 @@
-import { Box } from '@/components/ui/box';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { createNewTool, getTool, updateTool } from '@/services/tool';
+import { createNewTool, getToolEditData, updateTool } from '@/services/tool';
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
-  Platform,
   ScrollView,
   View,
 } from 'react-native';
-import { Heading } from '@/components/ui/heading';
 import { VStack } from '@/components/ui/vstack';
 import Avatar from '@/components/Avatar';
 import { ImagePickerAsset } from 'expo-image-picker';
@@ -31,6 +28,8 @@ import { Text } from '@/components/ui/text';
 import { Input, InputField } from '@/components/ui/input';
 import { HStack } from '@/components/ui/hstack';
 import { BoxSearchSelect } from '@/components/form/BoxSearchSelect';
+import { ListHeader } from '@/components/list/ListHeader';
+import clsx from 'clsx';
 
 export default function EditToolScreen() {
   const { id: toolId, boxId } = useLocalSearchParams<{
@@ -48,30 +47,37 @@ export default function EditToolScreen() {
     error: errorExistingTool,
   } = useQuery({
     queryKey: ['tools', toolId],
-    queryFn: () => getTool(toolId!),
+    queryFn: () => getToolEditData(toolId!),
     enabled: isEditMode,
   });
 
   const {
     control,
-    formState: { errors, isDirty, isValid },
+    formState: { errors, isDirty },
     handleSubmit,
     reset,
     setValue,
-  } = useForm<ToolFormData>({
-    defaultValues: {
-      name: '',
-      description: '',
-      new_tool_asset: null,
-      photo_added: false,
-    },
-  });
+  } = useForm<ToolFormData>({ mode: 'onChange' });
 
-  const { mutate } = useMutation({
+  useEffect(() => {
+    if (existingTool) {
+      reset(existingTool);
+      if (existingTool.image_url) {
+        setPublicImageUrl(existingTool.image_url);
+      }
+    } else if (boxId) {
+      setValue('box_id', boxId, { shouldDirty: false });
+    }
+    // setValue('photo_added', !!existingTool);
+  }, [existingTool, reset]);
+  // }, [existingTool, boxId, reset()]);
+
+  const { mutate, isPending } = useMutation({
     mutationFn: async (data: ToolFormData) =>
       isEditMode ? updateTool(toolId!, data) : createNewTool(data),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['tools'] });
+      router.dismissAll();
       router.navigate('/(tabs)');
     },
     onError: (e: Error) => {
@@ -83,19 +89,10 @@ export default function EditToolScreen() {
   });
 
   useEffect(() => {
-    if (existingTool) {
-      reset(existingTool);
-    } else if (boxId) {
-      setValue('box_id', boxId, { shouldDirty: false });
+    if (existingTool?.image_url) {
+      setPublicImageUrl(existingTool.image_url);
     }
-    setValue('photo_added', !!existingTool);
-  }, [existingTool, boxId, reset()]);
-
-  useEffect(() => {
-    if (existingTool?.publicImageUrl) {
-      setPublicImageUrl(existingTool.publicImageUrl);
-    }
-  }, [existingTool?.publicImageUrl]);
+  }, [existingTool?.image_url]);
 
   const handleImageChange = (image: ImagePickerAsset) => {
     setPublicImageUrl(image.uri);
@@ -103,10 +100,14 @@ export default function EditToolScreen() {
     setValue('photo_added', true);
   };
 
+  const saveTheTool = (formData: ToolFormData) => {
+    mutate(formData);
+  };
+
   if (fetchingExistingTool) {
     return (
-      <View className={'flex-1 justify-center'}>
-        <ActivityIndicator size={'large'} />
+      <View className={'flex-1 justify-center bg-white dark:bg-black'}>
+        <ActivityIndicator size={'large'} color={'#2563eb'} />
       </View>
     );
   }
@@ -114,151 +115,226 @@ export default function EditToolScreen() {
   if (status === 'error') {
     return (
       <View className={'flex-1 justify-center items-center p-4'}>
-        <Text>Error fetching box: {errorExistingTool.message}</Text>
+        <Text>Error fetching tool: {errorExistingTool.message}</Text>
       </View>
     );
   }
 
   return (
-    <Box className={'flex-1 bg-white dark:bg-black'}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        className={'flex-1 '}
-      >
-        <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
-          <View className={'px-6 py-4'}>
-            <Heading size={'xl'} className={'text-gray-900 dark:text-white'}>
-              {isEditMode ? 'Edit tool' : 'Add new tool'}
-            </Heading>
+    <KeyboardAvoidingView
+      behavior={'height'}
+      className={'flex-1 bg-white dark:bg-black'}
+    >
+      <ListHeader
+        title={`${isEditMode ? 'Edit' : 'New'} tool`}
+        subtitle={
+          isEditMode
+            ? 'Update details for this tool.'
+            : 'Add a new tool to the box.'
+        }
+      />
+      <ScrollView className={'flex-1 px-4 pb-4'}>
+        <VStack space={'2xl'}>
+          <View
+            className={
+              'bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800'
+            }
+          >
+            <VStack space={'xl'}>
+              <Controller
+                control={control}
+                name={'photo_added'}
+                rules={{ required: 'Photo is required!' }}
+                render={() => (
+                  <FormControl isInvalid={!!errors.photo_added}>
+                    <VStack className={'items-center py-2'} space={'md'}>
+                      <Avatar
+                        avatarUrl={publicImageUrl}
+                        onImageChange={handleImageChange}
+                        type={'box'}
+                      />
+                      <VStack className={'items-center'}>
+                        <Text className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                          Tool Photo
+                        </Text>
+                        <Text className="text-xs text-gray-500">
+                          Tap to change image
+                        </Text>
+                      </VStack>
+                    </VStack>
+                    {errors.photo_added && (
+                      <FormControlError className={'justify-center'}>
+                        <FormControlErrorIcon as={AlertCircleIcon} />
+                        <FormControlErrorText>
+                          {errors.photo_added?.message}
+                        </FormControlErrorText>
+                      </FormControlError>
+                    )}
+                  </FormControl>
+                )}
+              />
+
+              <Controller
+                control={control}
+                name={'name'}
+                rules={{ required: 'Name is required' }}
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <FormControl isInvalid={!!errors.name}>
+                    <VStack space={'xs'}>
+                      <FormControlLabel>
+                        <FormControlLabelText
+                          className={
+                            'text-sm font-medium text-gray-700 dark:text-gray-300'
+                          }
+                        >
+                          Tool name
+                        </FormControlLabelText>
+                      </FormControlLabel>
+                      <Input
+                        className={clsx(
+                          'h-12 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-80',
+                          // Target the focus state specifically via the data attribute
+                          'data-[focus=true]:border-blue-500 data-[focus=true]:ring-1 data-[focus=true]:ring-blue-500'
+                        )}
+                      >
+                        <InputField
+                          type={'text'}
+                          placeholder={'e.g. Wrench, Hammer'}
+                          onBlur={onBlur}
+                          onChangeText={onChange}
+                          value={value}
+                          autoCapitalize={'none'}
+                          className={
+                            'text-gray-900 dark:text-white bg-white dark:bg-gray-900'
+                          }
+                        />
+                      </Input>
+                      {errors.name && (
+                        <FormControlError>
+                          <FormControlErrorIcon as={AlertCircleIcon} />
+                          <FormControlErrorText>
+                            {errors.name.message}
+                          </FormControlErrorText>
+                        </FormControlError>
+                      )}
+                    </VStack>
+                  </FormControl>
+                )}
+              />
+
+              <Controller
+                control={control}
+                name={'box_id'}
+                rules={{
+                  required: 'Box where the tool is stored is required!',
+                }}
+                render={({ field: { onChange, value } }) => (
+                  <FormControl isInvalid={!!errors.box_id}>
+                    <VStack space={'xs'}>
+                      <FormControlLabel>
+                        <FormControlLabelText
+                          className={
+                            'text-sm font-medium text-gray-700 dark:text-gray-300'
+                          }
+                        >
+                          Box!
+                        </FormControlLabelText>
+                      </FormControlLabel>
+                      <BoxSearchSelect
+                        value={value}
+                        onSelect={onChange}
+                        disabled={!!boxId}
+                      />
+                      <FormControlError>
+                        <FormControlErrorIcon as={AlertCircleIcon} />
+                        <FormControlErrorText>
+                          {errors?.box_id?.message}
+                        </FormControlErrorText>
+                      </FormControlError>
+                    </VStack>
+                  </FormControl>
+                )}
+              />
+
+              <Controller
+                control={control}
+                name={'description'}
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <FormControl isInvalid={!!errors.description}>
+                    <VStack space={'xs'}>
+                      <FormControlLabel>
+                        <FormControlLabelText
+                          className={
+                            'text-sm font-medium text-gray-700 dark:text-gray-300'
+                          }
+                        >
+                          Description (optional)
+                        </FormControlLabelText>
+                      </FormControlLabel>
+                      <Input
+                        className={clsx(
+                          'h-12 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-80',
+                          // Target the focus state specifically via the data attribute
+                          'data-[focus=true]:border-blue-500 data-[focus=true]:ring-1 data-[focus=true]:ring-blue-500'
+                        )}
+                      >
+                        <InputField
+                          type={'text'}
+                          placeholder={
+                            "Briefly describe the tool you're storing..."
+                          }
+                          onBlur={onBlur}
+                          onChangeText={onChange}
+                          value={value || ''}
+                          autoCapitalize={'none'}
+                          className={
+                            'text-gray-900 dark:text-white bg-white dark:bg-gray-900'
+                          }
+                        />
+                      </Input>
+                    </VStack>
+                  </FormControl>
+                )}
+              />
+            </VStack>
           </View>
-
-          <VStack space={'md'} className={'px-6 mt-2'}>
-            <Controller
-              control={control}
-              name={'photo_added'}
-              rules={{ required: 'Photo is required!' }}
-              render={() => (
-                <FormControl isInvalid={!!errors.photo_added} size={'md'}>
-                  <Avatar
-                    avatarUrl={publicImageUrl}
-                    onImageChange={handleImageChange}
-                    type={'box'}
-                  />
-                  {errors.photo_added && (
-                    <FormControlError>
-                      <FormControlErrorIcon as={AlertCircleIcon} />
-                      <FormControlErrorText>
-                        {errors.photo_added?.message}
-                      </FormControlErrorText>
-                    </FormControlError>
-                  )}
-                </FormControl>
-              )}
-            />
-
-            <Controller
-              control={control}
-              name={'name'}
-              rules={{ required: 'Name is required' }}
-              render={({ field: { onChange, onBlur, value } }) => (
-                <FormControl isInvalid={!!errors.name} size={'md'}>
-                  <Text className={'text-gray-700 dark:text-gray-300'}>
-                    Name
-                  </Text>
-                  <Input
-                    variant={'outline'}
-                    size={'md'}
-                    className={'bg-gray-50 dark:bg-ray-900 border-gray-300'}
-                  >
-                    <InputField
-                      type={'text'}
-                      placeholder={'Super tool'}
-                      onBlur={onBlur}
-                      onChangeText={onChange}
-                      value={value}
-                      autoCapitalize={'none'}
-                    />
-                  </Input>
-                  {errors.name && (
-                    <FormControlError>
-                      <FormControlErrorIcon as={AlertCircleIcon} />
-                      <FormControlErrorText>
-                        {errors.name.message}
-                      </FormControlErrorText>
-                    </FormControlError>
-                  )}
-                </FormControl>
-              )}
-            />
-
-            <Controller
-              control={control}
-              name={'description'}
-              render={({ field: { onChange, onBlur, value } }) => (
-                <FormControl isInvalid={!!errors.description} size={'md'}>
-                  <Text className={'text-gray-700 dark:text-gray-300'}>
-                    Description
-                  </Text>
-                  <Input
-                    variant={'outline'}
-                    size={'md'}
-                    className={'bg-gray-50 dark:bg-ray-900 border-gray-300'}
-                  >
-                    <InputField
-                      type={'text'}
-                      placeholder={'Super tool'}
-                      onBlur={onBlur}
-                      onChangeText={onChange}
-                      value={value || ''}
-                      autoCapitalize={'none'}
-                    />
-                  </Input>
-                </FormControl>
-              )}
-            />
-
-            <Controller
-              control={control}
-              name={'box_id'}
-              render={({ field: { onChange, value } }) => (
-                <FormControl size={'md'}>
-                  <FormControlLabel>
-                    <FormControlLabelText>Box</FormControlLabelText>
-                  </FormControlLabel>
-                  <BoxSearchSelect
-                    value={value}
-                    onSelect={onChange}
-                    disabled={!!boxId}
-                  />
-                </FormControl>
-              )}
-            />
-          </VStack>
-
-          <HStack space={'md'} className={'justify-between p-6 mb-6'}>
+          <HStack space={'md'} className={'justify-end mt-2'}>
             <Button
               variant={'outline'}
-              onPress={() =>
-                router.canGoBack() ? router.back() : router.navigate('/(tabs)')
+              size={'lg'}
+              className={
+                'border-gray-200 dark:border-gray-700 rounded-xl px-6 py-3'
               }
+              onPress={() =>
+                router.canGoBack() ? router.back : router.navigate('/(tabs)')
+              }
+              disabled={isPending}
             >
-              <ButtonText>Cancel</ButtonText>
+              <ButtonText className={'text-gray-600 dark:text-gray-300'}>
+                Cancel
+              </ButtonText>
             </Button>
             <Button
               size={'lg'}
-              onPress={handleSubmit((data: ToolFormData) => {
-                mutate(data);
-              })}
-              disabled={!isDirty}
-              className={`${!isDirty || !isValid ? 'bg-blue-300' : 'bg-blue-600'}`}
+              className={`rounded-xl px-8 ${!isDirty ? 'bg-gray-300' : 'bg-blue-600 data-[hover=true]:bg-blue-700'}`}
+              onPress={handleSubmit(saveTheTool)}
+              disabled={!isDirty || isPending}
             >
-              <ButtonText className={'font-medium'}>
-                {isEditMode ? 'Update' : 'Create'}
-              </ButtonText>
+              {isPending ? (
+                <ActivityIndicator
+                  size={'small'}
+                  color={'white'}
+                  className={'mr-2'}
+                />
+              ) : (
+                <ButtonText className={'font-semibold text-white'}>
+                  {isEditMode ? 'Update' : 'Create'}
+                </ButtonText>
+              )}
             </Button>
           </HStack>
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </Box>
+        </VStack>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }

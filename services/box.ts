@@ -3,12 +3,15 @@ import { Platform } from 'react-native';
 import {
   getBoxStorageInformation,
   getSignedUrlForImage,
+  handleImageUploadToTheBucket,
 } from '@/lib/helpers/supabase/storage';
 import { Box, BoxFormData } from '@/types/box';
 import { handleErrors } from '@/lib/helpers/supabase';
 import { createCommonSearchQuery } from '@/services/index';
 
 const TABLE_NAME = 'boxes';
+const BUCKET_NAME = 'boxes';
+const squareImageOptions = { width: 300, height: 300 };
 
 type fetchBoxesFilterProp = {
   location?: string;
@@ -42,27 +45,36 @@ export const fetchAllBoxes = async ({
   return await Promise.all(
     (data ?? []).map(async (box: Box) => {
       if (!box.image_url) {
-        return { ...box, publicImageUrl: null };
+        return { ...box, image_url: null };
       }
 
-      let publicImageUrl = await getSignedUrlForImage({ url: box.image_url });
+      let image_url = await getSignedUrlForImage({
+        url: box.image_url,
+        bucket: BUCKET_NAME,
+        options: squareImageOptions,
+      });
 
-      return { ...box, publicImageUrl };
+      return { ...box, image_url };
     })
   );
 };
 
-export const getBox = async (id: string): Promise<Box> => {
-  const { data, error } = await supabase
-    .from(TABLE_NAME)
-    .select(
-      `
+export const getBox = async (
+  id: string,
+  includeLocation: boolean = true
+): Promise<Box> => {
+  let selection = '*';
+  if (includeLocation) {
+    selection = `
     *,
     location:locations (
       id,
       name
-    )`
-    )
+    )`;
+  }
+  const { data, error }: { data: any; error: any | undefined } = await supabase
+    .from(TABLE_NAME)
+    .select(selection)
     .eq('id', id)
     .single();
 
@@ -70,8 +82,16 @@ export const getBox = async (id: string): Promise<Box> => {
 
   return {
     ...data,
-    publicImageUrl: await getSignedUrlForImage({ url: data.image_url }),
+    image_url: await getSignedUrlForImage({
+      url: data.image_url,
+      bucket: BUCKET_NAME,
+      options: squareImageOptions,
+    }),
   };
+};
+
+export const getBoxEditData = async (id: string): Promise<Box> => {
+  return getBox(id, false);
 };
 
 export const getBoxes = async ({
@@ -95,7 +115,7 @@ export const getBoxWithoutLocation = async (id: string): Promise<Box> => {
 };
 
 export const createNewBox = async (formData: BoxFormData): Promise<void> => {
-  const { new_box_asset, ...data } = formData;
+  const { new_box_asset, photo_added, ...data } = formData;
 
   const { data: supabaseResponse, error: createError } = await supabase
     .from(TABLE_NAME)
@@ -108,14 +128,15 @@ export const createNewBox = async (formData: BoxFormData): Promise<void> => {
   const boxId = supabaseResponse?.id;
 
   if (boxId) {
-    const extractedData = await handleNewImageIfAny({
+    const uploadedImagePath = await handleImageUploadToTheBucket({
       id: boxId,
-      data: formData,
+      asset: new_box_asset!,
+      bucket: BUCKET_NAME,
     });
 
     const { error: upsertError } = await supabase
       .from(TABLE_NAME)
-      .update({ image_url: extractedData?.image_url })
+      .update({ image_url: uploadedImagePath })
       .eq('id', boxId);
 
     handleErrors(upsertError, 'Updating the box with the image error:');
@@ -175,6 +196,8 @@ const handleNewImageIfAny = async ({
     handleErrors(uploadError, 'Image upload to the bucket error:');
 
     extractedData.image_url = uploadData?.path;
+  } else {
+    delete extractedData.image_url;
   }
 
   return extractedData;

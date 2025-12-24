@@ -4,6 +4,8 @@ import { getTool } from '@/services/tool';
 import { ActivityIndicator, Image, Text, View } from 'react-native';
 import { Box } from '@/components/ui/box';
 import { VStack } from '@/components/ui/vstack';
+import { ListHeader } from '@/components/list/ListHeader';
+import { ScrollTextIcon } from 'lucide-react-native';
 
 export default function ToolDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -38,18 +40,25 @@ export default function ToolDetailsScreen() {
 
   return (
     <Box className={'flex-1 bg-white dark:bg-black'}>
+      <ListHeader
+        title={toolData.name}
+        subtitle={toolData.description ?? undefined}
+        subtitleIcon={ScrollTextIcon}
+        showBackButton={true}
+      />
       <VStack className="flex-1 p-4 gap-4">
-        <Text className="text-3xl font-bold">{toolData.name}</Text>
-        {toolData.publicImageUrl ? (
+        {toolData.image_url ? (
           <Image
-            source={{ uri: toolData.publicImageUrl }}
+            source={{ uri: toolData.image_url }}
             className={'w-full aspect-square rounded-lg'}
             resizeMode={'cover'}
           />
         ) : (
           <View className={'w-full h-full rounded-lg bg-neutral-200'} />
         )}
-        <Text className="text-lg">{toolData.description}</Text>
+        <Text className="text-lg text-gray-900 dark:text-white">
+          {toolData.description}
+        </Text>
       </VStack>
     </Box>
   );

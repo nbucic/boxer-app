@@ -1,14 +1,16 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { getLocation } from '@/services/location';
-import { ActivityIndicator, FlatList, Text, View } from 'react-native';
+import { ActivityIndicator, Text, View } from 'react-native';
 import { VStack } from '@/components/ui/vstack';
 import { fetchAllBoxes } from '@/services/box';
 import { BoxCard } from '@/components/list/BoxCard';
 import { Box } from '@/components/ui/box';
 import WithFab from '@/components/layout/withFab';
-import InfoItem from '@/components/box/InfoItem';
 import { ScrollTextIcon } from 'lucide-react-native';
+import { ListHeader } from '@/components/list/ListHeader';
+import { ItemsList } from '@/components/box/ItemsList';
+import { Box as BoxType } from '@/types/box';
 
 const LocationDetailsScreen = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -58,24 +60,25 @@ const LocationDetailsScreen = () => {
   return (
     <WithFab onFabPress={() => router.push(`/box/create?locationId=${id}`)}>
       <Box className={'flex-1 bg-white dark:bg-black'}>
+        <ListHeader
+          title={location.name}
+          subtitle={location.description ?? undefined}
+          subtitleIcon={ScrollTextIcon}
+          showBackButton={true}
+        />
         <VStack className="flex-1 p-4 gap-4">
-          <Text className="text-3xl font-bold text-gray-900 dark:text-white">
-            {location.name}
-          </Text>
-
-          {location.description && (
-            <InfoItem icon={ScrollTextIcon} text={location.description} />
-          )}
-          {/* You can add more details about the box here */}
           <Text className={'text-xl font-bold text-gray-900 dark:text-white'}>
             Boxes at this location:
           </Text>
-          <FlatList
-            data={boxes}
+          <ItemsList
+            data={boxes || []}
             renderItem={({ item }) => (
-              <BoxCard box={item} listType={'static'} />
+              <BoxCard
+                item={item as BoxType}
+                layout={'list'}
+                listType={'static'}
+              />
             )}
-            keyExtractor={(item) => item.id}
           />
         </VStack>
       </Box>

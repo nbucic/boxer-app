@@ -1,8 +1,13 @@
-import { Heading } from '@/components/ui/heading';
 import { Button, ButtonText } from '@/components/ui/button';
 import { Input, InputField } from '@/components/ui/input';
 import { VStack } from '@/components/ui/vstack';
-import { ActivityIndicator, Alert, View } from 'react-native';
+import {
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  ScrollView,
+  Text,
+  View,
+} from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Controller, useForm } from 'react-hook-form';
 import {
@@ -13,7 +18,6 @@ import {
   FormControlLabel,
   FormControlLabelText,
 } from '@/components/ui/form-control';
-import { Text } from '@/components/ui/text';
 import { Textarea, TextareaInput } from '@/components/ui/textarea';
 import { HStack } from '@/components/ui/hstack';
 import { AlertCircleIcon } from '@/components/ui/icon';
@@ -25,13 +29,21 @@ import {
 } from '@/services/location';
 import { useEffect } from 'react';
 import { LocationFormData } from '@/types/location';
+import { showAlert } from '@/lib/helpers/alert';
+import { ListHeader } from '@/components/list/ListHeader';
+import clsx from 'clsx';
 
 export default function EditLocationScreen() {
   const { id: locationId } = useLocalSearchParams<{ id: string }>();
   const queryClient = useQueryClient();
   const isEditMode = !!locationId;
 
-  const { data: existingLocation, isFetching } = useQuery({
+  const {
+    data: existingLocation,
+    isFetching: fetchingExistingLocation,
+    status,
+    error: errorExistingLocation,
+  } = useQuery({
     queryKey: ['locations', locationId],
     queryFn: () => getLocation(locationId!),
     enabled: isEditMode,
@@ -39,7 +51,7 @@ export default function EditLocationScreen() {
 
   const {
     control,
-    formState: { isDirty, errors },
+    formState: { isDirty, isValid, errors },
     handleSubmit,
     reset,
   } = useForm<LocationFormData>();
@@ -55,13 +67,14 @@ export default function EditLocationScreen() {
       isEditMode ? updateLocation(locationId!, data) : createNewLocation(data),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['locations'] });
+      router.dismissAll();
       router.navigate('/(tabs)/locations');
     },
     onError: (e: Error) => {
-      Alert.alert(
-        'Error',
-        `Failed to ${isEditMode ? 'update' : 'create'} location: ${e.message}`
-      );
+      showAlert({
+        title: 'Error',
+        message: `Failed to ${isEditMode ? 'update' : 'create'} location: ${e.message}`,
+      });
     },
   });
 
@@ -69,103 +82,167 @@ export default function EditLocationScreen() {
     mutate(formData);
   };
 
-  if (isFetching) {
+  if (fetchingExistingLocation) {
     return (
-      <View className={'flex-1 justify-center'}>
-        <ActivityIndicator size={'large'} />
+      <View className={'flex-1 justify-center bg-white dark:bg-black'}>
+        <ActivityIndicator size={'large'} color={'#2563eb'} />
+      </View>
+    );
+  }
+
+  if (status === 'error') {
+    return (
+      <View className={'flex-1 justify-center items-center p-4'}>
+        <Text>Error fetching location: {errorExistingLocation.message}</Text>
       </View>
     );
   }
 
   return (
-    <View className={'p-4 w-full flex-1'}>
-      <VStack className={'gap-4 flex-1'}>
-        <Heading size={'lg'}>{isEditMode ? 'Edit' : 'New'} Location</Heading>
-        <Controller
-          control={control}
-          name={'name'}
-          rules={{
-            required: 'Name is required',
-          }}
-          render={({ field: { onChange, onBlur, value } }) => (
-            <FormControl isInvalid={!!errors.name} size={'md'}>
-              <VStack space={'xs'}>
-                <FormControlLabel>
-                  <FormControlLabelText className={'text-typography-500'}>
-                    Name the location
-                  </FormControlLabelText>
-                </FormControlLabel>
-                <Input>
-                  <InputField
-                    type={'text'}
-                    placeholder={'Basement'}
-                    onBlur={onBlur}
-                    onChangeText={onChange}
-                    value={value}
-                    autoCapitalize={'none'}
-                  />
-                </Input>
-                {errors.name && (
-                  <FormControlError>
-                    <FormControlErrorIcon as={AlertCircleIcon} />
-                    <FormControlErrorText>
-                      {errors.name?.message}
-                    </FormControlErrorText>
-                  </FormControlError>
+    <KeyboardAvoidingView
+      behavior={'height'}
+      className={'flex-1 bg-white dark:bg-black'}
+    >
+      <ListHeader
+        title={`${isEditMode ? 'Edit' : 'New'} Location`}
+        subtitle={
+          isEditMode
+            ? 'Update details for this place.'
+            : 'Add a new spot to organize your tools.'
+        }
+      />
+      <ScrollView className={'flex-1 px-4 pb-4'}>
+        <VStack space={'2xl'}>
+          <View
+            className={
+              'bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800'
+            }
+          >
+            <VStack space={'xl'}>
+              <Controller
+                control={control}
+                name={'name'}
+                rules={{
+                  required: 'Name is required',
+                }}
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <FormControl isInvalid={!!errors.name}>
+                    <VStack space={'xs'}>
+                      <FormControlLabel>
+                        <FormControlLabelText
+                          className={
+                            'text-sm font-medium text-gray-700 dark:text-gray-300'
+                          }
+                        >
+                          Location name
+                        </FormControlLabelText>
+                      </FormControlLabel>
+                      <Input
+                        className={clsx(
+                          'h-12 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800',
+                          // Target the focus state specifically via the data attribute
+                          'data-[focus=true]:border-blue-500 data-[focus=true]:ring-1 data-[focus=true]:ring-blue-500'
+                        )}
+                      >
+                        <InputField
+                          type={'text'}
+                          placeholder={'e.g. Garage, Basement'}
+                          onBlur={onBlur}
+                          onChangeText={onChange}
+                          value={value}
+                          autoCapitalize={'none'}
+                          className={'text-gray-900 dark:text-white'}
+                        />
+                      </Input>
+                      {errors.name && (
+                        <FormControlError>
+                          <FormControlErrorIcon as={AlertCircleIcon} />
+                          <FormControlErrorText>
+                            {errors.name?.message}
+                          </FormControlErrorText>
+                        </FormControlError>
+                      )}
+                    </VStack>
+                  </FormControl>
                 )}
-              </VStack>
-            </FormControl>
-          )}
-        />
-        <Controller
-          control={control}
-          name={'description'}
-          render={({ field: { onChange, onBlur, value } }) => (
-            <FormControl size={'md'}>
-              <Text className={'text-typography-500'}>Brief description</Text>
-              <Textarea>
-                <TextareaInput
-                  placeholder={'Brief description'}
-                  onBlur={onBlur}
-                  onChangeText={onChange}
-                  value={value || ''}
-                />
-              </Textarea>
-            </FormControl>
-          )}
-        />
-        <HStack space={'md'} className={'justify-between p-4'}>
-          <Button
-            variant={'outline'}
-            onPress={() =>
-              router.canGoBack()
-                ? router.back()
-                : router.navigate('/(tabs)/locations')
-            }
-            disabled={isPending}
-          >
-            <ButtonText>Cancel</ButtonText>
-          </Button>
-          <Button
-            className={'accent-indicator-primary'}
-            action={
-              !isDirty || Object.keys(errors).length > 0
-                ? 'secondary'
-                : 'positive'
-            }
-            onPress={handleSubmit(saveTheLocation)}
-            disabled={!isDirty || Object.keys(errors).length > 0 || isPending}
-          >
-            {isPending ? (
-              <ButtonText>
-                {isEditMode ? 'Updating ...' : 'Creating ...'}
+              />
+
+              <Controller
+                control={control}
+                name={'description'}
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <FormControl>
+                    <VStack space={'xs'}>
+                      <FormControlLabel>
+                        <FormControlLabelText
+                          className={
+                            'text-sm font-medium text-gray-700 dark:text-gray-300'
+                          }
+                        >
+                          Description (optional)
+                        </FormControlLabelText>
+                      </FormControlLabel>
+                      <Textarea
+                        className={
+                          'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700'
+                        }
+                      >
+                        <TextareaInput
+                          placeholder={
+                            'Briefly describe what is stored here...'
+                          }
+                          onBlur={onBlur}
+                          onChangeText={onChange}
+                          value={value || ''}
+                          className={'text-gray-900 dark:text-white'}
+                        />
+                      </Textarea>
+                    </VStack>
+                  </FormControl>
+                )}
+              />
+            </VStack>
+          </View>
+
+          <HStack space={'md'} className={'justify-end mt-2'}>
+            <Button
+              variant={'outline'}
+              size={'lg'}
+              className={
+                'border-gray-200 dark:border-gray-700 rounded-xl px-6 py-3'
+              }
+              onPress={() =>
+                router.canGoBack()
+                  ? router.back()
+                  : router.navigate('/(tabs)/locations')
+              }
+              disabled={isPending}
+            >
+              <ButtonText className={'text-gray-600 dark:text-gray-300'}>
+                Cancel
               </ButtonText>
-            ) : (
-              <ButtonText>{isEditMode ? 'Update' : 'Create'}</ButtonText>
-            )}
-          </Button>
-        </HStack>
-      </VStack>
-    </View>
+            </Button>
+            <Button
+              size={'lg'}
+              className={`rounded-xl px-8 ${!isDirty || !isValid ? 'bg-gray-300' : 'bg-blue-600 data-[hover=true]:bg-blue-700'}`}
+              onPress={handleSubmit(saveTheLocation)}
+              disabled={!isDirty || !isValid || isPending}
+            >
+              {isPending ? (
+                <ActivityIndicator
+                  size={'small'}
+                  color={'white'}
+                  className={'mr-2'}
+                />
+              ) : (
+                <ButtonText className={'font-semibold text-white'}>
+                  {isEditMode ? 'Update' : 'Create'}
+                </ButtonText>
+              )}
+            </Button>
+          </HStack>
+        </VStack>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }

@@ -1,6 +1,6 @@
-import { ActivityIndicator, Alert, View } from 'react-native';
+import { ActivityIndicator, Alert, TouchableOpacity, View } from 'react-native';
 import { Text } from '@/components/ui/text';
-import { Link, router } from 'expo-router';
+import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   deleteLocation,
@@ -15,12 +15,10 @@ import { ItemsList } from '@/components/box/ItemsList';
 import { Location } from '@/types/location';
 import { LocationCard } from '@/components/list/LocationCard';
 import { EmptyList } from '@/components/list/EmptyList';
-import { InfoIcon } from 'lucide-react-native';
-import { Icon } from '@/components/ui/icon';
-import { HStack } from '@/components/ui/hstack';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { showAlert } from '@/lib/helpers/alert';
 import { Box } from '@/components/ui/box';
+import { EditIcon, LocationEditIcon, TrashIcon } from 'lucide-react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 export default function Locations() {
   const queryClient = useQueryClient();
@@ -85,17 +83,51 @@ export default function Locations() {
         <Box className={'flex-1 bg-white dark:bg-black'}>
           <ItemsList
             data={data || []}
-            renderItem={({ item }) => (
-              <LocationCard
-                item={item as Location}
-                onDelete={handleDeleteAttempt}
-                setRef={(ref) => (swipeableRefs.current[item.id] = ref)}
-                close={() => swipeableRefs.current[item.id]?.close()}
-              />
-            )}
+            renderItem={({ item }) => {
+              const closeSwipedItem = swipeableRefs.current[item.id]?.close;
+              return (
+                <LocationCard
+                  item={item as Location}
+                  swipeProperties={{
+                    setRef: (ref) => (swipeableRefs.current[item.id] = ref),
+                    renderLeftActions: [
+                      {
+                        onPress: () => {
+                          closeSwipedItem?.();
+                          setTimeout(() => {
+                            router.push(`/location/${item.id}/edit`);
+                          }, 100);
+                        },
+                        text: 'Edit',
+                        icon: EditIcon,
+                        className: 'bg-blue-500',
+                      },
+                    ],
+                    renderRightActions: [
+                      {
+                        onPress: () => {
+                          showAlert({
+                            title: 'Delete location',
+                            message: `Are you sure you want to delete ${item.name}?`,
+                            onCancel: closeSwipedItem,
+                            onConfirm: async () => {
+                              await handleDeleteAttempt(item.id);
+                              closeSwipedItem?.();
+                            },
+                          });
+                        },
+                        text: 'Delete',
+                        icon: TrashIcon,
+                        className: 'bg-red-500',
+                      },
+                    ],
+                  }}
+                />
+              );
+            }}
             ListHeaderComponent={
               <ListHeader
-                title="Locations"
+                title={'Locations'}
                 refetch={refetch}
                 isRefetching={isRefetching}
               />
@@ -103,19 +135,35 @@ export default function Locations() {
             ListEmptyComponent={
               <EmptyList
                 content={
-                  <HStack space={'sm'}>
-                    <Icon as={InfoIcon} />
-                    <Text>
-                      No location yet!{' '}
-                      <Link
-                        href={'/location/create'}
-                        className={'text-red-300 underline decoration-dashed'}
-                      >
-                        Add
-                      </Link>{' '}
-                      a new box{' '}
+                  <>
+                    <LocationEditIcon
+                      className={'w-12 h-12 text-blue-500 mb-4'}
+                    />
+                    <Text
+                      className={
+                        'text-xl font-semibold text-gray-700 dark:text-gray-200 mb-2'
+                      }
+                    >
+                      No locations found
                     </Text>
-                  </HStack>
+                    <Text
+                      className={
+                        'text-base text-gray-500 dark:text-gray-400 mb-6 text-center'
+                      }
+                    >
+                      It looks like your location list is currently empty.
+                    </Text>
+                    <TouchableOpacity
+                      onPress={() => router.push('/location/create')}
+                      className={
+                        'px-6 py-3 bg-blue-600 rounded-lg shadow-md hover:bg-blue-700 transition-colors'
+                      }
+                    >
+                      <Text className={'text-lg font-medium text-white'}>
+                        + Add new location
+                      </Text>
+                    </TouchableOpacity>
+                  </>
                 }
               />
             }

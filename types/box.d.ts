@@ -19,4 +19,5 @@ export type Box = SelectSearchable &
 
 export type BoxFormData = BoxBase & {
   new_box_asset?: ImagePickerAsset | null;
+  photo_added: boolean;
 };

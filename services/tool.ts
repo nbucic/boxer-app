@@ -1,4 +1,4 @@
-import { Tool, ToolFormData } from '@/types/tools';
+import { Tool, ToolFormData, ToolWithBox } from '@/types/tools';
 import { supabase } from '@/lib/supabase';
 import { handleErrors } from '@/lib/helpers/supabase';
 import {
@@ -8,6 +8,7 @@ import {
 
 const TABLE_NAME = 'tools';
 const BUCKET_NAME = 'tools';
+const squareImageOptions = { width: 300, height: 300 };
 
 type fetchToolsFilterProp = {
   box?: string;
@@ -42,38 +43,51 @@ export const fetchAllTools = async ({
     (data ?? []).map(async (tool: Tool) => {
       return {
         ...tool,
-        publicImageUrl: await getSignedUrlForImage({
-          url: tool.image_url,
-          bucket: BUCKET_NAME,
-        }),
+        image_url:
+          (await getSignedUrlForImage({
+            url: tool.image_url,
+            bucket: BUCKET_NAME,
+            options: squareImageOptions,
+          })) ?? '',
       };
     })
   );
 };
 
-export const getTool = async (id: string): Promise<Tool> => {
-  const { data, error } = await supabase
-    .from(TABLE_NAME)
-    .select(
-      `*,
-      box:boxes (
-      id,
+export const getTool = async (id: string, includeBox: boolean = true) => {
+  let selection = '*';
+  if (includeBox) {
+    selection = `
+    *,
+    box:boxes (
+      id, 
       name
-      )`
-    )
-    .eq('id', id)
-    .single();
+    )`;
+  }
+  const { data, error }: { data: Tool | ToolWithBox | null; error: any } =
+    await supabase.from(TABLE_NAME).select(selection).eq('id', id).single();
 
-  handleErrors(error, 'Get tool error:');
-
-  return {
-    ...data,
-    publicImageUrl: await getSignedUrlForImage({
+  if (!data) {
+    handleErrors(error, 'Get tool error:');
+  } else {
+    const imageUrl = await getSignedUrlForImage({
       url: data.image_url,
       bucket: 'tools',
-    }),
-  };
+      options: squareImageOptions,
+    });
+
+    if (!imageUrl) {
+      throw new Error('Cannot get image.');
+    }
+
+    return {
+      ...data,
+      image_url: imageUrl,
+    };
+  }
 };
+
+export const getToolEditData = async (id: string) => await getTool(id, false);
 
 export const createNewTool = async (formData: ToolFormData): Promise<void> => {
   const { new_tool_asset, photo_added, ...data } = formData;
@@ -122,4 +136,10 @@ export const updateTool = async (
   const { error } = await supabase.from(TABLE_NAME).update(data).eq('id', id);
 
   handleErrors(error, 'Update tool error:');
+};
+
+export const deleteTool = async (id: string): Promise<void> => {
+  const { error } = await supabase.from(TABLE_NAME).delete().eq('id', id);
+
+  handleErrors(error, 'Cannot delete tool:');
 };

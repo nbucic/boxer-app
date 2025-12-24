@@ -13,30 +13,32 @@ const AppLayout = () => {
   if (isLoading) {
     return (
       <View className={'flex-1 justify-center items-center'}>
-        <ActivityIndicator size={'large'} />
+        <ActivityIndicator size={'large'} color={'red'} />
       </View>
     );
   }
 
   return (
-    <Stack
-      screenOptions={{
-        headerShown: false,
-        animation: 'slide_from_left',
-        statusBarHidden: true,
-        navigationBarHidden: true,
-      }}
-    >
-      <Stack.Protected guard={!!session}>
-        <Stack.Screen name={'(tabs)'} />
-        <Stack.Screen name={'location'} />
-        <Stack.Screen name={'box'} />
-      </Stack.Protected>
+    <View className={'flex-1 bg-white dark:bg-black'}>
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          animation: 'slide_from_left',
+          statusBarHidden: true,
+          navigationBarHidden: true,
+        }}
+      >
+        <Stack.Protected guard={!!session}>
+          <Stack.Screen name={'(tabs)'} />
+          <Stack.Screen name={'location'} />
+          <Stack.Screen name={'box'} />
+        </Stack.Protected>
 
-      <Stack.Protected guard={!session}>
-        <Stack.Screen name={'(auth)/auth'} />
-      </Stack.Protected>
-    </Stack>
+        <Stack.Protected guard={!session}>
+          <Stack.Screen name={'(auth)/auth'} />
+        </Stack.Protected>
+      </Stack>
+    </View>
   );
 };
 
