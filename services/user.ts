@@ -42,6 +42,7 @@ export const getCurrentUser = async (): Promise<User> => {
     avatar_url: await getSignedUrlForImage({
       url: data?.avatar_url,
       bucket: 'avatar',
+      options: { width: 160, height: 160 },
     }),
   };
 };

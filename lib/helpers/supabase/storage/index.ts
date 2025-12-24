@@ -60,9 +60,16 @@ export const getAvatarStorageInformation = ({
 export const getSignedUrlForImage = async ({
   url,
   bucket = 'boxes',
+  options = {},
 }: {
   url: string | null | undefined;
   bucket?: 'boxes' | 'tools' | 'avatar';
+  options?: {
+    height?: number;
+    quality?: number;
+    resize?: 'cover' | 'contain' | 'fill';
+    width?: number;
+  };
 }): Promise<string | null> => {
   if (url === null || url === undefined) {
     return null;
@@ -71,7 +78,7 @@ export const getSignedUrlForImage = async ({
   const { data: signedUrlData, error: signedUrlError } = await supabase.storage
     .from(bucket)
     .createSignedUrl(url, 60 * 60 * 24 * 7, {
-      transform: { width: 500, height: 500 },
+      transform: options,
     });
 
   handleErrors(signedUrlError, 'Error creating signed URL for', url);

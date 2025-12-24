@@ -1,12 +1,16 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { getBox } from '@/services/box';
-import { ActivityIndicator, FlatList, Image, Text, View } from 'react-native';
+import { ActivityIndicator, Image, Text, View } from 'react-native';
 import { VStack } from '@/components/ui/vstack';
 import WithFab from '@/components/layout/withFab';
 import { fetchAllTools } from '@/services/tool';
 import { ToolCard } from '@/components/list/ToolCard';
 import { Box } from '@/components/ui/box';
+import { ListHeader } from '@/components/list/ListHeader';
+import { ScrollTextIcon } from 'lucide-react-native';
+import { ItemsList } from '@/components/box/ItemsList';
+import { Tool } from '@/types/tools';
 
 export default function BoxDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -49,25 +53,34 @@ export default function BoxDetailsScreen() {
   return (
     <WithFab onFabPress={() => router.push(`/tool/create?boxId=${id}`)}>
       <Box className={'flex-1 bg-white dark:bg-black'}>
+        <ListHeader
+          title={box.name}
+          subtitle={box.description ?? undefined}
+          subtitleIcon={ScrollTextIcon}
+          showBackButton={true}
+        />
         <VStack className="flex-1 p-4 gap-4">
-          <Text className="text-3xl font-bold">{box?.name}</Text>
-          {box?.publicImageUrl ? (
+          {box?.image_url ? (
             <Image
-              source={{ uri: box.publicImageUrl }}
+              source={{ uri: box.image_url }}
               className={'w-full aspect-square rounded-lg'}
               resizeMode={'cover'}
             />
           ) : (
             <View className={'w-full h-full rounded-lg bg-neutral-200'} />
           )}
-          <Text className="text-lg">{box?.description}</Text>
-          <Text className={'text-xl font-bold mt-5'}>
+          <Text className={'text-xl font-bold text-gray-900 dark:text-white'}>
             Tools at this location:
           </Text>
-          <FlatList
-            data={tools}
-            renderItem={({ item }) => <ToolCard tool={item} />}
-            keyExtractor={(item) => item.id}
+          <ItemsList
+            data={tools || []}
+            renderItem={({ item }) => (
+              <ToolCard
+                item={item as Tool}
+                layout={'list'}
+                listType={'static'}
+              />
+            )}
           />
         </VStack>
       </Box>

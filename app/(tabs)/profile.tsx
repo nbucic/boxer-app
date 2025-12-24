@@ -5,7 +5,6 @@ import {
   Pressable,
   RefreshControl,
   ScrollView,
-  TouchableOpacity,
   View,
 } from 'react-native';
 import { AlertCircleIcon, Icon } from '@/components/ui/icon';
@@ -31,7 +30,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useState } from 'react';
 import { ImagePickerAsset } from 'expo-image-picker';
 import Avatar from '@/components/Avatar';
-import { Moon, RefreshCwIcon, Smartphone, Sun } from 'lucide-react-native';
+import { Moon, Smartphone, Sun } from 'lucide-react-native';
 import { Heading } from '@/components/ui/heading';
 import { Box } from '@/components/ui/box';
 import { Divider } from '@/components/ui/divider';
@@ -39,6 +38,7 @@ import { supabase } from '@/lib/supabase';
 import { useColorScheme } from 'nativewind';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Theme, THEME_STORAGE_KEY } from '@/hooks/useInitialTheme';
+import { ListHeader } from '@/components/list/ListHeader';
 
 // Extend the form's data type to include the new image asset.
 type ProfileFormData = User & {
@@ -129,7 +129,6 @@ export default function Profile() {
   const setTheme = (theme: Theme) => {
     setColorScheme(theme);
     void AsyncStorage.setItem(THEME_STORAGE_KEY, theme);
-    // console.log(`Setting ${theme} theme!`);
     // window.location.reload();
   };
 
@@ -143,22 +142,11 @@ export default function Profile() {
           ) : undefined
         }
       >
-        {Platform.OS === 'web' && (
-          <TouchableOpacity
-            onPress={() => refetch()}
-            disabled={isRefetching}
-            className="absolute top-5 right-5 z-10 bg-gray-200 p-2 rounded-full"
-          >
-            <RefreshCwIcon
-              className={`w-5 h-5 text-gray-700 ${isRefetching ? 'animate-spin' : ''}`}
-            />
-          </TouchableOpacity>
-        )}
-        <View className={'px-6 py-4'}>
-          <Heading size={'xl'} className={'text-gray-900 dark:text-white'}>
-            Settings
-          </Heading>
-        </View>
+        <ListHeader
+          title={'Settings'}
+          isRefetching={isRefetching}
+          refetch={refetch}
+        />
 
         <VStack space={'lg'} className={'px-6 mt-2'}>
           <Heading

@@ -1,64 +1,48 @@
+import tw from 'twrnc';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Tabs } from 'expo-router';
 import React from 'react';
-import { Text, View } from 'react-native';
 
-interface TabIconProps {
+const TabIcon = ({
+  focused,
+  icon,
+  iconFocused,
+  color,
+}: {
   focused: boolean;
-  icon: any;
-  iconFocused: any;
-  title: string;
-}
+  icon: keyof typeof Ionicons.glyphMap;
+  iconFocused: keyof typeof Ionicons.glyphMap;
+  color: string;
+}) => {
+  const iconName = focused ? iconFocused : icon;
 
-const TabIcon = ({ focused, icon, iconFocused, title }: TabIconProps) => {
-  if (focused) {
-    return (
-      <View className="flex flex-row justify-center min-w-[90px] items-center overflow-hidden">
-        <Ionicons name={iconFocused} className="text-2xl/6" size={20} />
-        {title !== '' && (
-          <Text className="text-secondary text-base font-semibold ml-2">
-            {title}
-          </Text>
-        )}
-      </View>
-    );
-  }
-
-  return (
-    <View className="h-full items-center justify-center">
-      <Ionicons name={icon} className="text-2xl/6" size={20} />
-    </View>
-  );
+  return <Ionicons name={iconName} style={{ color }} size={24} />;
 };
-
 export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
         tabBarShowLabel: false,
-        tabBarStyle: {
-          backgroundColor: '#d3d3d3',
-          marginHorizontal: 10,
-          marginBottom: 10,
-          height: 40,
-          position: 'absolute',
-          paddingBottom: 0,
-          overflow: 'hidden',
-          borderRadius: 5,
-          borderWidth: 1,
-        },
+        tabBarStyle: tw.style(
+          'bg-white dark:bg-gray-900',
+          'h-10 absolute left-0 right-0 bottom-0 overflow-hidden border-t border-gray-100 dark:border-gray-800',
+          'shadow-lg',
+          'pb-safe'
+        ),
+        tabBarActiveTintColor: tw.color('blue-600'),
+        tabBarInactiveTintColor: tw.color('gray-500'),
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
           headerShown: false,
-          tabBarIcon: ({ focused }) => (
+          tabBarIcon: ({ color, focused }) => (
             <TabIcon
               icon={'home-outline'}
               iconFocused={'home'}
               focused={focused}
-              title={'Home'}
+              color={color}
             />
           ),
         }}
@@ -67,12 +51,12 @@ export default function TabLayout() {
         name={'boxes'}
         options={{
           headerShown: false,
-          tabBarIcon: ({ focused }: { focused: boolean }) => (
+          tabBarIcon: ({ color, focused }) => (
             <TabIcon
               icon={'cube-outline'}
               iconFocused={'cube'}
               focused={focused}
-              title={'Boxes'}
+              color={color}
             />
           ),
         }}
@@ -81,12 +65,12 @@ export default function TabLayout() {
         name="locations"
         options={{
           headerShown: false,
-          tabBarIcon: ({ focused }) => (
+          tabBarIcon: ({ color, focused }) => (
             <TabIcon
               icon={'location-outline'}
               iconFocused={'location'}
               focused={focused}
-              title={'Locations'}
+              color={color}
             />
           ),
         }}
@@ -95,12 +79,12 @@ export default function TabLayout() {
         name="profile"
         options={{
           headerShown: false,
-          tabBarIcon: ({ focused }) => (
+          tabBarIcon: ({ color, focused }) => (
             <TabIcon
               icon={'person-outline'}
               iconFocused={'person'}
               focused={focused}
-              title={'Profile'}
+              color={color}
             />
           ),
         }}

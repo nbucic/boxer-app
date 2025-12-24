@@ -65,32 +65,36 @@ const RoundedBox = ({
   isUploading,
 }: ImageProps) => {
   return (
-    <View className={'relative w-full'}>
-      <View className={'w-full aspect-square rounded-lg p-[10] bg-[#e5e5e5]'}>
+    <View className={'relative self-center'}>
+      <View
+        className={
+          'w-48 aspect-square rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800 shadow-sm'
+        }
+      >
         {uri ? (
           <Image
             source={{ uri }}
-            accessibilityLabel={'Box Image'}
-            className={'w-full h-full object-cover rounded-lg'}
+            accessibilityLabel={'image'}
+            className={'w-full h-full'}
           />
         ) : (
-          <View
-            className={
-              'flex-1 justify-center items-center border-2 border-[#a3a3a3] border-dashed rounded-[4px]'
-            }
-          >
-            <Icon as={icon} className={'text-neutral-400 w-[200] h-[200]'} />
+          <View className={'flex-1 justify-center items-center'}>
+            <Icon
+              as={icon}
+              className={'text-gray-400 dark:text-gray-500 w-12 h-12'}
+            />
           </View>
         )}
       </View>
       <TouchableOpacity
         onPress={pickImage}
         disabled={isUploading}
+        activeOpacity={0.8}
         className={
-          'absolute bottom-2.5 right-2.5 bg-gray-700 p-2 rounded-br-[4px]'
+          'absolute -bottom-2 -right-2 bg-blue-600 p-3 rounded-xl shadow-lg border-2 border-white dark:border-gray-900'
         }
       >
-        <Icon as={editIcon} color={'white'} size={'sm'} />
+        <Icon as={editIcon} className={'text-white'} size={'xs'} />
       </TouchableOpacity>
     </View>
   );
@@ -121,7 +125,7 @@ const Avatar = ({ type = 'avatar', avatarUrl, onImageChange }: Props) => {
     try {
       const result = await ImagePicker.launchCameraAsync({
         mediaTypes: 'images',
-        cameraType: ImagePicker.CameraType.front,
+        cameraType: ImagePicker.CameraType.back,
         allowsMultipleSelection: false,
         allowsEditing: true,
         quality: 1,

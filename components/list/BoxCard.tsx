@@ -1,68 +1,23 @@
 // noinspection JSDeprecatedSymbols,XmlDeprecatedElement
-
-import { Alert, Image, Pressable, TouchableOpacity, View } from 'react-native';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { deleteBox } from '@/services/box';
-import { HStack } from '@/components/ui/hstack';
 import { VStack } from '@/components/ui/vstack';
-import { memo, useCallback, useRef } from 'react';
-import Swipeable from 'react-native-gesture-handler/Swipeable';
-import { router, useFocusEffect } from 'expo-router';
-import { SwipeableMethods } from 'react-native-gesture-handler/ReanimatedSwipeable';
+import React, { memo, useCallback } from 'react';
+import { useFocusEffect } from 'expo-router';
+import { MapPinnedIcon, ScrollTextIcon } from 'lucide-react-native';
+import { Box } from '@/types/box';
+import { useSharedValue } from 'react-native-reanimated';
+import { InfoItem } from '@/components/box/InfoItem';
+import { LayoutListProps, ListView } from '@/components/list/view/ListView';
 import {
-  EditIcon,
-  MapPinnedIcon,
-  QrCodeIcon,
-  ScrollTextIcon,
-  TrashIcon,
-} from 'lucide-react-native';
-import { showAlert } from '@/lib/helpers/alert';
-import { Box as BoxType } from '@/types/box';
-import Animated, {
-  interpolate,
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
-} from 'react-native-reanimated';
-import InfoItem from '@/components/box/InfoItem';
+  DenseGridView,
+  LayoutGridProps,
+} from '@/components/list/view/DenseGridView';
 import { NameItem } from '@/components/box/NameItem';
-import { Action } from '@/components/swipeable/Action';
-import { BackAction } from '@/components/BackAction';
-import { Layout } from '@/types';
 
-type BoxCardProps =
-  // Scenario 1: layout is 'list' (or default), and listType is 'static'
-  // In this case, onShare is optional as it's not used.
-  | {
-      box: BoxType;
-      layout?: 'list'; // Covers layout list and undefined (which defaults to list)'
-      listType: 'static';
-      onShare?: (box: BoxType) => void;
-    }
-  // Scenario 2: layout is 'list' (or default), and listType is 'swipeable' (or default)
-  // In this case, onShare is required for the swipeable actions
-  | {
-      box: BoxType;
-      layout: Layout; // Covers layout list and undefined (which defaults to list)
-      onShare: (box: BoxType) => void;
-    };
+type BoxCardProps = { item: Box } & (LayoutListProps | LayoutGridProps);
 
 export const BoxCard = memo((props: BoxCardProps) => {
-  const queryClient = useQueryClient();
-  const swipeableRefs = useRef<{ [key: string]: SwipeableMethods | null }>({});
   const isFlipped = useSharedValue(0);
-
-  const deleteMutation = useMutation({
-    mutationFn: deleteBox,
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['boxes'] });
-    },
-    onError: (e: Error) => {
-      Alert.alert('Error', `Failed to delete box: ${e.message}`);
-    },
-  });
-
-  const { box, layout = 'list' } = props;
+  const { item: box } = props;
 
   useFocusEffect(
     useCallback(() => {
@@ -71,250 +26,59 @@ export const BoxCard = memo((props: BoxCardProps) => {
     }, [isFlipped])
   );
 
-  const handleDelete = () => {
-    showAlert({
-      title: 'Delete Box',
-      message: `Are you sure you want to delete ${box.name}?`,
-      onConfirm: () => {
-        deleteMutation.mutate(box.id);
-        swipeableRefs.current[box.id]?.close();
-      },
-      onCancel: () => {
-        swipeableRefs.current[box.id]?.close();
-      },
-    });
-  };
+  if (props.layout === 'list') {
+    const properties: any = {};
+    properties.item = box;
+    properties.itemType = 'Box';
+    properties.listType = props.listType;
+    if (props.listType === 'swipeable') {
+      properties.swipeProperties = props.swipeProperties;
+    }
 
-  const CardBack = () => (
-    <Animated.View
-      style={[
-        {
-          position: 'absolute',
-          top: 0,
-          right: 0,
-          bottom: 0,
-          left: 0,
-          backfaceVisibility: 'hidden',
-        },
-        backAnimatedStyle,
-      ]}
-    >
-      <View
-        className={
-          'm-1 flex-1 items-center justify-center rounded-lg bg-black/70'
-        }
-      >
-        <HStack space={'xl'}>
-          <BackAction
-            label={'Edit'}
-            icon={EditIcon}
-            onPress={() => router.push(`/box/${box.id}/edit`)}
-            className={'bg-blue-500'}
-          />
-          <BackAction
-            label={'Share'}
-            icon={QrCodeIcon}
-            onPress={() => {
-              if ('onShare' in props && props.onShare) {
-                props.onShare(box);
-              }
-            }}
-            className={'bg-green-500'}
-          />
-          <BackAction
-            label={'Delete'}
-            icon={TrashIcon}
-            onPress={handleDelete}
-            className={'bg-red-500'}
-          />
-        </HStack>
-      </View>
-    </Animated.View>
-  );
-
-  const frontAnimatedStyle = useAnimatedStyle(() => {
-    const rotate = interpolate(isFlipped.value, [0, 1], [0, 180]);
-    // When the card is flipped (isFlipped.value === 1), the front should not receive pointer events.
-    const pointerEvents = isFlipped.value === 1 ? 'none' : 'auto';
-
-    return {
-      transform: [{ rotateY: `${rotate}deg` }],
-      pointerEvents: pointerEvents,
-    };
-  });
-  const backAnimatedStyle = useAnimatedStyle(() => {
-    const rotate = interpolate(isFlipped.value, [0, 1], [180, 360]);
-    // When the card is not flipped (isFlipped.value === 0), the back should not receive pointer events.
-    const pointerEvents = isFlipped.value === 0 ? 'none' : 'auto';
-
-    return {
-      transform: [{ rotateY: `${rotate}deg` }],
-      pointerEvents: pointerEvents,
-    };
-  });
-
-  const flipCard = () => {
-    isFlipped.value = withTiming(isFlipped.value ? 0 : 1, { duration: 500 });
-  };
-  const ListView = () => {
-    const listType =
-      'listType' in props && props.listType ? props.listType : 'swipeable';
-    const onShare = 'onShare' in props ? props.onShare : undefined;
-
-    const internalBoxListView = (
-      <View
-        className={`p-2 dark:border-b light:border border-outline-200 dark:bg-background-dark bg-background-0 dark:my-0 my-1 max-h-[100px]`}
-      >
-        <TouchableOpacity onPress={() => router.navigate(`/box/${box.id}`)}>
-          <HStack space={'sm'} className={'items-center'}>
-            <View className={'h-full aspect-square flex-shrink-0'}>
-              {box.publicImageUrl ? (
-                <Image
-                  source={{ uri: box.publicImageUrl }}
-                  className={'w-full h-full rounded-lg'}
-                  resizeMode={'cover'}
-                />
-              ) : (
-                <View className={'w-full h-full rounded-lg bg-neutral-200'} />
-              )}
-            </View>
-            <VStack className={'flex-1 gap-0.5'}>
-              <NameItem
-                boxName={box.name}
-                containerClassName={'items-center gap-1'}
-              />
-              <InfoItem
-                icon={MapPinnedIcon}
-                text={box.location?.name}
-                link={{
-                  pathname: '/box/create',
-                  params: { id: box.id, focus: 'location' },
-                }}
-                linkText={'Add location?'}
-              />
+    return (
+      <ListView
+        {...properties}
+        infotainment={
+          <VStack className={'gap-1 justify-between'}>
+            <NameItem name={box.name} key={'name'} className={'p-3'} />
+            <InfoItem
+              icon={MapPinnedIcon}
+              text={box.location?.name}
+              link={{
+                pathname: '/box/create',
+                params: { id: box.id, focus: 'location' },
+              }}
+              linkText={'Add location?'}
+            />
+            {box.description ? (
+              <InfoItem icon={ScrollTextIcon} text={box.description} />
+            ) : (
               <InfoItem
                 icon={ScrollTextIcon}
-                text={box.description}
                 link={{
                   pathname: '/box/create',
                   params: { id: box.id, focus: 'description' },
                 }}
                 linkText={'Add description?'}
               />
-            </VStack>
-          </HStack>
-        </TouchableOpacity>
-      </View>
-    );
-
-    return listType === 'swipeable' ? (
-      <Swipeable
-        ref={(ref) => {
-          swipeableRefs.current[box.id] = ref;
-        }}
-        overshootFriction={8}
-        renderLeftActions={() => (
-          <Action
-            items={[
-              {
-                onPress: () => {
-                  router.push(`/box/${box.id}/edit`);
-                  swipeableRefs.current[box.id]?.close();
-                },
-                text: 'Edit',
-                icon: EditIcon,
-                className: 'bg-blue-500',
-              },
-              {
-                onPress: () => {
-                  onShare && onShare(box);
-                  swipeableRefs.current[box.id]?.close();
-                },
-                text: 'Share',
-                icon: QrCodeIcon,
-                className: 'bg-white',
-              },
-            ]}
-          />
-        )}
-        renderRightActions={() => (
-          <Action
-            items={[
-              {
-                onPress: handleDelete,
-                text: 'Delete',
-                icon: TrashIcon,
-                className: 'bg-red-500',
-              },
-            ]}
-          />
-        )}
-      >
-        {internalBoxListView}
-      </Swipeable>
-    ) : (
-      internalBoxListView
-    );
-  };
-
-  const GridView = () => (
-    <Pressable onPress={flipCard}>
-      <View className={'p-1 my-0.5'}>
-        <Animated.View style={frontAnimatedStyle}>
-          <VStack
-            className={
-              'border border-outline-200 bg-background-0 rounded-lg gap-2'
-            }
-          >
-            <View>
-              {box.publicImageUrl ? (
-                <Image
-                  source={{ uri: box.publicImageUrl }}
-                  className={'w-full aspect-video rounded-t-lg'}
-                  resizeMode="cover"
-                />
-              ) : (
-                <View
-                  className={'w-full aspect-video rounded-t-lg bg-neutral-200'}
-                />
-              )}
-              <NameItem
-                key={'name'}
-                boxName={box.name}
-                containerClassName={
-                  'absolute bottom-2 left-2 right-2 flex flex-row items-center gap-x-1 rounded-md px-2 py-1 bg-black/50'
-                }
-                clickable={`/box/${box.id}`}
-                iconColor={'white'}
-                isTextWhite={true}
-              />
-            </View>
-            <VStack className={'gap-0.5 p-2'}>
-              <InfoItem
-                icon={MapPinnedIcon}
-                text={box.location?.name}
-                link={{
-                  pathname: '/box/create',
-                  params: { id: box.id, focus: 'location' },
-                }}
-                linkText={'Add location?'}
-              />
-              <InfoItem
-                icon={ScrollTextIcon}
-                text={box.description}
-                link={{
-                  pathname: '/box/create',
-                  params: { id: box.id, focus: 'description' },
-                }}
-                linkText={'Add description?'}
-              />
-            </VStack>
+            )}
           </VStack>
-        </Animated.View>
-        <CardBack />
-      </View>
-    </Pressable>
-  );
+        }
+      />
+    );
+  }
 
-  return layout === 'list' ? <ListView /> : <GridView />;
+  if (props.layout === 'grid') {
+    const actionableItems = [
+      ...(props.swipeProperties.renderLeftActions ?? []),
+      ...(props.swipeProperties.renderRightActions ?? []),
+    ];
+    return (
+      <DenseGridView
+        item={box}
+        isFlipped={isFlipped}
+        actionableItems={actionableItems}
+      />
+    );
+  }
 });

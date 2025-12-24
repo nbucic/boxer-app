@@ -1,100 +1,39 @@
-// noinspection XmlDeprecatedElement,JSDeprecatedSymbols
-
-import { TouchableOpacity, View } from 'react-native';
-import { Text } from '@/components/ui/text';
-import { router } from 'expo-router';
-import { EditIcon, TrashIcon } from 'lucide-react-native';
-import Swipeable from 'react-native-gesture-handler/Swipeable';
+import { ScrollTextIcon } from 'lucide-react-native';
 import { Location } from '@/types/location';
-import { Action } from '@/components/swipeable/Action';
-import { SwipeableMethods } from 'react-native-gesture-handler/ReanimatedSwipeable';
-import { showAlert } from '@/lib/helpers/alert';
+import { ListView, SwipeableProps } from '@/components/list/view/ListView';
+import { NameItem } from '@/components/box/NameItem';
+import { VStack } from '@/components/ui/vstack';
+import { InfoItem } from '@/components/box/InfoItem';
 
 type LocationCardProps = {
   item: Location;
-  onDelete: (id: string) => void;
-  setRef: (ref: SwipeableMethods | null) => void;
-  close: () => void;
-};
+} & SwipeableProps;
 
-export const LocationCard = ({
-  item,
-  onDelete,
-  setRef,
-  close,
-}: LocationCardProps) => {
+export const LocationCard = ({ item, swipeProperties }: LocationCardProps) => {
   return (
-    <Swipeable
-      ref={setRef}
-      overshootFriction={8}
-      renderLeftActions={() => (
-        <Action
-          items={[
-            {
-              onPress: () => {
-                close();
-                setTimeout(() => {
-                  router.push(`/location/${item.id}/edit`);
-                }, 100);
-              },
-              text: 'Edit',
-              icon: EditIcon,
-              className: 'bg-blue-500',
-            },
-          ]}
-        />
-      )}
-      renderRightActions={() => (
-        <Action
-          items={[
-            {
-              onPress: () => {
-                showAlert({
-                  title: 'Delete Location',
-                  message: `Are you sure you want to delete ${item.name}?`,
-                  onCancel: close,
-                  onConfirm: () => {
-                    onDelete(item.id);
-                    close();
-                  },
-                });
-              },
-              text: 'Delete',
-              icon: TrashIcon,
-              className: 'bg-red-500',
-            },
-          ]}
-        />
-      )}
-    >
-      <View
-        className={
-          'p-2 dark:border-b dark:border-x-0 dark:border-t-0  border border-outline-200 dark:bg-background-dark bg-background-0 dark:my-0 my-1 max-h-[100px]'
-        }
-      >
-        <TouchableOpacity onPress={() => router.push(`/location/${item.id}/`)}>
-          <Text
-            className={
-              'text-lg font-medium text-typography-900 whitespace-nowrap overflow-hidden overflow-ellipsis'
-            }
-            numberOfLines={1}
-            ellipsizeMode={'tail'}
-          >
-            {item.name}
-          </Text>
-          {item.description && (
-            <Text
-              className={
-                'text-sm text-typography-500 text-right whitespace-nowrap overflow-hidden overflow-ellipsis'
-              }
-              numberOfLines={1}
-              ellipsizeMode={'tail'}
-            >
-              {item.description}
-            </Text>
+    <ListView
+      item={item}
+      itemType={'Location'}
+      listType={'swipeable'}
+      options={{ showPicture: false }}
+      swipeProperties={swipeProperties}
+      infotainment={
+        <VStack className={'gap-1 px-2 h-14 justify-between'}>
+          <NameItem name={item.name} key={'name'} />
+          {item.description ? (
+            <InfoItem icon={ScrollTextIcon} text={item.description} />
+          ) : (
+            <InfoItem
+              icon={ScrollTextIcon}
+              link={{
+                pathname: '/location/create',
+                params: { id: item.id, focus: 'description' },
+              }}
+              linkText={'Add description?'}
+            />
           )}
-        </TouchableOpacity>
-      </View>
-    </Swipeable>
+        </VStack>
+      }
+    />
   );
 };

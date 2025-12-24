@@ -1,36 +1,33 @@
 import { TouchableOpacity } from 'react-native';
 import { GridIcon, ListIcon } from 'lucide-react-native';
 import { HStack } from '@/components/ui/hstack';
+import clsx from 'clsx';
 
 export const IconizedSwitch = (props: {
-  onSwitchLeft: () => void;
   layout: string;
+  onSwitchLeft: () => void;
   onSwitchRight: () => void;
 }) => (
-  <HStack className="ml-2 p-1 bg-gray-200 rounded-full">
+  <HStack className="p-1">
     <TouchableOpacity
       onPress={props.onSwitchLeft}
-      className={`p-1 ${
-        props.layout === 'list' ? 'bg-white rounded-full' : ''
-      }`}
+      className={clsx(
+        'p-1 rounded-md transition-colors',
+        props.layout === 'list' && 'bg-white shadow dark:bg-gray-700',
+        props.layout !== 'list' && 'hover:bg-gray-100 dark:hover:bg-gray-800'
+      )}
     >
-      <ListIcon
-        className={`w-5 h-5 ${
-          props.layout === 'list' ? 'text-gray-900' : 'text-gray-700'
-        }`}
-      />
+      <ListIcon className={'w-5 h-5 text-gray-700 dark:text-gray-300'} />
     </TouchableOpacity>
     <TouchableOpacity
       onPress={props.onSwitchRight}
-      className={`p-1 ${
-        props.layout === 'grid' ? 'bg-white rounded-full' : ''
-      }`}
+      className={clsx(
+        'p-1 rounded-md transition-colors',
+        props.layout === 'grid' && 'bg-white shadow dark:bg-gray-700',
+        props.layout !== 'grid' && 'hover:bg-gray-100 dark:hover:bg-gray-800'
+      )}
     >
-      <GridIcon
-        className={`w-5 h-5 ${
-          props.layout === 'grid' ? 'text-gray-900' : 'text-gray-700'
-        }`}
-      />
+      <GridIcon className={'w-5 h-5 text-gray-700 dark:text-gray-300'} />
     </TouchableOpacity>
   </HStack>
 );

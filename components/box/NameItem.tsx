@@ -1,42 +1,32 @@
-import { HStack } from '@/components/ui/hstack';
-import { InboxIcon } from 'lucide-react-native';
-import { Icon } from '@/components/ui/icon';
-import { Text } from '@/components/ui/text';
-import { TouchableOpacity } from 'react-native';
+import { Text, TouchableOpacity } from 'react-native';
 import { router } from 'expo-router';
+import React from 'react';
+import clsx from 'clsx';
 
 type Props = {
-  boxName: string;
-  containerClassName: string;
-  iconColor?: string;
-  isTextWhite?: boolean;
+  name: string;
   clickable?: string | null;
+  className?: string;
 };
 
-export const NameItem = ({
-  boxName,
-  containerClassName,
-  iconColor,
-  isTextWhite = false,
-  clickable = null,
-}: Props) => {
-  const IconAndTextElements = () => {
-    return (
-      <HStack className={containerClassName}>
-        <Icon as={InboxIcon} color={iconColor} size={'md'} />
-        <Text
-          className={`flex-1 text-lg font-medium whitespace-nowrap overflow-hidden overflow-ellipsis ${isTextWhite ? 'text-white' : ''}`}
-          numberOfLines={1}
-          ellipsizeMode={'tail'}
-        >
-          {boxName}
-        </Text>
-      </HStack>
-    );
-  };
+export const NameItem = ({ name, clickable = null, className }: Props) => {
+  const IconAndTextElements = () => (
+    <Text
+      className={
+        'text-base font-semibold text-gray-900 dark:text-white whitespace-nowrap overflow-ellipsis overflow-hidden'
+      }
+      numberOfLines={1}
+      ellipsizeMode={'tail'}
+    >
+      {name}
+    </Text>
+  );
 
   return clickable ? (
-    <TouchableOpacity onPress={() => router.navigate(clickable as any)}>
+    <TouchableOpacity
+      onPress={() => router.navigate(clickable as any)}
+      className={clsx(className)}
+    >
       <IconAndTextElements />
     </TouchableOpacity>
   ) : (
