@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabase';
-import { Alert, View } from 'react-native';
+import { View } from 'react-native';
 import { useState } from 'react';
 import { Input, InputField, InputIcon, InputSlot } from '@/components/ui/input';
 import { VStack } from '@/components/ui/vstack';
@@ -12,11 +12,13 @@ import {
 import { Text } from '@/components/ui/text';
 import { AlertCircleIcon, EyeIcon, EyeOffIcon } from '@/components/ui/icon';
 import { HStack } from '@/components/ui/hstack';
-import { Button, ButtonText } from '@/components/ui/button';
-import { Controller, FieldValues, useForm } from 'react-hook-form';
+import { Button, ButtonSpinner, ButtonText } from '@/components/ui/button';
+import { Controller, useForm } from 'react-hook-form';
 import { AuthWeakPasswordError } from '@supabase/auth-js';
 import { router } from 'expo-router';
 import { getDeepLink } from '@/components/DeepLink';
+import { showAlert } from '@/lib/helpers/alert';
+import { Heading } from '@/components/ui/heading';
 
 interface Props {
   email: string;
@@ -42,26 +44,30 @@ export default function Auth() {
     setShowPassword((state) => !state);
   };
 
-  const signInWithEmail = async (data: FieldValues) => {
+  const signInWithEmail = async (data: Props) => {
     setLoading(true);
     const { error } = await supabase.auth.signInWithPassword(data as Props);
 
     if (error) {
       console.log({ error });
-      Alert.alert('Error', error.message);
+      showAlert({
+        title: 'Authentication Error',
+        message: error.message,
+      });
+    } else {
+      router.replace('/(tabs)');
     }
 
     setLoading(false);
-    router.navigate('/(tabs)');
   };
 
-  const signUpWithEmail = async (data: FieldValues) => {
+  const signUpWithEmail = async (data: Props) => {
     setLoading(true);
     const {
       data: { session },
       error,
     } = await supabase.auth.signUp({
-      ...(data as Props),
+      ...data,
       options: {
         emailRedirectTo: getDeepLink(''),
       },
@@ -70,7 +76,7 @@ export default function Auth() {
     if (error) {
       if (error instanceof AuthWeakPasswordError) {
         let types: { [key: string]: string } = {};
-        error.reasons.map((reason) => {
+        error.reasons.forEach((reason) => {
           switch (reason) {
             case 'characters':
               types['pattern'] =
@@ -94,16 +100,29 @@ export default function Auth() {
     }
 
     if (!session) {
-      Alert.alert('Please check your inbox for email verification');
+      showAlert({
+        title: 'Successful signup',
+        message: 'Please check your inbox for email verification',
+      });
     }
 
     setLoading(false);
   };
 
   return (
-    <View className={'flex-1 justify-center'}>
-      <View className={'p-4 w-full'}>
-        <VStack className={'gap-4'}>
+    <View className={'flex-1 bg-background-0'}>
+      <View className={'flex-1 justify-center p-8'}>
+        <VStack space={'xs'} className={'mb-10'}>
+          <Heading size={'3xl'} className={'text-typography-900'}>
+            Un-Box your tools
+          </Heading>
+          <Text className={'text-typography-500'}>
+            Sign in to your account or create a now one
+          </Text>
+        </VStack>
+
+        <VStack space={'xl'}>
+          {/*Email field */}
           <Controller
             control={control}
             name={'email'}
@@ -111,21 +130,28 @@ export default function Auth() {
               required: 'Email is required',
               pattern: {
                 value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                message: 'Email invalid',
+                message: 'Please enter a valid email address',
               },
             }}
             render={({ field: { onChange, onBlur, value } }) => (
-              <FormControl isInvalid={!!errors.email} size={'md'}>
+              <FormControl isInvalid={!!errors.email}>
                 <VStack space={'xs'}>
-                  <Text className={'text-typography-500'}>Email</Text>
-                  <Input>
+                  <Text className={'text-typography-600 font-medium ml-1'}>
+                    Email
+                  </Text>
+                  <Input
+                    variant={'outline'}
+                    size={'lg'}
+                    className={'bg-background-50'}
+                  >
                     <InputField
                       type={'text'}
-                      placeholder={'email@example.com'}
+                      placeholder={'name@example.com'}
                       onBlur={onBlur}
                       onChangeText={onChange}
                       value={value}
                       autoCapitalize={'none'}
+                      keyboardType={'email-address'}
                     />
                   </Input>
                   <FormControlError>
@@ -138,6 +164,8 @@ export default function Auth() {
               </FormControl>
             )}
           />
+
+          {/*Password field */}
           <Controller
             control={control}
             name={'password'}
@@ -145,13 +173,19 @@ export default function Auth() {
               required: 'Password is required',
             }}
             render={({ field: { onChange, onBlur, value } }) => (
-              <FormControl isInvalid={!!errors.password} size={'md'}>
+              <FormControl isInvalid={!!errors.password}>
                 <VStack space={'xs'}>
-                  <Text className={'text-typography-500'}>Password</Text>
-                  <Input className={'text-center'}>
+                  <Text className={'text-typography-600 font-medium ml-1'}>
+                    Password
+                  </Text>
+                  <Input
+                    variant={'outline'}
+                    size={'lg'}
+                    className={'bg-background-50'}
+                  >
                     <InputField
                       type={showPassword ? 'text' : 'password'}
-                      placeholder={'password'}
+                      placeholder={'Enter your password'}
                       onBlur={onBlur}
                       onChangeText={onChange}
                       value={value}
@@ -164,43 +198,44 @@ export default function Auth() {
                       <InputIcon as={showPassword ? EyeIcon : EyeOffIcon} />
                     </InputSlot>
                   </Input>
-                  {errors.password?.message && (
-                    <FormControlError>
-                      <FormControlErrorIcon as={AlertCircleIcon} />
-                      <FormControlErrorText>
-                        {errors.password?.message}
-                      </FormControlErrorText>
-                    </FormControlError>
-                  )}
-                  {errors.password?.types &&
-                    Object.entries(errors.password.types).map(
-                      ([key, value]) => (
-                        <FormControlError key={key}>
-                          <FormControlErrorIcon as={AlertCircleIcon} />
-                          <FormControlErrorText>{value}</FormControlErrorText>
-                        </FormControlError>
-                      )
-                    )}
+                  <FormControlError>
+                    <FormControlErrorIcon as={AlertCircleIcon} />
+                    <FormControlErrorText>
+                      {errors.password?.message}
+                    </FormControlErrorText>
+                  </FormControlError>
                 </VStack>
               </FormControl>
             )}
           />
-          <HStack space={'md'} className={'justify-between'}>
+
+          {/* Actions */}
+          <VStack space={'lg'} className={'mt-4'}>
             <Button
-              className={'accent-indicator-primary'}
+              size={'lg'}
+              className={'bg-primary-500'}
               onPress={handleSubmit(signInWithEmail)}
-              disabled={loading || !!errors.email || !!errors.password}
+              disabled={loading}
             >
-              <ButtonText> Sign in</ButtonText>
+              {loading && <ButtonSpinner className={'mr-2'} />}
+              <ButtonText className={'font-semibold'}>Sign in</ButtonText>
             </Button>
-            <Button
-              variant={'outline'}
-              onPress={handleSubmit(signUpWithEmail)}
-              disabled={loading || !!errors.email || !!errors.password}
-            >
-              <ButtonText>Sign up</ButtonText>
-            </Button>
-          </HStack>
+
+            <HStack space={'xs'} className={'justify-center items-center'}>
+              <Text className={'text-typography-500'}>
+                Don't have an account?
+              </Text>
+              <Button
+                variant={'link'}
+                onPress={handleSubmit(signUpWithEmail)}
+                disabled={loading}
+              >
+                <ButtonText className={'text-primary-500 font-bold'}>
+                  Sign Up
+                </ButtonText>
+              </Button>
+            </HStack>
+          </VStack>
         </VStack>
       </View>
     </View>
