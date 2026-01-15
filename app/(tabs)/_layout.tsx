@@ -2,6 +2,13 @@ import tw from 'twrnc';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Tabs } from 'expo-router';
 import React from 'react';
+import { Platform } from 'react-native';
+import * as Haptics from 'expo-haptics';
+
+type iconsType = {
+  icon: keyof typeof Ionicons.glyphMap;
+  iconFocused: keyof typeof Ionicons.glyphMap;
+};
 
 const TabIcon = ({
   focused,
@@ -10,85 +17,73 @@ const TabIcon = ({
   color,
 }: {
   focused: boolean;
-  icon: keyof typeof Ionicons.glyphMap;
-  iconFocused: keyof typeof Ionicons.glyphMap;
   color: string;
-}) => {
+} & iconsType) => {
   const iconName = focused ? iconFocused : icon;
 
   return <Ionicons name={iconName} style={{ color }} size={24} />;
 };
 export default function TabLayout() {
+  const screens: Array<{ name: string } & iconsType> = [
+    {
+      name: 'index',
+      icon: 'home-outline',
+      iconFocused: 'home',
+    },
+    {
+      name: 'boxes',
+      icon: 'cube-outline',
+      iconFocused: 'cube',
+    },
+    {
+      name: 'locations',
+      icon: 'location-outline',
+      iconFocused: 'location',
+    },
+    {
+      name: 'profile',
+      icon: 'person-outline',
+      iconFocused: 'person',
+    },
+  ];
+
+  const hapticTabListener = {
+    tabPress: () => {
+      if (Platform.OS !== 'web') {
+        void Haptics.selectionAsync();
+      }
+    },
+  };
+
   return (
     <Tabs
       screenOptions={{
         tabBarShowLabel: false,
         tabBarStyle: tw.style(
-          'bg-white dark:bg-gray-900',
-          'h-10 absolute left-0 right-0 bottom-0 overflow-hidden border-t border-gray-100 dark:border-gray-800',
-          'shadow-lg',
-          'pb-safe'
+          'bg-background-0',
+          'h-10 border-t border-outline-100 shadow-sm'
         ),
-        tabBarActiveTintColor: tw.color('blue-600'),
-        tabBarInactiveTintColor: tw.color('gray-500'),
+        tabBarActiveTintColor: tw.color('primary-500'),
+        tabBarInactiveTintColor: tw.color('typography-400'),
       }}
     >
-      <Tabs.Screen
-        name="index"
-        options={{
-          headerShown: false,
-          tabBarIcon: ({ color, focused }) => (
-            <TabIcon
-              icon={'home-outline'}
-              iconFocused={'home'}
-              focused={focused}
-              color={color}
-            />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name={'boxes'}
-        options={{
-          headerShown: false,
-          tabBarIcon: ({ color, focused }) => (
-            <TabIcon
-              icon={'cube-outline'}
-              iconFocused={'cube'}
-              focused={focused}
-              color={color}
-            />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="locations"
-        options={{
-          headerShown: false,
-          tabBarIcon: ({ color, focused }) => (
-            <TabIcon
-              icon={'location-outline'}
-              iconFocused={'location'}
-              focused={focused}
-              color={color}
-            />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="profile"
-        options={{
-          headerShown: false,
-          tabBarIcon: ({ color, focused }) => (
-            <TabIcon
-              icon={'person-outline'}
-              iconFocused={'person'}
-              focused={focused}
-              color={color}
-            />
-          ),
-        }}
-      />
+      {screens.map(({ name, icon, iconFocused }) => (
+        <Tabs.Screen
+          name={name}
+          listeners={hapticTabListener}
+          options={{
+            headerShown: false,
+            tabBarIcon: ({ color, focused }) => (
+              <TabIcon
+                icon={icon}
+                iconFocused={iconFocused}
+                focused={focused}
+                color={color}
+              />
+            ),
+          }}
+        />
+      ))}
     </Tabs>
   );
 }
