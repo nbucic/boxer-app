@@ -1,12 +1,11 @@
 import { router } from 'expo-router';
-import { Image, TouchableOpacity, View } from 'react-native';
+import { TouchableOpacity, View } from 'react-native';
 import { Action, ActionItem } from '@/components/swipeable/Action';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
 import { SwipeableMethods } from 'react-native-gesture-handler/ReanimatedSwipeable';
 import React, { memo, ReactElement, ReactNode } from 'react';
 import tw from 'twrnc';
 import clsx from 'clsx';
-import { useColorScheme } from 'nativewind';
 
 type ListViewOptions = {
   showPicture?: boolean;
@@ -57,11 +56,9 @@ const listViewOptions: ListViewOptions = {
 
 export const ListView = memo((props: ListViewProps) => {
   const { item, itemType, infotainment } = props;
-  const { colorScheme } = useColorScheme();
   const options: ListViewOptions = { ...listViewOptions, ...props?.options };
   const borderAndMargins = clsx(
-    'my-1 mx-2 border border-gray-100 dark:border-gray-800 rounded-xl shadow-md',
-    colorScheme === 'dark' ? 'shadow-yellow-200' : 'shadow-blue-200'
+    'my-1.5 mx-4 border border-blue-300 rounded-md shadow-sm overflow-hidden bg-background-0'
   );
 
   const InternalToolListView = () => {
@@ -69,10 +66,11 @@ export const ListView = memo((props: ListViewProps) => {
     return (
       <View
         className={clsx(
-          `bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800 min-h-20 `
+          `bg-background-0 active:bg-background-50 hover:bg-background-50 min-h-20 `
         )}
       >
         <TouchableOpacity
+          activeOpacity={0.7}
           className={'flex flex-row'}
           onPress={() => {
             //@ts-ignore
@@ -80,21 +78,25 @@ export const ListView = memo((props: ListViewProps) => {
           }}
         >
           {options.showPicture === true && (
-            <View className={'w-20 aspect-square mr-2 shrink-0'}>
-              {item.image_url ? (
-                <Image
-                  source={{ uri: item.image_url }}
-                  className={'w-full h-full'}
-                  resizeMode={'cover'}
-                />
-              ) : (
-                <View
-                  className={'w-full h-full bg-neutral-100 dark:bg-neutral-700'}
-                />
-              )}
+            <View className={'w-20 h-20 shrink-0 bg-background-0'}>
+              {/*{item.image_url ? (*/}
+              {/*  <Image*/}
+              {/*    source={{ uri: item.image_url }}*/}
+              {/*    className={'w-full h-full'}*/}
+              {/*    resizeMode={'cover'}*/}
+              {/*  />*/}
+              {/*) : (*/}
+              <View
+                className={
+                  'w-full h-full items-center justify-center opacity-20'
+                }
+              >
+                <View className={'w-8 h-8 rounded-full bg-typography-300'} />
+              </View>
+              {/*)}*/}
             </View>
           )}
-          <View className={'flex-grow flex-shrink py-1.5 pr-3'}>
+          <View className={'flex-grow flex-shrink my-1 mx-2 justify-between'}>
             {infotainment}
           </View>
         </TouchableOpacity>
@@ -103,24 +105,10 @@ export const ListView = memo((props: ListViewProps) => {
   };
 
   if (props.listType === 'swipeable') {
-    const style = tw.style(
-      clsx(
-        borderAndMargins,
-        colorScheme === 'dark' ? 'border-gray-800' : undefined
-      )
-    );
     const swipeProperties = props.swipeProperties;
     return (
       <Swipeable
-        containerStyle={[
-          style,
-          {
-            shadowColor: colorScheme === 'dark' ? '#fef08a' : '#bfdbfe',
-            shadowOffset: { width: 0, height: 3 },
-            shadowOpacity: 1,
-            shadowRadius: 10,
-          },
-        ]}
+        containerStyle={tw.style(borderAndMargins)}
         ref={swipeProperties.setRef}
         overshootFriction={8}
         leftThreshold={80}
@@ -142,9 +130,8 @@ export const ListView = memo((props: ListViewProps) => {
       </Swipeable>
     );
   } else {
-    const style = clsx(borderAndMargins, 'overflow-hidden');
     return (
-      <View className={style}>
+      <View className={borderAndMargins}>
         <InternalToolListView />
       </View>
     );

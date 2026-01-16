@@ -7,7 +7,7 @@ type DataErrorProps = {
 export const DataError = (props: DataErrorProps) => {
   return (
     <View className={'flex-1 justify-center items-center bg-background-0'}>
-      <Text>{props?.text}</Text>
+      <Text className={'text-typography-600'}>{props?.text}</Text>
     </View>
   );
 };

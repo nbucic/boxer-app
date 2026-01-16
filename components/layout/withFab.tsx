@@ -10,7 +10,7 @@ export default function WithFab({
   onFabPress: () => void;
 }) {
   return (
-    <View style={{ flex: 1 }}>
+    <View className={'flex-1'}>
       {children}
       <Fab onPress={onFabPress} />
     </View>

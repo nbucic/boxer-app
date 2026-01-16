@@ -25,8 +25,8 @@ export const InfoItem = (props: InfoItemProps) => {
     innerElement = (
       <Text
         className={clsx(
-          'flex-1 whitespace-nowrap overflow-hidden overflow-ellipsis',
-          'text-xs text-gray-500 dark:text-gray-400',
+          'flex-1 text-xs font-medium whitespace-nowrap overflow-hidden overflow-ellipsis',
+          'text-typography-500',
           className
         )}
         numberOfLines={1}
@@ -38,12 +38,7 @@ export const InfoItem = (props: InfoItemProps) => {
   } else {
     const { link, linkText } = props;
     innerElement = (
-      <Link
-        href={link}
-        className={
-          'text-xs font-medium text-blue-500 dark:Text-blue-400 underline'
-        }
-      >
+      <Link href={link} className={'text-xs font-bold text-primary-500'}>
         {linkText}
       </Link>
     );
@@ -51,10 +46,7 @@ export const InfoItem = (props: InfoItemProps) => {
 
   return (
     <HStack className={'items-center gap-x-1'}>
-      <Icon
-        as={icon}
-        className={'w-4 h-4 text-gray-400 dark:text-gray-500 shrink-0'}
-      />
+      <Icon as={icon} className={'w-3.5 h-3.5 text-typography-400 shrink-0'} />
       {innerElement}
     </HStack>
   );
