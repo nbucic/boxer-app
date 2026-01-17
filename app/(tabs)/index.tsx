@@ -1,6 +1,6 @@
 import { Box } from '@/components/ui/box';
 import { Text } from '@/components/ui/text';
-import WithFab from '@/components/layout/withFab';
+import FabWrapper from '@/components/hoc/FabWrapper';
 import { router } from 'expo-router';
 import { ItemsList } from '@/components/box/ItemsList';
 import { ListHeader } from '@/components/list/ListHeader';
@@ -56,7 +56,7 @@ export default function Index() {
   }
 
   return (
-    <WithFab onFabPress={() => router.push('/tool/create')}>
+    <FabWrapper onPress={() => router.push('/tool/create')}>
       <GestureHandlerRootView>
         <Box className={'flex-1 bg-white dark:bg-black'}>
           <ItemsList
@@ -154,6 +154,6 @@ export default function Index() {
           />
         </Box>
       </GestureHandlerRootView>
-    </WithFab>
+    </FabWrapper>
   );
 }

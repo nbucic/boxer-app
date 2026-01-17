@@ -32,7 +32,6 @@ export const ItemsList = ({
   return (
     <FlatList
       data={data}
-      contentContainerClassName={'pb-[60]'}
       key={`items-${numColumns}`}
       keyExtractor={(item) => item.id.toString()}
       renderItem={renderItem}

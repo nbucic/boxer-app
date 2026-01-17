@@ -5,18 +5,17 @@ import { Text } from 'react-native';
 import { VStack } from '@/components/ui/vstack';
 import { fetchAllBoxes } from '@/services/box';
 import { BoxCard } from '@/components/list/BoxCard';
-import { Box } from '@/components/ui/box';
-import WithFab from '@/components/layout/withFab';
 import { ScrollTextIcon } from 'lucide-react-native';
 import { ListHeader } from '@/components/list/ListHeader';
 import { ItemsList } from '@/components/box/ItemsList';
 import { Box as BoxType } from '@/types/box';
-import { DataLoader } from '@/components/layout/elements/DataLoader';
-import { DataError } from '@/components/layout/elements/DataError';
+import { DataLoader } from '@/components/layout/DataLoader';
+import { DataError } from '@/components/layout/DataError';
+import { ScreenContainer } from '@/components/layout/ScreenContainer';
+import { FAB } from '@/components/common/FAB';
 
 const LocationDetailsScreen = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
-
   if (!id) {
     router.replace('/');
     return null;
@@ -58,33 +57,34 @@ const LocationDetailsScreen = () => {
   }
 
   return (
-    <WithFab onFabPress={() => router.push(`/box/create?locationId=${id}`)}>
-      <Box className={'flex-1 bg-background-0'}>
+    <ScreenContainer
+      scrollable={false}
+      header={
         <ListHeader
           title={location.name}
           subtitle={location.description ?? undefined}
           subtitleIcon={ScrollTextIcon}
           showBackButton={true}
         />
-        <Text
-          className={'text-xl font-bold text-gray-900 dark:text-white px-4'}
-        >
-          Boxes at this location
-        </Text>
-        <VStack className="flex-1 gap-4">
-          <ItemsList
-            data={boxes || []}
-            renderItem={({ item }) => (
-              <BoxCard
-                item={item as BoxType}
-                layout={'list'}
-                listType={'static'}
-              />
-            )}
-          />
-        </VStack>
-      </Box>
-    </WithFab>
+      }
+    >
+      <Text className={'text-xl font-bold text-gray-900 dark:text-white px-4'}>
+        Boxes at this location
+      </Text>
+      <VStack className="flex-1 gap-4">
+        <ItemsList
+          data={boxes || []}
+          renderItem={({ item }) => (
+            <BoxCard
+              item={item as BoxType}
+              layout={'list'}
+              listType={'static'}
+            />
+          )}
+        />
+      </VStack>
+      <FAB onPress={() => router.push(`/box/create?locationId=${id}`)} />
+    </ScreenContainer>
   );
 };
 

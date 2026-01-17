@@ -1,6 +1,6 @@
 import { Box } from '@/components/ui/box';
 import { ActivityIndicator, TouchableOpacity, View } from 'react-native';
-import WithFab from '@/components/layout/withFab';
+import FabWrapper from '@/components/hoc/FabWrapper';
 import { router } from 'expo-router';
 import { deleteBox, fetchAllBoxes } from '@/services/box';
 import { Text } from '@/components/ui/text';
@@ -68,7 +68,7 @@ export default function Boxes() {
   }
 
   return (
-    <WithFab onFabPress={() => router.push('/box/create')}>
+    <FabWrapper onPress={() => router.push('/box/create')}>
       <GestureHandlerRootView>
         <Box className={'flex-1 bg-white dark:bg-black'}>
           <ItemsList
@@ -181,6 +181,6 @@ export default function Boxes() {
           )}
         </Box>
       </GestureHandlerRootView>
-    </WithFab>
+    </FabWrapper>
   );
 }

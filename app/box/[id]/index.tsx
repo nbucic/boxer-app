@@ -3,14 +3,14 @@ import { useQuery } from '@tanstack/react-query';
 import { getBox } from '@/services/box';
 import { ActivityIndicator, Image, Text, View } from 'react-native';
 import { VStack } from '@/components/ui/vstack';
-import WithFab from '@/components/layout/withFab';
+import FabWrapper from '@/components/hoc/FabWrapper';
 import { fetchAllTools } from '@/services/tool';
 import { ToolCard } from '@/components/list/ToolCard';
 import { Box } from '@/components/ui/box';
 import { ListHeader } from '@/components/list/ListHeader';
 import { ScrollTextIcon } from 'lucide-react-native';
 import { ItemsList } from '@/components/box/ItemsList';
-import { Tool } from '@/types/tools';
+import { ToolWithBox } from '@/types/tools';
 
 export default function BoxDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -51,7 +51,7 @@ export default function BoxDetailsScreen() {
   }
 
   return (
-    <WithFab onFabPress={() => router.push(`/tool/create?boxId=${id}`)}>
+    <FabWrapper onFabPress={() => router.push(`/tool/create?boxId=${id}`)}>
       <Box className={'flex-1 bg-white dark:bg-black'}>
         <ListHeader
           title={box.name}
@@ -76,7 +76,7 @@ export default function BoxDetailsScreen() {
             data={tools || []}
             renderItem={({ item }) => (
               <ToolCard
-                item={item as Tool}
+                item={item as ToolWithBox}
                 layout={'list'}
                 listType={'static'}
               />
@@ -84,6 +84,6 @@ export default function BoxDetailsScreen() {
           />
         </VStack>
       </Box>
-    </WithFab>
+    </FabWrapper>
   );
 }
