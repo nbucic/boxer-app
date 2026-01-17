@@ -1,7 +1,7 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { getLocation } from '@/services/location';
-import { ActivityIndicator, Text, View } from 'react-native';
+import { Text } from 'react-native';
 import { VStack } from '@/components/ui/vstack';
 import { fetchAllBoxes } from '@/services/box';
 import { BoxCard } from '@/components/list/BoxCard';
@@ -11,6 +11,8 @@ import { ScrollTextIcon } from 'lucide-react-native';
 import { ListHeader } from '@/components/list/ListHeader';
 import { ItemsList } from '@/components/box/ItemsList';
 import { Box as BoxType } from '@/types/box';
+import { DataLoader } from '@/components/layout/elements/DataLoader';
+import { DataError } from '@/components/layout/elements/DataError';
 
 const LocationDetailsScreen = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -44,22 +46,20 @@ const LocationDetailsScreen = () => {
   const error = locationError || boxesError;
 
   if (isLoading) {
-    return <ActivityIndicator size={'large'} className={'flex-1'} />;
+    return <DataLoader text={'Loading location ...'} />;
   }
 
   if (error || !location) {
     return (
-      <View className={'flex-1 justify-center items-center'}>
-        <Text>
-          Error loading box: {error ? error.message : 'No such location'}
-        </Text>
-      </View>
+      <DataError
+        text={`Error loading location: ${error ? error.message : 'No such location'}`}
+      />
     );
   }
 
   return (
     <WithFab onFabPress={() => router.push(`/box/create?locationId=${id}`)}>
-      <Box className={'flex-1 bg-white dark:bg-black'}>
+      <Box className={'flex-1 bg-background-0'}>
         <ListHeader
           title={location.name}
           subtitle={location.description ?? undefined}
@@ -69,7 +69,7 @@ const LocationDetailsScreen = () => {
         <Text
           className={'text-xl font-bold text-gray-900 dark:text-white px-4'}
         >
-          Boxes at this location:
+          Boxes at this location
         </Text>
         <VStack className="flex-1 gap-4">
           <ItemsList
