@@ -33,11 +33,11 @@ export const ListHeader = (props: ListHeaderProps) => {
   } = props;
   return (
     <HStack className={'justify-between items-center px-6 py-4 bg-transparent'}>
-      <HStack className={'flex-1 items-center space-x-4 min-w-0'}>
+      <HStack className={'flex-1 items-center gap-4 min-w-0'}>
         {showBackButton && (
           <View
             className={
-              'rounded-lg border border-gray-300 dark:border-gray-700 overflow-hidden p-1'
+              'rounded-lg border border-outline-100 overflow-hidden bg-background-50'
             }
           >
             <TouchableOpacity
@@ -45,15 +45,11 @@ export const ListHeader = (props: ListHeaderProps) => {
                 router.canGoBack() ? router.back() : router.navigate('/')
               }
               activeOpacity={0.7}
-              className={clsx(
-                'p-1 rounded-md transition-colors',
-                'bg-white dark:bg-gray-700',
-                'hover:bg-gray-100 dark:hover:bg-gray-800'
-              )}
+              className={
+                'p-2 bg-background-0 hover:bg-background-100 active:bg-background-100'
+              }
             >
-              <ChevronLeft
-                className={'w-5 h-5 text-gray-700 dark:text-gray-300'}
-              />
+              <ChevronLeft className={'w-5 h-5 text-typography-900'} />
             </TouchableOpacity>
           </View>
         )}
@@ -62,25 +58,25 @@ export const ListHeader = (props: ListHeaderProps) => {
           <Heading
             size={'xl'}
             className={
-              ' text-gray-900 dark:text-white overflow-ellipsis overflow-hidden whitespace-nowrap'
+              'text-typography-900 leading-tight overflow-ellipsis overflow-hidden whitespace-nowrap'
             }
+            numberOfLines={1}
           >
             {title}
           </Heading>
           {subtitle && (
-            <HStack className={'items-center gap-x-1'}>
+            <HStack className={'items-center gap-1 mt-0.5'}>
               {subtitleIcon && (
                 <Icon
                   as={subtitleIcon}
-                  className={
-                    'w-4 h-4 text-gray-500 dark:text-gray-400 shrink-0 '
-                  }
+                  className={'w-3.5 h-3.5 text-typography-400 shrink-0'}
                 />
               )}
               <Text
                 className={
-                  'text-gray-500 dark:text-gray-400 overflow-ellipsis overflow-hidden whitespace-nowrap'
+                  'text-typography-500 text-sm overflow-ellipsis overflow-hidden whitespace-nowrap '
                 }
+                numberOfLines={1}
               >
                 {subtitle}
               </Text>
@@ -88,23 +84,26 @@ export const ListHeader = (props: ListHeaderProps) => {
           )}
         </View>
 
-        <HStack className="items-center space-x-2">
+        <HStack className="items-center gap-3">
           {Platform.OS === 'web' && refetch && (
             <TouchableOpacity
               onPress={refetch}
               disabled={isRefetching}
-              className={clsx('p-2 rounded-full transition-colors', {
-                'bg-gray-100 text-gray-600 hover:bg-gray-200': !isRefetching,
-                'bg-gray-50 text-gray-400': isRefetching,
-              })}
+              className={clsx(
+                'p-2 rounded-full transition-all',
+                isRefetching
+                  ? 'opacity-40'
+                  : 'bg-background-50 active:bg-background-100 hover:bg-background-100'
+              )}
             >
-              <RefreshCwIcon className={'w-5 h-5'} />
+              <RefreshCwIcon className={'w-5 h-5 text-typography-600'} />
             </TouchableOpacity>
           )}
+
           {layout && setLayout && (
             <View
               className={
-                'rounded-lg border border-gray-300 dark:border-gray-700 overflow-hidden'
+                'rounded-lg border border-outline-100 bg-background-50 overflow-hidden'
               }
             >
               <IconizedSwitch

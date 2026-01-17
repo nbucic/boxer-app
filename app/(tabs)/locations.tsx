@@ -74,7 +74,7 @@ export default function Locations() {
   return (
     <WithFab onFabPress={() => router.push('/location/create')}>
       <GestureHandlerRootView>
-        <Box className={'flex-1 bg-white dark:bg-black'}>
+        <Box className={'flex-1 bg-background-0'}>
           <ItemsList
             data={data || []}
             renderItem={({ item }) => {
