@@ -12,9 +12,7 @@ type Props = {
 export const NameItem = ({ name, clickable = null, className }: Props) => {
   const IconAndTextElements = () => (
     <Text
-      className={
-        'text-base font-semibold text-gray-900 dark:text-white whitespace-nowrap overflow-ellipsis overflow-hidden'
-      }
+      className={'text-lg font-bold text-typography-900 leading-tight'}
       numberOfLines={1}
       ellipsizeMode={'tail'}
     >
@@ -24,7 +22,9 @@ export const NameItem = ({ name, clickable = null, className }: Props) => {
 
   return clickable ? (
     <TouchableOpacity
+      activeOpacity={0.6}
       onPress={() => router.navigate(clickable as any)}
+      hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
       className={clsx(className)}
     >
       <IconAndTextElements />

@@ -16,14 +16,10 @@ type ActionProps = {
   place: 'left' | 'right';
 };
 
-export const Action = ({ items, place }: ActionProps) => (
+export const Action = ({ items }: ActionProps) => (
   <View className={'flex flex-row justify-start'}>
     <HStack>
       {items.map((item, index) => {
-        //TODO: figure out whether it's needed
-        const borderRadius =
-          index === 0 && (place === 'right' ? 'rounded-r-xl' : 'rounded-l-xl');
-
         return (
           <TouchableOpacity
             className={clsx(item.className, 'justify-center items-center w-20')}
@@ -31,12 +27,10 @@ export const Action = ({ items, place }: ActionProps) => (
             onPress={item.onPress}
           >
             <View className={'flex justify-center items-center gap-y-1'}>
-              <Icon
-                as={item.icon}
-                size={'custom'}
-                className={'text-typography-0'}
-              />
-              <Text className={'text-base text-white'}>{item.text}</Text>
+              <Icon as={item.icon} size={'custom'} className={'text-white'} />
+              <Text className={'text-base text-white tracking-wide'}>
+                {item.text}
+              </Text>
             </View>
           </TouchableOpacity>
         );

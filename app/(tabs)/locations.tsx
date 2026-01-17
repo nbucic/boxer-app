@@ -1,4 +1,4 @@
-import { ActivityIndicator, Alert, TouchableOpacity, View } from 'react-native';
+import { Alert } from 'react-native';
 import { Text } from '@/components/ui/text';
 import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -19,6 +19,10 @@ import { showAlert } from '@/lib/helpers/alert';
 import { Box } from '@/components/ui/box';
 import { EditIcon, LocationEditIcon, TrashIcon } from 'lucide-react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { DataLoader } from '@/components/layout/elements/DataLoader';
+import { DataError } from '@/components/layout/elements/DataError';
+import { VStack } from '@/components/ui/vstack';
+import { Button, ButtonText } from '@/components/ui/button';
 
 export default function Locations() {
   const queryClient = useQueryClient();
@@ -60,21 +64,11 @@ export default function Locations() {
   };
 
   if (isFetching) {
-    return (
-      <View className={'flex-1 justify-center'}>
-        <ActivityIndicator size={'large'} />
-      </View>
-    );
+    return <DataLoader text={'Sorting your locations ...'} />;
   }
 
   if (status === 'error' && error) {
-    return (
-      <View className={'flex-1 justify-center items-center p-4'}>
-        <Text className={'text-error-500'}>
-          Error fetching locations: {error.message}
-        </Text>
-      </View>
-    );
+    return <DataError text={`Error fetching locations: ${error.message}`} />;
   }
 
   return (
@@ -100,7 +94,7 @@ export default function Locations() {
                         },
                         text: 'Edit',
                         icon: EditIcon,
-                        className: 'bg-blue-500',
+                        className: 'bg-success-500',
                       },
                     ],
                     renderRightActions: [
@@ -118,7 +112,7 @@ export default function Locations() {
                         },
                         text: 'Delete',
                         icon: TrashIcon,
-                        className: 'bg-red-500',
+                        className: 'bg-error-500',
                       },
                     ],
                   }}
@@ -137,32 +131,33 @@ export default function Locations() {
                 content={
                   <>
                     <LocationEditIcon
-                      className={'w-12 h-12 text-blue-500 mb-4'}
+                      className={'w-16 h-16 text-primary-500 mb-4 opacity-80'}
                     />
-                    <Text
-                      className={
-                        'text-xl font-semibold text-gray-700 dark:text-gray-200 mb-2'
-                      }
-                    >
-                      No locations found
-                    </Text>
-                    <Text
-                      className={
-                        'text-base text-gray-500 dark:text-gray-400 mb-6 text-center'
-                      }
-                    >
-                      It looks like your location list is currently empty.
-                    </Text>
-                    <TouchableOpacity
-                      onPress={() => router.push('/location/create')}
-                      className={
-                        'px-6 py-3 bg-blue-600 rounded-lg shadow-md hover:bg-blue-700 transition-colors'
-                      }
-                    >
-                      <Text className={'text-lg font-medium text-white'}>
-                        + Add new location
+
+                    <VStack space={'xs'} className={'items-center'}>
+                      <Text className={'text-xl font-bold text-typography-900'}>
+                        No locations found
                       </Text>
-                    </TouchableOpacity>
+                      <Text
+                        className={
+                          'text-base text-typography-500 text-center px-4'
+                        }
+                      >
+                        It looks like your location list is currently empty.
+                      </Text>
+                    </VStack>
+
+                    <Button
+                      size={'lg'}
+                      className={
+                        'mt-8 bg-primary-500 rounded-xl px-8 shadow-soft-1'
+                      }
+                      onPress={() => router.push('/location/create')}
+                    >
+                      <ButtonText className={'font-semibold text-white'}>
+                        + Add new location
+                      </ButtonText>
+                    </Button>
                   </>
                 }
               />

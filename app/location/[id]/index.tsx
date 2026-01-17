@@ -66,10 +66,12 @@ const LocationDetailsScreen = () => {
           subtitleIcon={ScrollTextIcon}
           showBackButton={true}
         />
-        <VStack className="flex-1 p-4 gap-4">
-          <Text className={'text-xl font-bold text-gray-900 dark:text-white'}>
-            Boxes at this location:
-          </Text>
+        <Text
+          className={'text-xl font-bold text-gray-900 dark:text-white px-4'}
+        >
+          Boxes at this location:
+        </Text>
+        <VStack className="flex-1 gap-4">
           <ItemsList
             data={boxes || []}
             renderItem={({ item }) => (
