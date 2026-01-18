@@ -1,5 +1,4 @@
-// noinspection XmlDeprecatedElement,JSDeprecatedSymbols
-import { Tool } from '@/types/tools';
+import { Tool, ToolWithBox } from '@/types/tools';
 import React, { memo } from 'react';
 import { useSharedValue } from 'react-native-reanimated';
 import {
@@ -7,12 +6,15 @@ import {
   LayoutGridProps,
 } from '@/components/list/view/DenseGridView';
 import { LayoutListProps, ListView } from '@/components/list/view/ListView';
-import { InfoItem } from '@/components/box/InfoItem';
+import { InfoItem } from '@/components/common/InfoItem';
 import { MapPinnedIcon, ScrollTextIcon } from 'lucide-react-native';
 import { VStack } from '@/components/ui/vstack';
-import { NameItem } from '@/components/box/NameItem';
+import { NameItem } from '@/components/common/NameItem';
 
-type ToolCardProps = { item: Tool } & (LayoutListProps | LayoutGridProps);
+type ToolCardProps = { item: Tool | ToolWithBox } & (
+  | LayoutListProps
+  | LayoutGridProps
+);
 
 export const ToolCard = memo((props: ToolCardProps) => {
   const isFlipped = useSharedValue(0);

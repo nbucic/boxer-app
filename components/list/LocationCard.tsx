@@ -1,9 +1,9 @@
 import { ScrollTextIcon } from 'lucide-react-native';
 import { Location } from '@/types/location';
 import { ListView, SwipeableProps } from '@/components/list/view/ListView';
-import { NameItem } from '@/components/box/NameItem';
+import { NameItem } from '@/components/common/NameItem';
 import { VStack } from '@/components/ui/vstack';
-import { InfoItem } from '@/components/box/InfoItem';
+import { InfoItem } from '@/components/common/InfoItem';
 
 type LocationCardProps = {
   item: Location;

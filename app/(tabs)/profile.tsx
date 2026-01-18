@@ -1,22 +1,8 @@
-import {
-  Alert,
-  Platform,
-  Pressable,
-  RefreshControl,
-  ScrollView,
-  View,
-} from 'react-native';
-import { AlertCircleIcon, Icon } from '@/components/ui/icon';
+import { Alert, Platform, Pressable, RefreshControl, View } from 'react-native';
+import { Icon } from '@/components/ui/icon';
 import { VStack } from '@/components/ui/vstack';
 import { Controller, useForm } from 'react-hook-form';
-import {
-  FormControl,
-  FormControlError,
-  FormControlErrorIcon,
-  FormControlErrorText,
-} from '@/components/ui/form-control';
 import { Text } from '@/components/ui/text';
-import { Input, InputField } from '@/components/ui/input';
 import {
   getCurrentUser,
   updateCurrentUser,
@@ -24,22 +10,24 @@ import {
   User,
 } from '@/services/user';
 import { HStack } from '@/components/ui/hstack';
-import { Button, ButtonSpinner, ButtonText } from '@/components/ui/button';
+import { Button, ButtonText } from '@/components/ui/button';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useState } from 'react';
 import { ImagePickerAsset } from 'expo-image-picker';
 import Avatar from '@/components/Avatar';
 import { Computer, Moon, Smartphone, Sun } from 'lucide-react-native';
-import { Heading } from '@/components/ui/heading';
-import { Box } from '@/components/ui/box';
 import { Divider } from '@/components/ui/divider';
 import { supabase } from '@/lib/supabase';
 import { useColorScheme } from 'nativewind';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Theme, THEME_STORAGE_KEY } from '@/hooks/useInitialTheme';
 import { ListHeader } from '@/components/list/ListHeader';
-import { DataLoader } from '@/components/layout/elements/DataLoader';
-import { DataError } from '@/components/layout/elements/DataError';
+import { DataLoader } from '@/components/layout/DataLoader';
+import { DataError } from '@/components/layout/DataError';
+import { FormField } from '@/components/common/FormField';
+import { FormActions } from '@/components/form/FormActions';
+import { GlassCard } from '@/components/layout/GlassCard';
+import { ScreenContainer } from '@/components/layout/ScreenContainer';
 
 type ProfileFormData = User & {
   new_avatar_asset: ImagePickerAsset | null;
@@ -60,7 +48,7 @@ export default function Profile() {
 
   const {
     control,
-    formState: { errors, isDirty },
+    formState: { isDirty, isValid },
     handleSubmit,
     reset,
     setValue,
@@ -121,185 +109,121 @@ export default function Profile() {
   }
 
   return (
-    <Box className={'flex-1 bg-background-0'}>
-      <ScrollView
-        contentContainerStyle={{ paddingBottom: 40 }}
-        refreshControl={
-          Platform.OS !== 'web' ? (
-            <RefreshControl refreshing={isRefetching} onRefresh={onRefresh} />
-          ) : undefined
-        }
-      >
-        <ListHeader
-          title={'Settings'}
-          isRefetching={isRefetching}
-          refetch={refetch}
+    <ScreenContainer
+      refreshControl={
+        Platform.OS !== 'web' ? (
+          <RefreshControl refreshing={isRefetching} onRefresh={onRefresh} />
+        ) : undefined
+      }
+    >
+      <ListHeader
+        title={'Settings'}
+        isRefetching={isRefetching}
+        refetch={refetch}
+      />
+      <VStack space={'xl'} className={'px-6'}>
+        <GlassCard title={'Account Information'}>
+          <HStack className={'justify-center py-2'}>
+            <Controller
+              control={control}
+              name="new_avatar_asset"
+              render={() => (
+                <Avatar
+                  avatarUrl={avatarPreview}
+                  onImageChange={handleImageChange}
+                />
+              )}
+            />
+          </HStack>
+
+          <VStack space={'lg'}>
+            <FormField
+              control={control}
+              name={'email'}
+              label={'Email address'}
+              placeholder={'email@example.com'}
+              isDisabled={true}
+            />
+
+            <FormField
+              control={control}
+              name={'full_name'}
+              label={'Full name'}
+              placeholder={'Your name'}
+              rules={{
+                required: 'Full name is required',
+              }}
+            />
+          </VStack>
+        </GlassCard>
+
+        <FormActions
+          onSave={handleSubmit(onUpdateProfile)}
+          isPending={isPending}
+          isValid={isValid}
+          isDirty={isDirty}
+          saveLabel={'Update profile'}
         />
 
-        <VStack space={'xl'} className={'px-6 mt-4'}>
-          <VStack space={'md'}>
-            <Heading
-              size={'xs'}
-              className={'text-typography-500 uppercase tracking-widest'}
-            >
-              Account Information
-            </Heading>
+        <Divider className={'my-2 bg-outline-100'} />
 
-            <HStack className={'justify-center py-4'}>
-              <Controller
-                control={control}
-                name="new_avatar_asset"
-                render={() => (
-                  <Avatar
-                    avatarUrl={avatarPreview}
-                    onImageChange={handleImageChange}
-                  />
-                )}
-              />
-            </HStack>
-
-            <VStack space={'lg'}>
-              <FormControl isDisabled>
-                <VStack space={'xs'}>
-                  <Text className={'text-typography-600 font-medium ml-1'}>
-                    Email Address
-                  </Text>
-                  <Input
-                    variant={'outline'}
-                    size={'lg'}
-                    className={'bg-background-50 opacity-60'}
-                  >
-                    <InputField
-                      type={'text'}
-                      placeholder={'email@example.com'}
-                      value={control._defaultValues.email}
-                      autoCapitalize={'none'}
-                      readOnly={true}
-                    />
-                  </Input>
-                </VStack>
-              </FormControl>
-
-              <Controller
-                control={control}
-                name={'full_name'}
-                rules={{
-                  required: 'Full name is required',
-                }}
-                render={({ field: { onChange, onBlur, value } }) => (
-                  <FormControl isInvalid={!!errors.full_name}>
-                    <VStack space={'xs'}>
-                      <Text className={'text-typography-600 font-medium ml-1'}>
-                        Full name
-                      </Text>
-                      <Input
-                        variant={'outline'}
-                        size={'lg'}
-                        className={'bg-background-50'}
-                      >
-                        <InputField
-                          type={'text'}
-                          placeholder={'Your name'}
-                          onBlur={onBlur}
-                          onChangeText={onChange}
-                          value={value}
-                          autoCapitalize={'words'}
-                        />
-                      </Input>
-                      <FormControlError>
-                        <FormControlErrorIcon as={AlertCircleIcon} />
-                        <FormControlErrorText>
-                          {errors.full_name?.message}
-                        </FormControlErrorText>
-                      </FormControlError>
-                    </VStack>
-                  </FormControl>
-                )}
-              />
-            </VStack>
-
-            <Button
-              size={'lg'}
-              className={'mt-4 bg-primary-500'}
-              isDisabled={!isDirty || isPending}
-              onPress={handleSubmit(onUpdateProfile)}
-            >
-              {isPending ? (
-                <ButtonSpinner className={'mr-2'} />
-              ) : (
-                <ButtonText>Save Changes</ButtonText>
-              )}
-            </Button>
-          </VStack>
-
-          <Divider className={'my-4 bg-outline-100'} />
-
-          {/* 2. PERSONALIZATION (Segmented Control Look) */}
-          <VStack space={'md'}>
-            <Heading
-              size={'xs'}
-              className={'text-typography-500 uppercase tracking-widest'}
-            >
-              Personalization
-            </Heading>
-
-            <View
-              className={
-                'bg-background-50 p-1.5 rounded-xl flex-row border border-outline-100'
-              }
-            >
-              {(['light', 'dark', 'system'] as Theme[]).map((t) => {
-                const isActive = colorScheme === t;
-                return (
-                  <Pressable
-                    key={t}
-                    onPress={() => setTheme(t)}
-                    className={`flex-1 flex-row items-center justify-center py-3 rounded-lg ${
-                      isActive ? 'bg-background-0 shadow-sm ' : 'bg-transparent'
-                    }`}
-                  >
-                    <Icon
-                      as={
-                        t === 'light'
-                          ? Sun
-                          : t === 'dark'
-                            ? Moon
-                            : Platform.OS === 'web'
-                              ? Computer
-                              : Smartphone
-                      }
-                      size={'xs'}
-                      className={`${isActive ? 'text-primary-500' : 'text-typography-400'}`}
-                    />
-                    <Text
-                      className={`ml-2 text-xs font-bold ${isActive ? 'text-typography-900' : 'text-typography-400'}`}
-                    >
-                      {t.toUpperCase()}
-                    </Text>
-                  </Pressable>
-                );
-              })}
-            </View>
-          </VStack>
-
-          <Divider className={'my-4 bg-outline-100'} />
-
-          {/* 3. SIGN OUT (Solid Red Button) */}
-          <Button
-            action={'negative'}
-            variant={'outline'}
-            size={'lg'}
-            onPress={handleSignOut}
-            className={'border-error-500'}
+        {/* 2. PERSONALIZATION (Segmented Control Look) */}
+        <GlassCard title={'Personalization'}>
+          <View
+            className={
+              'bg-background-50 p-1.5 rounded-xl flex-row border border-outline-100'
+            }
           >
-            <ButtonText className={'text-error-500'}>Sign Out</ButtonText>
-          </Button>
+            {(['light', 'dark', 'system'] as Theme[]).map((t) => {
+              const isActive = colorScheme === t;
+              return (
+                <Pressable
+                  key={t}
+                  onPress={() => setTheme(t)}
+                  className={`flex-1 flex-row items-center justify-center py-3 rounded-lg ${
+                    isActive ? 'bg-background-0 shadow-sm ' : 'bg-transparent'
+                  }`}
+                >
+                  <Icon
+                    as={
+                      t === 'light'
+                        ? Sun
+                        : t === 'dark'
+                          ? Moon
+                          : Platform.OS === 'web'
+                            ? Computer
+                            : Smartphone
+                    }
+                    size={'xs'}
+                    className={`${isActive ? 'text-primary-500' : 'text-typography-400'}`}
+                  />
+                  <Text
+                    className={`ml-2 text-xs font-bold ${isActive ? 'text-typography-900' : 'text-typography-400'}`}
+                  >
+                    {t.toUpperCase()}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
+        </GlassCard>
 
-          <Text className={'text-center text-typography-400 text-xs mt-1'}>
-            Version 1.0.1
-          </Text>
-        </VStack>
-      </ScrollView>
-    </Box>
+        <Divider className={'my-4 bg-outline-100'} />
+
+        <GlassCard
+          title={'Danger zone'}
+          className={'border-error-100 bg-error-0'}
+        >
+          {/* 3. SIGN OUT (Solid Red Button) */}
+          <Button action={'negative'} size={'lg'} onPress={handleSignOut}>
+            <ButtonText className={'text-typography-0'}>Sign Out</ButtonText>
+          </Button>
+        </GlassCard>
+
+        <Text className={'text-center text-typography-400 text-xs mt-1'}>
+          Version 1.0.1
+        </Text>
+      </VStack>
+    </ScreenContainer>
   );
 }

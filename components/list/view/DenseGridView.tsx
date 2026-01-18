@@ -1,7 +1,7 @@
 import React, { memo } from 'react';
 import { Image, Pressable, View } from 'react-native';
 import { VStack } from '@/components/ui/vstack';
-import { NameItem } from '@/components/box/NameItem';
+import { NameItem } from '@/components/common/NameItem';
 import Animated, {
   interpolate,
   SharedValue,

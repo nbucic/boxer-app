@@ -9,20 +9,20 @@ import {
 } from '@/services/location';
 import { SwipeableMethods } from 'react-native-gesture-handler/ReanimatedSwipeable';
 import { useRef } from 'react';
-import WithFab from '@/components/layout/withFab';
 import { ListHeader } from '@/components/list/ListHeader';
 import { ItemsList } from '@/components/box/ItemsList';
 import { Location } from '@/types/location';
 import { LocationCard } from '@/components/list/LocationCard';
 import { EmptyList } from '@/components/list/EmptyList';
 import { showAlert } from '@/lib/helpers/alert';
-import { Box } from '@/components/ui/box';
 import { EditIcon, LocationEditIcon, TrashIcon } from 'lucide-react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { DataLoader } from '@/components/layout/elements/DataLoader';
-import { DataError } from '@/components/layout/elements/DataError';
+import { DataLoader } from '@/components/layout/DataLoader';
+import { DataError } from '@/components/layout/DataError';
 import { VStack } from '@/components/ui/vstack';
 import { Button, ButtonText } from '@/components/ui/button';
+import { ScreenContainer } from '@/components/layout/ScreenContainer';
+import { FAB } from '@/components/common/FAB';
 
 export default function Locations() {
   const queryClient = useQueryClient();
@@ -72,101 +72,101 @@ export default function Locations() {
   }
 
   return (
-    <WithFab onFabPress={() => router.push('/location/create')}>
-      <GestureHandlerRootView>
-        <Box className={'flex-1 bg-background-0'}>
-          <ItemsList
-            data={data || []}
-            renderItem={({ item }) => {
-              const closeSwipedItem = swipeableRefs.current[item.id]?.close;
-              return (
-                <LocationCard
-                  item={item as Location}
-                  swipeProperties={{
-                    setRef: (ref) => (swipeableRefs.current[item.id] = ref),
-                    renderLeftActions: [
-                      {
-                        onPress: () => {
-                          closeSwipedItem?.();
-                          setTimeout(() => {
-                            router.push(`/location/${item.id}/edit`);
-                          }, 100);
-                        },
-                        text: 'Edit',
-                        icon: EditIcon,
-                        className: 'bg-success-500',
+    <GestureHandlerRootView>
+      <ScreenContainer scrollable={false}>
+        <ItemsList
+          data={data || []}
+          renderItem={({ item }) => {
+            const closeSwipedItem = swipeableRefs.current[item.id]?.close;
+            return (
+              <LocationCard
+                item={item as Location}
+                swipeProperties={{
+                  setRef: (ref) => (swipeableRefs.current[item.id] = ref),
+                  renderLeftActions: [
+                    {
+                      onPress: () => {
+                        closeSwipedItem?.();
+                        setTimeout(() => {
+                          router.push(`/location/${item.id}/edit`);
+                        }, 100);
                       },
-                    ],
-                    renderRightActions: [
-                      {
-                        onPress: () => {
-                          showAlert({
-                            title: 'Delete location',
-                            message: `Are you sure you want to delete ${item.name}?`,
-                            onCancel: closeSwipedItem,
-                            onConfirm: async () => {
-                              await handleDeleteAttempt(item.id);
-                              closeSwipedItem?.();
-                            },
-                          });
-                        },
-                        text: 'Delete',
-                        icon: TrashIcon,
-                        className: 'bg-error-500',
+                      text: 'Edit',
+                      icon: EditIcon,
+                      className: 'bg-success-500',
+                    },
+                  ],
+                  renderRightActions: [
+                    {
+                      onPress: () => {
+                        showAlert({
+                          title: 'Delete location',
+                          message: `Are you sure you want to delete ${item.name}?`,
+                          onCancel: closeSwipedItem,
+                          onConfirm: async () => {
+                            await handleDeleteAttempt(item.id);
+                            closeSwipedItem?.();
+                          },
+                        });
                       },
-                    ],
-                  }}
-                />
-              );
-            }}
-            ListHeaderComponent={
-              <ListHeader
-                title={'Locations'}
-                refetch={refetch}
-                isRefetching={isRefetching}
+                      text: 'Delete',
+                      icon: TrashIcon,
+                      className: 'bg-error-500',
+                    },
+                  ],
+                }}
               />
-            }
-            ListEmptyComponent={
-              <EmptyList
-                content={
-                  <>
-                    <LocationEditIcon
-                      className={'w-16 h-16 text-primary-500 mb-4 opacity-80'}
-                    />
+            );
+          }}
+          ListHeaderComponent={
+            <ListHeader
+              title={'Locations'}
+              refetch={refetch}
+              isRefetching={isRefetching}
+            />
+          }
+          ListEmptyComponent={
+            <EmptyList
+              content={
+                <>
+                  <LocationEditIcon
+                    className={'w-16 h-16 text-primary-500 mb-4 opacity-80'}
+                  />
 
-                    <VStack space={'xs'} className={'items-center'}>
-                      <Text className={'text-xl font-bold text-typography-900'}>
-                        No locations found
-                      </Text>
-                      <Text
-                        className={
-                          'text-base text-typography-500 text-center px-4'
-                        }
-                      >
-                        It looks like your location list is currently empty.
-                      </Text>
-                    </VStack>
-
-                    <Button
-                      size={'lg'}
+                  <VStack space={'xs'} className={'items-center'}>
+                    <Text className={'text-xl font-bold text-typography-900'}>
+                      No locations found
+                    </Text>
+                    <Text
                       className={
-                        'mt-8 bg-primary-500 rounded-xl px-8 shadow-soft-1'
+                        'text-base text-typography-500 text-center px-4'
                       }
-                      onPress={() => router.push('/location/create')}
                     >
-                      <ButtonText className={'font-semibold text-white'}>
-                        + Add new location
-                      </ButtonText>
-                    </Button>
-                  </>
-                }
-              />
-            }
-            isRefetching={isRefetching}
-            refetch={refetch}
-          />
-        </Box>
-      </GestureHandlerRootView>
-    </WithFab>
+                      It looks like your location list is currently empty.
+                    </Text>
+                  </VStack>
+
+                  <Button
+                    size={'lg'}
+                    className={
+                      'mt-8 bg-primary-500 rounded-xl px-8 shadow-soft-1'
+                    }
+                    onPress={() => router.push('/location/create')}
+                  >
+                    <ButtonText className={'font-semibold text-white'}>
+                      + Add new location
+                    </ButtonText>
+                  </Button>
+                </>
+              }
+            />
+          }
+          isRefetching={isRefetching}
+          refetch={refetch}
+        />
+
+        <FAB onPress={() => router.push('/location/create')} />
+      </ScreenContainer>
+    </GestureHandlerRootView>
   );
 }

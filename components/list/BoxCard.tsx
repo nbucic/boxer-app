@@ -5,13 +5,13 @@ import { useFocusEffect } from 'expo-router';
 import { MapPinnedIcon, ScrollTextIcon } from 'lucide-react-native';
 import { Box } from '@/types/box';
 import { useSharedValue } from 'react-native-reanimated';
-import { InfoItem } from '@/components/box/InfoItem';
+import { InfoItem } from '@/components/common/InfoItem';
 import { LayoutListProps, ListView } from '@/components/list/view/ListView';
 import {
   DenseGridView,
   LayoutGridProps,
 } from '@/components/list/view/DenseGridView';
-import { NameItem } from '@/components/box/NameItem';
+import { NameItem } from '@/components/common/NameItem';
 
 type BoxCardProps = { item: Box } & (LayoutListProps | LayoutGridProps);
 
@@ -45,7 +45,7 @@ export const BoxCard = memo((props: BoxCardProps) => {
               icon={MapPinnedIcon}
               text={box.location?.name}
               link={{
-                pathname: '/box/create',
+                pathname: '/box/[id]/edit',
                 params: { id: box.id, focus: 'location' },
               }}
               linkText={'Add location?'}
@@ -56,7 +56,7 @@ export const BoxCard = memo((props: BoxCardProps) => {
               <InfoItem
                 icon={ScrollTextIcon}
                 link={{
-                  pathname: '/box/create',
+                  pathname: '/box/[id]/edit',
                   params: { id: box.id, focus: 'description' },
                 }}
                 linkText={'Add description?'}

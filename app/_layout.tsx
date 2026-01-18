@@ -32,6 +32,7 @@ const AppLayout = () => {
           <Stack.Screen name={'(tabs)'} />
           <Stack.Screen name={'location'} />
           <Stack.Screen name={'box'} />
+          <Stack.Screen name={'tool'} />
         </Stack.Protected>
 
         <Stack.Protected guard={!session}>

@@ -1,37 +1,31 @@
 import { supabase } from '@/lib/supabase';
-import { View } from 'react-native';
 import { useState } from 'react';
-import { Input, InputField, InputIcon, InputSlot } from '@/components/ui/input';
 import { VStack } from '@/components/ui/vstack';
-import {
-  FormControl,
-  FormControlError,
-  FormControlErrorIcon,
-  FormControlErrorText,
-} from '@/components/ui/form-control';
 import { Text } from '@/components/ui/text';
-import { AlertCircleIcon, EyeIcon, EyeOffIcon } from '@/components/ui/icon';
 import { HStack } from '@/components/ui/hstack';
-import { Button, ButtonSpinner, ButtonText } from '@/components/ui/button';
-import { Controller, useForm } from 'react-hook-form';
+import { Button, ButtonText } from '@/components/ui/button';
+import { useForm } from 'react-hook-form';
 import { AuthWeakPasswordError } from '@supabase/auth-js';
 import { router } from 'expo-router';
 import { getDeepLink } from '@/components/DeepLink';
 import { showAlert } from '@/lib/helpers/alert';
 import { Heading } from '@/components/ui/heading';
+import { ScreenContainer } from '@/components/layout/ScreenContainer';
+import { GlassCard } from '@/components/layout/GlassCard';
+import { FormField } from '@/components/common/FormField';
+import { FormActions } from '@/components/form/FormActions';
 
 interface Props {
   email: string;
   password: string;
 }
 
-export default function Auth() {
-  const [showPassword, setShowPassword] = useState<boolean>(false);
+const Auth = () => {
   const [loading, setLoading] = useState(false);
   const {
     control,
     handleSubmit,
-    formState: { errors },
+    formState: { isDirty },
     setError,
   } = useForm({
     defaultValues: {
@@ -39,11 +33,6 @@ export default function Auth() {
       password: '',
     },
   });
-
-  const handleShowingPassword = () => {
-    setShowPassword((state) => !state);
-  };
-
   const signInWithEmail = async (data: Props) => {
     setLoading(true);
     const { error } = await supabase.auth.signInWithPassword(data as Props);
@@ -110,22 +99,24 @@ export default function Auth() {
   };
 
   return (
-    <View className={'flex-1 bg-background-0'}>
-      <View className={'flex-1 justify-center p-8'}>
-        <VStack space={'xs'} className={'mb-10'}>
-          <Heading size={'3xl'} className={'text-typography-900'}>
-            Un-Box your tools
-          </Heading>
-          <Text className={'text-typography-500'}>
-            Sign in to your account or create a now one
-          </Text>
-        </VStack>
+    <ScreenContainer extraClasses={{ scrollableView: 'justify-center py-10' }}>
+      <VStack space={'xs'} className={'mb-10'}>
+        <Heading size={'3xl'} className={'text-typography-900'}>
+          Un-Box your tools
+        </Heading>
+        <Text className={'text-typography-500'}>
+          Sign in to your account or create a now one
+        </Text>
+      </VStack>
 
+      <GlassCard>
         <VStack space={'xl'}>
-          {/*Email field */}
-          <Controller
+          <FormField
             control={control}
             name={'email'}
+            label={'Email'}
+            placeholder={'name@example.com'}
+            keyboardType={'email-address'}
             rules={{
               required: 'Email is required',
               pattern: {
@@ -133,111 +124,44 @@ export default function Auth() {
                 message: 'Please enter a valid email address',
               },
             }}
-            render={({ field: { onChange, onBlur, value } }) => (
-              <FormControl isInvalid={!!errors.email}>
-                <VStack space={'xs'}>
-                  <Text className={'text-typography-600 font-medium ml-1'}>
-                    Email
-                  </Text>
-                  <Input
-                    variant={'outline'}
-                    size={'lg'}
-                    className={'bg-background-50'}
-                  >
-                    <InputField
-                      type={'text'}
-                      placeholder={'name@example.com'}
-                      onBlur={onBlur}
-                      onChangeText={onChange}
-                      value={value}
-                      autoCapitalize={'none'}
-                      keyboardType={'email-address'}
-                    />
-                  </Input>
-                  <FormControlError>
-                    <FormControlErrorIcon as={AlertCircleIcon} />
-                    <FormControlErrorText>
-                      {errors.email?.message}
-                    </FormControlErrorText>
-                  </FormControlError>
-                </VStack>
-              </FormControl>
-            )}
           />
 
-          {/*Password field */}
-          <Controller
+          <FormField
             control={control}
             name={'password'}
-            rules={{
-              required: 'Password is required',
-            }}
-            render={({ field: { onChange, onBlur, value } }) => (
-              <FormControl isInvalid={!!errors.password}>
-                <VStack space={'xs'}>
-                  <Text className={'text-typography-600 font-medium ml-1'}>
-                    Password
-                  </Text>
-                  <Input
-                    variant={'outline'}
-                    size={'lg'}
-                    className={'bg-background-50'}
-                  >
-                    <InputField
-                      type={showPassword ? 'text' : 'password'}
-                      placeholder={'Enter your password'}
-                      onBlur={onBlur}
-                      onChangeText={onChange}
-                      value={value}
-                      autoCapitalize={'none'}
-                    />
-                    <InputSlot
-                      className={'pr-3'}
-                      onPress={handleShowingPassword}
-                    >
-                      <InputIcon as={showPassword ? EyeIcon : EyeOffIcon} />
-                    </InputSlot>
-                  </Input>
-                  <FormControlError>
-                    <FormControlErrorIcon as={AlertCircleIcon} />
-                    <FormControlErrorText>
-                      {errors.password?.message}
-                    </FormControlErrorText>
-                  </FormControlError>
-                </VStack>
-              </FormControl>
-            )}
+            label={'Password'}
+            placeholder={'Enter your password'}
+            isPassword={true}
+            rules={{ required: 'Password is required' }}
           />
 
-          {/* Actions */}
-          <VStack space={'lg'} className={'mt-4'}>
-            <Button
-              size={'lg'}
-              className={'bg-primary-500'}
-              onPress={handleSubmit(signInWithEmail)}
-              disabled={loading}
-            >
-              {loading && <ButtonSpinner className={'mr-2'} />}
-              <ButtonText className={'font-semibold'}>Sign in</ButtonText>
-            </Button>
-
-            <HStack space={'xs'} className={'justify-center items-center'}>
-              <Text className={'text-typography-500'}>
-                Don't have an account?
-              </Text>
-              <Button
-                variant={'link'}
-                onPress={handleSubmit(signUpWithEmail)}
-                disabled={loading}
-              >
-                <ButtonText className={'text-primary-500 font-bold'}>
-                  Sign Up
-                </ButtonText>
-              </Button>
-            </HStack>
-          </VStack>
+          <FormActions
+            onSave={handleSubmit(signInWithEmail)}
+            isPending={loading}
+            isValid={true}
+            isDirty={isDirty}
+            saveLabel={'Sign in'}
+            submitFlex={1}
+          />
         </VStack>
-      </View>
-    </View>
+      </GlassCard>
+
+      <VStack space={'md'} className={'mt-8'}>
+        <HStack space={'xs'} className={'justify-center items-center'}>
+          <Text className={'text-typography-500'}>Don't have an account?</Text>
+          <Button
+            variant={'link'}
+            onPress={handleSubmit(signUpWithEmail)}
+            disabled={loading}
+          >
+            <ButtonText className={'text-primary-500 font-bold'}>
+              Sign Up
+            </ButtonText>
+          </Button>
+        </HStack>
+      </VStack>
+    </ScreenContainer>
   );
-}
+};
+
+export default Auth;
