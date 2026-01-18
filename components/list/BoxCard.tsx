@@ -76,6 +76,7 @@ export const BoxCard = memo((props: BoxCardProps) => {
     return (
       <DenseGridView
         item={box}
+        itemType={'Box'}
         isFlipped={isFlipped}
         actionableItems={actionableItems}
       />

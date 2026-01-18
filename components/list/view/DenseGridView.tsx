@@ -13,6 +13,8 @@ import { BackAction } from '@/components/BackAction';
 import { ActionItem } from '@/components/swipeable/Action';
 import clsx from 'clsx';
 import { SwipeableProps } from '@/components/list/view/ListView';
+import { GlassCard } from '@/components/layout/GlassCard';
+import { BoxIcon } from 'lucide-react-native';
 
 export type LayoutGridProps = {
   layout: 'grid';
@@ -25,6 +27,7 @@ type DenseGridViewProps = {
     image_url?: string | null;
     name: string;
   };
+  itemType: 'Box' | 'Tool' | 'Location';
 } & CardBackProps;
 
 type CardBackProps = {
@@ -33,9 +36,14 @@ type CardBackProps = {
 };
 
 export const DenseGridView = memo(
-  ({ item, isFlipped, actionableItems }: DenseGridViewProps) => {
+  ({ item, itemType, isFlipped, actionableItems }: DenseGridViewProps) => {
+    const urlPrefix = itemType.toLowerCase();
+    useAnimatedStyle(() => ({
+      transform: [{ rotateY: `${isFlipped.value * 180}deg` }],
+    }));
     const frontAnimatedStyle = useAnimatedStyle(() => ({
       transform: [{ rotateY: `${isFlipped.value * 180}deg` }],
+      backfaceVisibility: 'hidden',
     }));
 
     const flipCard = () => {
@@ -45,33 +53,39 @@ export const DenseGridView = memo(
     return (
       <Pressable onPress={flipCard} className={'basis-1/2 p-2 pb-1'}>
         <Animated.View style={frontAnimatedStyle}>
-          <VStack
-            className={
-              'bg-white dark:bg-gray-900 rounded-xl shadow-md overflow-hidden'
-            }
-          >
-            {item.image_url ? (
-              <Image
-                source={{ uri: item.image_url }}
-                className={'aspect-square w-full'}
-                alt={item.name}
-                resizeMode={'cover'}
-              />
-            ) : (
+          <GlassCard className={'p-0 overflow-hidden'} noPadding={true}>
+            <VStack space={'xs'}>
               <View
                 className={
-                  'aspect-square bg-neutral-200 dark:bg-neutral-700 w-full'
+                  'w-full aspect-square items-center justify-center bg-background-100/50'
                 }
+              >
+                {item.image_url ? (
+                  <Image
+                    source={{ uri: item.image_url }}
+                    className={'aspect-square w-full'}
+                    alt={item.name}
+                  />
+                ) : (
+                  <BoxIcon
+                    size={40}
+                    className="text-typography-300 opacity-50"
+                  />
+                )}
+              </View>
+
+              {/* Text Area */}
+              <NameItem
+                name={item.name}
+                clickable={`/${urlPrefix}/${item.id}`}
+                // Remove default padding/styling from NameItem if possible
+                // to control it here for grid density
+                className="font-bold text-sm px-2 py-2"
               />
-            )}
-            <NameItem
-              key={'name'}
-              name={item.name}
-              clickable={`/tool/${item.id}`}
-              className={'p-3'}
-            />
-          </VStack>
+            </VStack>
+          </GlassCard>
         </Animated.View>
+
         <CardBack actionableItems={actionableItems} isFlipped={isFlipped} />
       </Pressable>
     );
@@ -86,18 +100,20 @@ const CardBack = ({ actionableItems, isFlipped }: CardBackProps) => {
 
     return {
       transform: [{ rotateY: `${rotate}deg` }],
+      opacity: interpolate(isFlipped.value, [0.4, 0.5, 0.6], [0, 0.5, 1]),
       pointerEvents: pointerEvents,
     };
   });
+
   return (
     <Animated.View
       style={[
         {
           position: 'absolute',
-          top: 0,
-          right: 0,
-          bottom: 0,
-          left: 0,
+          top: 8,
+          right: 8,
+          bottom: 4,
+          left: 8,
           backfaceVisibility: 'hidden',
         },
         backAnimatedStyle,
@@ -105,10 +121,10 @@ const CardBack = ({ actionableItems, isFlipped }: CardBackProps) => {
     >
       <View
         className={
-          'flex-1 items-center justify-center rounded-xl bg-gray-900/90'
+          'flex-1 items-center justify-center rounded-xl bg-background-50/50 border border-outline-900 shadow-xl'
         }
       >
-        <HStack space={'2xl'}>
+        <HStack space={'lg'} className={'flex-wrap justify-center p-2'}>
           {actionableItems.map((action, index) => (
             <BackAction
               key={index}

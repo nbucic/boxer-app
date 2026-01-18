@@ -2,30 +2,32 @@ import { useCallback, useRef } from 'react';
 import { Heading } from '@/components/ui/heading';
 import { HStack } from '@/components/ui/hstack';
 import { VStack } from '@/components/ui/vstack';
-import { Button, ButtonText } from '@/components/ui/button';
+import { Button, ButtonIcon, ButtonText } from '@/components/ui/button';
 import {
   Alert,
   Linking,
   Modal,
   Platform,
-  Text,
   TouchableOpacity,
   View,
 } from 'react-native';
 import * as Print from 'expo-print';
-import { Box } from '@/types/box';
+import { Box as BoxType } from '@/types/box';
 import Svg from 'react-native-svg';
 import { File, Paths } from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
-import { XIcon } from 'lucide-react-native';
+import { PrinterIcon, ShareIcon, XIcon } from 'lucide-react-native';
 import { QRCodeDisplay } from '@/components/QRCode/Display';
+import { Text } from '@/components/ui/text';
+import { Box } from '@/components/ui/box';
+import { GlassCard } from '@/components/layout/GlassCard';
 
 export default function ShareBox({
   box,
   isOpen,
   onClose,
 }: {
-  box: Box;
+  box: BoxType;
   isOpen: boolean;
   onClose: () => void;
 }) {
@@ -141,33 +143,77 @@ export default function ShareBox({
       visible={isOpen}
       onRequestClose={onClose}
     >
-      <View className={'flex-1 bg-black/50'}>
-        <VStack className={'bg-white rounded-t-3xl mt-auto'}>
+      <View
+        className={'flex-1 bg-background-900/40 backdrop-blur-xl justify-end'}
+      >
+        <VStack
+          className={
+            'bg-background-0 rounded-t-3xl border-t border-outline-50 pb-safe shadow-2xl'
+          }
+        >
+          {/* Handle bar for visual cue */}
+          <View className="items-center pt-3 pb-1">
+            <View className="w-12 h-1.5 bg-outline-200 rounded-full" />
+          </View>
+
           {/* Header */}
-          <HStack
-            className={
-              'justify-between items-center p-4 border-b border-outline-100'
-            }
-          >
-            <Heading className={'text-center'}>Share the box</Heading>
-            <TouchableOpacity onPress={onClose}>
-              <XIcon size={24} />
+          <HStack className={'justify-between items-center px-6 py-4'}>
+            <VStack>
+              <Heading size="xl" className="text-typography-900">
+                Share Box
+              </Heading>
+              <Text size="sm" className="text-typography-500">
+                Generate a QR code for your label
+              </Text>
+            </VStack>
+            <TouchableOpacity
+              onPress={onClose}
+              className="bg-background-100 p-2 rounded-full"
+            >
+              <XIcon size={20} className="text-typography-600" />
             </TouchableOpacity>
           </HStack>
 
           {/* Body */}
-          <View className={'items-center justify-center p-5'}>
-            <Text className={'text-2xl pb-4'}>{box.name}!</Text>
-            <QRCodeDisplay box={box} ref={qrCodeRef} />
+          <View className={'px-6 py-4'}>
+            <GlassCard className={'items-center justify-center py-10'}>
+              <Text
+                className={'text-xl font-bold text-typography-900 text-center'}
+              >
+                {box.name}
+              </Text>
+
+              <Box
+                className={'bg-white p-4 rounded-3xl border border-outline-100'}
+              >
+                <QRCodeDisplay box={box} ref={qrCodeRef} />
+              </Box>
+
+              <Text className="text-xs text-typography-400 mt-6 text-center px-10">
+                Anyone with this QR code can view the contents of this box.
+              </Text>
+            </GlassCard>
           </View>
 
-          {/* Footer */}
-          <HStack className={'w-full gap-x-3 p-4 border-t border-outline-100'}>
-            <Button size={'sm'} onPress={handleShare} className={'flex-1'}>
-              <ButtonText>Share</ButtonText>
+          {/* Footer Actions */}
+          <HStack space="md" className="p-6 mb-4">
+            <Button
+              variant="outline"
+              size="lg"
+              onPress={handlePrint}
+              className="flex-1 rounded-2xl border-outline-300"
+            >
+              <ButtonIcon as={PrinterIcon} className="mr-2" />
+              <ButtonText className="text-typography-700">Print</ButtonText>
             </Button>
-            <Button size={'sm'} onPress={handlePrint} className={'flex-1'}>
-              <ButtonText>Print</ButtonText>
+
+            <Button
+              size="lg"
+              onPress={handleShare}
+              className="flex-1 bg-primary-500 rounded-2xl shadow-soft-1"
+            >
+              <ButtonIcon as={ShareIcon} className="mr-2" />
+              <ButtonText className="font-bold text-white">Share</ButtonText>
             </Button>
           </HStack>
         </VStack>

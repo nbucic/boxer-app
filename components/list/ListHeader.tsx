@@ -7,7 +7,7 @@ import { Layout } from '@/types';
 import { Heading } from '@/components/ui/heading';
 import clsx from 'clsx';
 import { Icon } from '@/components/ui/icon';
-import { router } from 'expo-router';
+import { RelativePathString, router } from 'expo-router';
 
 interface ListHeaderProps {
   title: string;
@@ -17,7 +17,7 @@ interface ListHeaderProps {
   isRefetching?: boolean;
   layout?: Layout;
   setLayout?: (layout: Layout) => void;
-  showBackButton?: boolean;
+  backButton?: boolean | string;
 }
 
 export const ListHeader = (props: ListHeaderProps) => {
@@ -29,21 +29,36 @@ export const ListHeader = (props: ListHeaderProps) => {
     isRefetching,
     layout,
     setLayout,
-    showBackButton = false,
+    backButton = false,
   } = props;
+  const determineBackButtonLinkType = (backButton: string | boolean) => {
+    switch (typeof backButton) {
+      case 'string':
+        return () => router.push(backButton as RelativePathString);
+      case 'boolean':
+        if (backButton) {
+          return () =>
+            router.canGoBack() ? router.back() : router.navigate('/');
+        }
+        return undefined;
+      default:
+        return undefined;
+    }
+  };
+
+  const backButtonLink = determineBackButtonLinkType(backButton);
+
   return (
     <HStack className={'justify-between items-center px-6 py-4 bg-transparent'}>
       <HStack className={'flex-1 items-center gap-4 min-w-0'}>
-        {showBackButton && (
+        {backButtonLink && (
           <View
             className={
               'rounded-lg border border-outline-100 overflow-hidden bg-background-50'
             }
           >
             <TouchableOpacity
-              onPress={() =>
-                router.canGoBack() ? router.back() : router.navigate('/')
-              }
+              onPress={backButtonLink}
               activeOpacity={0.7}
               className={
                 'p-2 bg-background-0 hover:bg-background-100 active:bg-background-100'

@@ -2,7 +2,7 @@ import { supabase } from '@/lib/supabase';
 import { handleErrors } from '@/lib/helpers/supabase';
 import { Platform } from 'react-native';
 import { ImagePickerAsset } from 'expo-image-picker';
-import { StorageError } from '@supabase/storage-js';
+import { StorageApiError, StorageError } from '@supabase/storage-js';
 
 interface IAvatarStorageInformationRequest {
   userId?: string;
@@ -80,6 +80,15 @@ export const getSignedUrlForImage = async ({
     .createSignedUrl(url, 60 * 60 * 24 * 7, {
       transform: options,
     });
+
+  if (signedUrlError) {
+    if (
+      signedUrlError instanceof StorageApiError &&
+      signedUrlError.statusCode === '404'
+    ) {
+      return null;
+    }
+  }
 
   handleErrors(signedUrlError, 'Error creating signed URL for', url);
 

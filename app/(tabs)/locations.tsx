@@ -1,5 +1,4 @@
 import { Alert } from 'react-native';
-import { Text } from '@/components/ui/text';
 import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
@@ -19,8 +18,6 @@ import { EditIcon, LocationEditIcon, TrashIcon } from 'lucide-react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { DataLoader } from '@/components/layout/DataLoader';
 import { DataError } from '@/components/layout/DataError';
-import { VStack } from '@/components/ui/vstack';
-import { Button, ButtonText } from '@/components/ui/button';
 import { ScreenContainer } from '@/components/layout/ScreenContainer';
 import { FAB } from '@/components/common/FAB';
 
@@ -127,38 +124,11 @@ export default function Locations() {
           }
           ListEmptyComponent={
             <EmptyList
-              content={
-                <>
-                  <LocationEditIcon
-                    className={'w-16 h-16 text-primary-500 mb-4 opacity-80'}
-                  />
-
-                  <VStack space={'xs'} className={'items-center'}>
-                    <Text className={'text-xl font-bold text-typography-900'}>
-                      No locations found
-                    </Text>
-                    <Text
-                      className={
-                        'text-base text-typography-500 text-center px-4'
-                      }
-                    >
-                      It looks like your location list is currently empty.
-                    </Text>
-                  </VStack>
-
-                  <Button
-                    size={'lg'}
-                    className={
-                      'mt-8 bg-primary-500 rounded-xl px-8 shadow-soft-1'
-                    }
-                    onPress={() => router.push('/location/create')}
-                  >
-                    <ButtonText className={'font-semibold text-white'}>
-                      + Add new location
-                    </ButtonText>
-                  </Button>
-                </>
-              }
+              titleIcon={LocationEditIcon}
+              title={'No locations found'}
+              subtitle={'It looks like your location list is currently empty.'}
+              linkLocation={'/location/create'}
+              linkCallToAction={'+ Add new location'}
             />
           }
           isRefetching={isRefetching}
