@@ -1,4 +1,4 @@
-import { router } from 'expo-router';
+import { RelativePathString, router } from 'expo-router';
 import { Image, TouchableOpacity, View } from 'react-native';
 import { Action, ActionItem } from '@/components/swipeable/Action';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
@@ -6,6 +6,8 @@ import { SwipeableMethods } from 'react-native-gesture-handler/ReanimatedSwipeab
 import React, { memo, ReactElement, ReactNode } from 'react';
 import tw from 'twrnc';
 import clsx from 'clsx';
+import { HStack } from '@/components/ui/hstack';
+import { ChevronRight } from 'lucide-react-native';
 
 type ListViewOptions = {
   showPicture?: boolean;
@@ -64,43 +66,51 @@ export const ListView = memo((props: ListViewProps) => {
   const InternalToolListView = () => {
     const urlPrefix = itemType.toLowerCase();
     return (
-      <View
-        className={clsx(
-          `bg-background-0 active:bg-background-50 hover:bg-background-50 min-h-20 `
-        )}
-      >
-        <TouchableOpacity
-          activeOpacity={0.7}
-          className={'flex flex-row'}
-          onPress={() => {
-            //@ts-ignore
-            router.navigate(`/${urlPrefix}/${item.id}`);
-          }}
-        >
-          {options.showPicture === true && (
-            <View className={'w-20 h-20 shrink-0 bg-background-0'}>
-              {item.image_url ? (
-                <Image
-                  source={{ uri: item.image_url }}
-                  className={'w-full h-full'}
-                  resizeMode={'cover'}
-                />
-              ) : (
-                <View
-                  className={
-                    'w-full h-full items-center justify-center opacity-20'
-                  }
-                >
-                  <View className={'w-8 h-8 rounded-full bg-typography-300'} />
-                </View>
-              )}
-            </View>
-          )}
-          <View className={'flex-grow flex-shrink my-1 mx-2 justify-between'}>
-            {infotainment}
+      <HStack className={'bg-background-0 min-h-20 items-center'}>
+        {/* 1. Image section */}
+        {options.showPicture && (
+          <View className={'w-20 h-20 shrink-0 bg-background-100'}>
+            {item.image_url ? (
+              <Image
+                source={{ uri: item.image_url }}
+                className={'w-full h-full'}
+                resizeMode={'contain'}
+              />
+            ) : (
+              <View
+                className={
+                  'w-full h-full opacity-20 items-center justify-center'
+                }
+              >
+                <View className={'w-8 h-8 rounded-full bg-typography-300'} />
+              </View>
+            )}
           </View>
-        </TouchableOpacity>
-      </View>
+        )}
+        {/* 2. Content section */}
+        <View className={'flex-1 mx-2 my-1 justify-between'}>
+          {infotainment}
+        </View>
+
+        {/* 3. The details view button */}
+        <View
+          className={
+            'rounded-lg border border-outline-100 overflow-hidden bg-background-50 mr-2'
+          }
+        >
+          <TouchableOpacity
+            onPress={() =>
+              router.navigate(`/${urlPrefix}/${item.id}` as RelativePathString)
+            }
+            activeOpacity={0.7}
+            className={clsx(
+              'p-2 bg-background-0 hover:bg-background-100 active:bg-background-100'
+            )}
+          >
+            <ChevronRight className={'w-5 h5 text-primary-500'} />
+          </TouchableOpacity>
+        </View>
+      </HStack>
     );
   };
 

@@ -19,7 +19,6 @@ export const FormActions = ({
   saveLabel = 'Create',
   cancelLabel = 'Cancel',
   isPending,
-  isValid,
   isDirty,
   submitFlex = 2,
 }: FormActionsProps) => {
@@ -46,10 +45,10 @@ export const FormActions = ({
         style={{ flex: submitFlex }}
         className={clsx(
           'rounded',
-          !isDirty || !isValid ? 'bg-background-200' : 'bg-primary-500'
+          !isDirty || isPending ? 'bg-background-200' : 'bg-primary-500'
         )}
         onPress={onSave}
-        isDisabled={!isDirty || !isValid || isPending}
+        isDisabled={!isDirty || isPending}
       >
         {isPending ? (
           <ButtonSpinner color={'white'} />

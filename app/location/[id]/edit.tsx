@@ -90,7 +90,7 @@ export default function EditLocationScreen() {
           subtitle={
             isEditMode
               ? 'Update details for this place'
-              : 'Add a new spot to organize your tools'
+              : 'Add a new spot to organize your boxes'
           }
         />
       }
@@ -113,7 +113,7 @@ export default function EditLocationScreen() {
               name={'description'}
               label={'Description (optional)'}
               placeholder={'Briefly describe what is stored here'}
-              isTextArea={true}
+              type={'text-area'}
             />
           </VStack>
         </GlassCard>

@@ -116,7 +116,7 @@ const Auth = () => {
             name={'email'}
             label={'Email'}
             placeholder={'name@example.com'}
-            keyboardType={'email-address'}
+            options={{ keyboardType: 'email-address' }}
             rules={{
               required: 'Email is required',
               pattern: {
@@ -131,7 +131,7 @@ const Auth = () => {
             name={'password'}
             label={'Password'}
             placeholder={'Enter your password'}
-            isPassword={true}
+            options={{ isSecuredField: true }}
             rules={{ required: 'Password is required' }}
           />
 
