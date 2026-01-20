@@ -1,16 +1,18 @@
-import { router, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { getBox } from '@/services/box';
-import { ActivityIndicator, Image, Text, View } from 'react-native';
+import { Text } from 'react-native';
 import { VStack } from '@/components/ui/vstack';
-import FabWrapper from '@/components/hoc/FabWrapper';
 import { fetchAllTools } from '@/services/tool';
 import { ToolCard } from '@/components/list/ToolCard';
-import { Box } from '@/components/ui/box';
 import { ListHeader } from '@/components/list/ListHeader';
-import { ScrollTextIcon } from 'lucide-react-native';
+import { BoxIcon, ScrollTextIcon } from 'lucide-react-native';
 import { ItemsList } from '@/components/box/ItemsList';
 import { ToolWithBox } from '@/types/tools';
+import { DataLoader } from '@/components/layout/DataLoader';
+import { DataError } from '@/components/layout/DataError';
+import { ScreenContainer } from '@/components/layout/ScreenContainer';
+import { EmptyList } from '@/components/list/EmptyList';
 
 export default function BoxDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -39,51 +41,69 @@ export default function BoxDetailsScreen() {
   const error = boxError || toolsError;
 
   if (isLoading) {
-    return <ActivityIndicator size={'large'} className={'flex-1'} />;
+    return <DataLoader text={'Unloading the box ...'} />;
   }
 
   if (error || !box) {
     return (
-      <View className={'flex-1 justify-center items-center'}>
-        <Text>Error loading box: {error ? error.message : 'No such box'}</Text>
-      </View>
+      <DataError
+        text={`Error loading box: ${error ? error.message : 'No such box'}`}
+      />
     );
   }
 
   return (
-    <FabWrapper onFabPress={() => router.push(`/tool/create?boxId=${id}`)}>
-      <Box className={'flex-1 bg-white dark:bg-black'}>
+    <ScreenContainer
+      scrollable={false}
+      header={
         <ListHeader
           title={box.name}
           subtitle={box.description ?? undefined}
           subtitleIcon={ScrollTextIcon}
-          backButton={true}
+          backButton={'/boxes'}
         />
-        <VStack className="flex-1 p-4 gap-4">
-          {box?.image_url ? (
-            <Image
-              source={{ uri: box.image_url }}
-              className={'w-full aspect-square rounded-lg'}
-              resizeMode={'cover'}
-            />
-          ) : (
-            <View className={'w-full h-full rounded-lg bg-neutral-200'} />
-          )}
-          <Text className={'text-xl font-bold text-gray-900 dark:text-white'}>
-            Tools at this location:
-          </Text>
-          <ItemsList
-            data={tools || []}
-            renderItem={({ item }) => (
-              <ToolCard
-                item={item as ToolWithBox}
-                layout={'list'}
-                listType={'static'}
-              />
-            )}
+      }
+    >
+      {(tools || []).length > 0 && (
+        <Text className={'text-xl font-bold text-typography-900 px-4'}>
+          Tools at this box
+        </Text>
+      )}
+      <VStack className="flex-1 gap-4">
+        {/*
+        {box?.image_url ? (
+          <Image
+            source={{ uri: box.image_url }}
+            className={'w-full aspect-square rounded-lg'}
+            resizeMode={'cover'}
           />
-        </VStack>
-      </Box>
-    </FabWrapper>
+        ) : (
+          <View className={'w-full h-full rounded-lg bg-neutral-200'} />
+        )}
+*/}
+        <ItemsList
+          data={tools || []}
+          renderItem={({ item }) => (
+            <ToolCard
+              item={item as ToolWithBox}
+              layout={'list'}
+              listType={'static'}
+            />
+          )}
+          listEmptyComponent={
+            <EmptyList
+              topMargin={false}
+              title={'No tools inside the box'}
+              subtitle={
+                "Looks like your box is completely empty. That's unbelievable."
+              }
+              titleIcon={BoxIcon}
+              linkLocation={`/tool/create?boxId=${id}`}
+              linkCallToAction={'+ Add new tool'}
+            />
+          }
+        />
+      </VStack>
+    </ScreenContainer>
   );
 }

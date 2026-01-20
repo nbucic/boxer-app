@@ -14,9 +14,9 @@ interface ItemsListProps {
   data: SelectSearchable[];
   isRefetching?: boolean;
   refetch?: () => void;
-  ListHeaderComponent?: ComponentType<any> | ReactElement | null | undefined;
+  listHeaderComponent?: ComponentType<any> | ReactElement | null | undefined;
   renderItem: ListRenderItem<Box | Location | Tool>;
-  ListEmptyComponent?: ComponentType<any> | ReactElement | null | undefined;
+  listEmptyComponent?: ComponentType<any> | ReactElement | null | undefined;
   numColumns?: number;
 }
 
@@ -24,9 +24,9 @@ export const ItemsList = ({
   data,
   isRefetching,
   refetch,
-  ListHeaderComponent,
+  listHeaderComponent,
   renderItem,
-  ListEmptyComponent,
+  listEmptyComponent,
   numColumns = 1,
 }: ItemsListProps) => {
   return (
@@ -35,8 +35,8 @@ export const ItemsList = ({
       key={`items-${numColumns}`}
       keyExtractor={(item) => item.id.toString()}
       renderItem={renderItem}
-      ListHeaderComponent={ListHeaderComponent}
-      ListEmptyComponent={ListEmptyComponent}
+      ListHeaderComponent={listHeaderComponent}
+      ListEmptyComponent={listEmptyComponent}
       indicatorStyle={'black'}
       numColumns={numColumns}
       refreshControl={
