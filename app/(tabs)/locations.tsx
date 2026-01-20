@@ -115,14 +115,14 @@ export default function Locations() {
               />
             );
           }}
-          ListHeaderComponent={
+          listHeaderComponent={
             <ListHeader
               title={'Locations'}
               refetch={refetch}
               isRefetching={isRefetching}
             />
           }
-          ListEmptyComponent={
+          listEmptyComponent={
             <EmptyList
               titleIcon={LocationEditIcon}
               title={'No locations found'}

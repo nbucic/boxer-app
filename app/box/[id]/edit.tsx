@@ -337,11 +337,9 @@ export default function EditBoxScreen() {
               className={
                 'border-gray-200 dark:border-gray-700 rounded-xl px-6 py-3'
               }
-              onPress={() =>
-                router.canGoBack()
-                  ? router.back
-                  : router.navigate('/(tabs)/boxes')
-              }
+              onPress={() => {
+                router.canGoBack() ? router.back : router.navigate('/boxes');
+              }}
               disabled={isPending}
             >
               <ButtonText className={'text-gray-600 dark:text-gray-300'}>

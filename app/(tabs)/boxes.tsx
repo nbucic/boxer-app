@@ -123,7 +123,7 @@ export default function Boxes() {
             />
           );
         }}
-        ListHeaderComponent={
+        listHeaderComponent={
           <ListHeader
             title="Boxes"
             layout={layout}
@@ -132,7 +132,7 @@ export default function Boxes() {
             isRefetching={isRefetching}
           />
         }
-        ListEmptyComponent={
+        listEmptyComponent={
           <EmptyList
             titleIcon={BoxIcon}
             title={'No boxes found'}

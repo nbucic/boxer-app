@@ -106,7 +106,7 @@ export default function Index() {
                 />
               );
             }}
-            ListHeaderComponent={
+            listHeaderComponent={
               <ListHeader
                 title={'Items'}
                 layout={layout}
@@ -115,7 +115,7 @@ export default function Index() {
                 isRefetching={isRefetching}
               />
             }
-            ListEmptyComponent={
+            listEmptyComponent={
               <EmptyList>
                 <>
                   <WrenchIcon className={'w-12 h-12 text-blue-500 mb-4'} />

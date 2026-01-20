@@ -86,7 +86,7 @@ const LocationDetailsScreen = () => {
               listType={'static'}
             />
           )}
-          ListEmptyComponent={
+          listEmptyComponent={
             <EmptyList
               topMargin={false}
               title={'No boxes here'}
