@@ -5,7 +5,7 @@ import { Text } from 'react-native';
 import { VStack } from '@/components/ui/vstack';
 import { fetchAllBoxes } from '@/services/box';
 import { BoxCard } from '@/components/list/BoxCard';
-import { ScrollTextIcon } from 'lucide-react-native';
+import { BoxIcon, ScrollTextIcon } from 'lucide-react-native';
 import { ListHeader } from '@/components/list/ListHeader';
 import { ItemsList } from '@/components/box/ItemsList';
 import { Box as BoxType } from '@/types/box';
@@ -13,6 +13,7 @@ import { DataLoader } from '@/components/layout/DataLoader';
 import { DataError } from '@/components/layout/DataError';
 import { ScreenContainer } from '@/components/layout/ScreenContainer';
 import { FAB } from '@/components/common/FAB';
+import { EmptyList } from '@/components/list/EmptyList';
 
 const LocationDetailsScreen = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -64,13 +65,17 @@ const LocationDetailsScreen = () => {
           title={location.name}
           subtitle={location.description ?? undefined}
           subtitleIcon={ScrollTextIcon}
-          showBackButton={true}
+          backButton={'/locations'}
         />
       }
     >
-      <Text className={'text-xl font-bold text-gray-900 dark:text-white px-4'}>
-        Boxes at this location
-      </Text>
+      {(boxes || []).length > 0 && (
+        <Text
+          className={'text-xl font-bold text-gray-900 dark:text-white px-4'}
+        >
+          Boxes at this location
+        </Text>
+      )}
       <VStack className="flex-1 gap-4">
         <ItemsList
           data={boxes || []}
@@ -81,6 +86,18 @@ const LocationDetailsScreen = () => {
               listType={'static'}
             />
           )}
+          ListEmptyComponent={
+            <EmptyList
+              topMargin={false}
+              title={'No boxes here'}
+              subtitle={
+                'Start filling this location with your precious boxes. When you have boxes, you can start organizing your tools!'
+              }
+              titleIcon={BoxIcon}
+              linkLocation={`/box/create?locationId=${id}`}
+              linkCallToAction={'+ Add new box'}
+            />
+          }
         />
       </VStack>
       <FAB onPress={() => router.push(`/box/create?locationId=${id}`)} />

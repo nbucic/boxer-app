@@ -16,7 +16,7 @@ export const BackAction = ({
 }) => (
   <TouchableOpacity className={'items-center gap-2'} onPress={onPress}>
     <View
-      className={`h-14 w-14 items-center justify-center rounded-full ${className}`}
+      className={`h-10 aspect-square items-center justify-center rounded-full ${className}`}
     >
       <Icon as={icon} color={'white'} size={'custom'} />
     </View>

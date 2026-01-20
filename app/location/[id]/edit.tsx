@@ -85,7 +85,7 @@ export default function EditLocationScreen() {
       noPadding={false}
       header={
         <ListHeader
-          showBackButton={true}
+          backButton={true}
           title={isEditMode ? `Edit ${existingLocation?.name}` : 'New location'}
           subtitle={
             isEditMode

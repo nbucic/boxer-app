@@ -116,37 +116,35 @@ export default function Index() {
               />
             }
             ListEmptyComponent={
-              <EmptyList
-                content={
-                  <>
-                    <WrenchIcon className={'w-12 h-12 text-blue-500 mb-4'} />
-                    <Text
-                      className={
-                        'text-xl font-semibold text-gray-700 dark:text-gray-200 mb-2'
-                      }
-                    >
-                      No tools found
+              <EmptyList>
+                <>
+                  <WrenchIcon className={'w-12 h-12 text-blue-500 mb-4'} />
+                  <Text
+                    className={
+                      'text-xl font-semibold text-gray-700 dark:text-gray-200 mb-2'
+                    }
+                  >
+                    No tools found
+                  </Text>
+                  <Text
+                    className={
+                      'text-base text-gray-500 dark:text-gray-400 mb-6 text-center'
+                    }
+                  >
+                    It looks like your tool inventory is currently empty.
+                  </Text>
+                  <TouchableOpacity
+                    onPress={() => router.push('/tool/create')}
+                    className={
+                      'px-6 py-3 bg-blue-600 rounded-lg shadow-md hover:bg-blue-700 transition-colors'
+                    }
+                  >
+                    <Text className={'text-lg font-medium text-white'}>
+                      + Add new tool
                     </Text>
-                    <Text
-                      className={
-                        'text-base text-gray-500 dark:text-gray-400 mb-6 text-center'
-                      }
-                    >
-                      It looks like your tool inventory is currently empty.
-                    </Text>
-                    <TouchableOpacity
-                      onPress={() => router.push('/tool/create')}
-                      className={
-                        'px-6 py-3 bg-blue-600 rounded-lg shadow-md hover:bg-blue-700 transition-colors'
-                      }
-                    >
-                      <Text className={'text-lg font-medium text-white'}>
-                        + Add new tool
-                      </Text>
-                    </TouchableOpacity>
-                  </>
-                }
-              />
+                  </TouchableOpacity>
+                </>
+              </EmptyList>
             }
             isRefetching={isRefetching}
             refetch={refetch}

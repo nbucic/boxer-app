@@ -7,6 +7,7 @@ import { Heading } from '@/components/ui/heading';
 interface GlassCardProps {
   children: ReactNode;
   className?: string;
+  noPadding?: boolean;
   viewSpace?: 'xl' | 'md';
   title?: string;
 }
@@ -14,13 +15,15 @@ interface GlassCardProps {
 export const GlassCard = ({
   children,
   className,
+  noPadding = false,
   viewSpace = 'xl',
   title,
 }: GlassCardProps) => (
   <View
     className={clsx(
-      'bg-background-50 p-6 rounded-xl border border-outline-100 shadow-sm',
-      className
+      className,
+      'bg-background-50 rounded-xl border border-outline-100 shadow-sm',
+      !noPadding && 'p-6'
     )}
   >
     <VStack space={viewSpace}>

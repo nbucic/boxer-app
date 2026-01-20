@@ -57,7 +57,7 @@ export default function BoxDetailsScreen() {
           title={box.name}
           subtitle={box.description ?? undefined}
           subtitleIcon={ScrollTextIcon}
-          showBackButton={true}
+          backButton={true}
         />
         <VStack className="flex-1 p-4 gap-4">
           {box?.image_url ? (
