@@ -54,7 +54,10 @@ export const fetchAllTools = async ({
   );
 };
 
-export const getTool = async (id: string, includeBox: boolean = true) => {
+export const getTool = async (
+  id: string,
+  includeBox: boolean = true
+): Promise<ToolWithBox> => {
   let selection = '*';
   if (includeBox) {
     selection = `
@@ -64,27 +67,22 @@ export const getTool = async (id: string, includeBox: boolean = true) => {
       name
     )`;
   }
-  const { data, error }: { data: Tool | ToolWithBox | null; error: any } =
-    await supabase.from(TABLE_NAME).select(selection).eq('id', id).single();
+  const { data, error }: { data: any; error: any | undefined } = await supabase
+    .from(TABLE_NAME)
+    .select(selection)
+    .eq('id', id)
+    .single();
 
-  if (!data) {
-    handleErrors(error, 'Get tool error:');
-  } else {
-    const imageUrl = await getSignedUrlForImage({
+  handleErrors(error, 'Get tool error:');
+
+  return {
+    ...data,
+    image_url: await getSignedUrlForImage({
       url: data.image_url,
-      bucket: 'tools',
+      bucket: BUCKET_NAME,
       options: squareImageOptions,
-    });
-
-    if (!imageUrl) {
-      throw new Error('Cannot get image.');
-    }
-
-    return {
-      ...data,
-      image_url: imageUrl,
-    };
-  }
+    }),
+  };
 };
 
 export const getToolEditData = async (id: string) => await getTool(id, false);

@@ -1,11 +1,13 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { getTool } from '@/services/tool';
-import { ActivityIndicator, Image, Text, View } from 'react-native';
-import { Box } from '@/components/ui/box';
+import { Image, Text, View } from 'react-native';
 import { VStack } from '@/components/ui/vstack';
 import { ListHeader } from '@/components/list/ListHeader';
 import { ScrollTextIcon } from 'lucide-react-native';
+import { DataLoader } from '@/components/layout/DataLoader';
+import { DataError } from '@/components/layout/DataError';
+import { ScreenContainer } from '@/components/layout/ScreenContainer';
 
 export default function ToolDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -15,7 +17,7 @@ export default function ToolDetailsScreen() {
   }
 
   const {
-    data: toolData,
+    data: tool,
     isLoading: toolLoading,
     error: toolError,
   } = useQuery({
@@ -25,41 +27,43 @@ export default function ToolDetailsScreen() {
   });
 
   if (toolLoading) {
-    return <ActivityIndicator size={'large'} className={'flex-1'} />;
+    return <DataLoader text={'Examining tool info ...'} />;
   }
 
-  if (toolError || !toolData) {
+  if (toolError || !tool) {
     return (
-      <View className={'flex-1 justify-center items-center'}>
-        <Text>
-          Error loading tool: {toolError ? toolError.message : 'No such tool'}
-        </Text>
-      </View>
+      <DataError
+        text={`Error loading tool: ${toolError ? toolError.message : 'No such tool'}`}
+      />
     );
   }
 
   return (
-    <Box className={'flex-1 bg-white dark:bg-black'}>
-      <ListHeader
-        title={toolData.name}
-        subtitle={toolData.description ?? undefined}
-        subtitleIcon={ScrollTextIcon}
-        backButton={true}
-      />
-      <VStack className="flex-1 p-4 gap-4">
-        {toolData.image_url ? (
+    <ScreenContainer
+      scrollable={false}
+      header={
+        <ListHeader
+          title={tool.name + '-'}
+          subtitle={tool.description || undefined}
+          subtitleIcon={ScrollTextIcon}
+          backButton={'/'}
+        />
+      }
+    >
+      <VStack className={'flex-1 gap-4'}>
+        {tool.image_url ? (
           <Image
-            source={{ uri: toolData.image_url }}
+            source={{ uri: tool.image_url }}
             className={'w-full aspect-square rounded-lg'}
-            resizeMode={'cover'}
+            resizeMode={'contain'}
           />
         ) : (
-          <View className={'w-full h-full rounded-lg bg-neutral-200'} />
+          <View className={'w-full aspect-square rounded-lg bg-neutral-200'} />
         )}
-        <Text className="text-lg text-gray-900 dark:text-white">
-          {toolData.description}
+        <Text className={'text-xl font-bold text-typography-900 px-4'}>
+          Located at {tool.box.name}
         </Text>
       </VStack>
-    </Box>
+    </ScreenContainer>
   );
 }
