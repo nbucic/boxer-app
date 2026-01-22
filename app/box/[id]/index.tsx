@@ -18,6 +18,10 @@ import { FAB } from '@/components/common/FAB';
 export default function BoxDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
 
+  if (!id) {
+    router.back();
+  }
+
   const {
     data: box,
     isLoading: boxLoading,
@@ -65,11 +69,6 @@ export default function BoxDetailsScreen() {
         />
       }
     >
-      {(tools || []).length > 0 && (
-        <Text className={'text-xl font-bold text-typography-900 px-4'}>
-          Tools at this box
-        </Text>
-      )}
       <VStack className="flex-1 gap-4">
         {box?.image_url ? (
           <Image
@@ -78,7 +77,12 @@ export default function BoxDetailsScreen() {
             resizeMode={'contain'}
           />
         ) : (
-          <View className={'w-full h-full rounded-lg bg-neutral-200'} />
+          <View className={'w-full aspect-square rounded-lg bg-neutral-200'} />
+        )}
+        {(tools || []).length > 0 && (
+          <Text className={'text-xl font-bold text-typography-900 px-4'}>
+            Tools at this box
+          </Text>
         )}
         <ItemsList
           data={tools || []}
