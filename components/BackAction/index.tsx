@@ -18,8 +18,8 @@ export const BackAction = ({
     <View
       className={`h-10 aspect-square items-center justify-center rounded-full ${className}`}
     >
-      <Icon as={icon} color={'white'} size={'custom'} />
+      <Icon as={icon} size={'custom'} className={'text-typography-900'} />
     </View>
-    <Text className={'font-semibold text-white'}>{label}</Text>
+    <Text className={'font-semibold text-typography-900'}>{label}</Text>
   </TouchableOpacity>
 );

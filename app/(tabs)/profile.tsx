@@ -12,7 +12,7 @@ import {
 import { HStack } from '@/components/ui/hstack';
 import { Button, ButtonText } from '@/components/ui/button';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect } from 'react';
 import { ImagePickerAsset } from 'expo-image-picker';
 import { Computer, Moon, Smartphone, Sun } from 'lucide-react-native';
 import { Divider } from '@/components/ui/divider';
@@ -33,7 +33,6 @@ type ProfileFormData = User & {
 };
 
 export default function Profile() {
-  const [publicImageUrl, setPublicImageUrl] = useState<string | null>(null);
   const queryClient = useQueryClient();
   const { setColorScheme, colorScheme } = useColorScheme();
 
@@ -69,13 +68,12 @@ export default function Profile() {
   useEffect(() => {
     if (data) {
       reset({ ...data, new_avatar_asset: null });
-      setPublicImageUrl(data.avatar_url);
     }
   }, [data, reset]);
 
   const handleImageChange = (image: ImagePickerAsset) => {
     setValue('new_avatar_asset', image, { shouldDirty: true });
-    setPublicImageUrl(image.uri);
+    setValue('avatar_url', image.uri, { shouldDirty: true });
   };
 
   const onUpdateProfile = (formData: ProfileFormData) => {
@@ -125,9 +123,9 @@ export default function Profile() {
           <HStack className={'justify-center py-2'}>
             <FormField
               control={control}
-              name={'new_avatar_asset'}
+              name={'avatar_url'}
               rules={{ required: 'Photo is required' }}
-              options={{ handleImageChange, preview: publicImageUrl }}
+              options={{ handleImageChange }}
               type={'image'}
             />
           </HStack>

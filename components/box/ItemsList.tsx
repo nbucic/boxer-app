@@ -7,7 +7,7 @@ import {
 import { Box } from '@/types/box';
 import { Location } from '@/types/location';
 import { ComponentType, ReactElement } from 'react';
-import { Tool } from '@/types/tools';
+import { ToolWithBox } from '@/types/tools';
 import { SelectSearchable } from '@/types';
 
 interface ItemsListProps {
@@ -15,7 +15,7 @@ interface ItemsListProps {
   isRefetching?: boolean;
   refetch?: () => void;
   listHeaderComponent?: ComponentType<any> | ReactElement | null | undefined;
-  renderItem: ListRenderItem<Box | Location | Tool>;
+  renderItem: ListRenderItem<Box | Location | ToolWithBox>;
   listEmptyComponent?: ComponentType<any> | ReactElement | null | undefined;
   numColumns?: number;
 }

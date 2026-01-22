@@ -1,5 +1,5 @@
 import { Tool, ToolWithBox } from '@/types/tools';
-import React, { memo } from 'react';
+import React, { memo, useCallback } from 'react';
 import { useSharedValue } from 'react-native-reanimated';
 import {
   DenseGridView,
@@ -10,8 +10,9 @@ import { InfoItem } from '@/components/common/InfoItem';
 import { MapPinnedIcon, ScrollTextIcon } from 'lucide-react-native';
 import { VStack } from '@/components/ui/vstack';
 import { NameItem } from '@/components/common/NameItem';
+import { useFocusEffect } from 'expo-router';
 
-type ToolCardProps = { item: Tool | ToolWithBox } & (
+type ToolCardProps = { item: ToolWithBox } & (
   | LayoutListProps
   | LayoutGridProps
 );
@@ -19,6 +20,13 @@ type ToolCardProps = { item: Tool | ToolWithBox } & (
 export const ToolCard = memo((props: ToolCardProps) => {
   const isFlipped = useSharedValue(0);
   const { item: tool } = props;
+
+  useFocusEffect(
+    useCallback(() => {
+      isFlipped.value = 0;
+      return () => {};
+    }, [isFlipped])
+  );
 
   if (props.layout === 'list') {
     const properties: any = {
@@ -34,7 +42,7 @@ export const ToolCard = memo((props: ToolCardProps) => {
       <ListView
         {...properties}
         infotainment={
-          <VStack className={'gap-1'}>
+          <VStack space={'sm'}>
             <NameItem name={tool.name} key={'name'} />
             <InfoItem icon={MapPinnedIcon} text={tool.box.name} />
             {tool.description ? (
@@ -43,11 +51,10 @@ export const ToolCard = memo((props: ToolCardProps) => {
               <InfoItem
                 icon={ScrollTextIcon}
                 link={{
-                  pathname: '/tool/create',
+                  pathname: '/tool/[id]/edit',
                   params: { id: tool.id, focus: 'description' },
                 }}
                 linkText={'Add description?'}
-                className={'text-sm'}
               />
             )}
           </VStack>
@@ -64,6 +71,7 @@ export const ToolCard = memo((props: ToolCardProps) => {
     return (
       <DenseGridView
         item={tool}
+        itemType={'Tool'}
         isFlipped={isFlipped}
         actionableItems={actionableItems}
       />
