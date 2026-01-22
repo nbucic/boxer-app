@@ -56,12 +56,13 @@ export const FormField = <T extends FieldValues>({
   placeholder,
   rules,
   fieldRef,
-  options: PassedOptions = {},
+  options = {},
 }: RenderFieldProps<T>) => {
   const [showPassword, setShowPassword] = useState(false);
-  const RenderFieldContent = ({ onBlur, onChange, value, options }: any) => {
+  const RenderFieldContent = ({ onBlur, onChange, value }: any) => {
     switch (type) {
       case 'text': {
+        const textOptions = { ...options } as TextFieldOptions;
         return (
           <Input
             variant={'outline'}
@@ -73,15 +74,20 @@ export const FormField = <T extends FieldValues>({
               onBlur={onBlur}
               onChangeText={onChange}
               value={value}
-              className={'text-typography-900'}
+              className={clsx(
+                'text-typography-900',
+                !options?.isDisabled && 'bg-background-0'
+              )}
               type={
-                options.isSecuredField && !showPassword ? 'password' : 'text'
+                textOptions.isSecuredField && !showPassword
+                  ? 'password'
+                  : 'text'
               }
               autoCapitalize={'none'}
-              keyboardType={options.keyboardType as any}
+              keyboardType={textOptions.keyboardType as any}
               ref={fieldRef}
             />
-            {options.isSecuredField && (
+            {textOptions.isSecuredField && (
               <InputSlot
                 className={'pr-3'}
                 onPress={() => setShowPassword(!showPassword)}
@@ -107,12 +113,13 @@ export const FormField = <T extends FieldValues>({
         );
       }
       case 'image': {
+        const imageOptions = { ...options } as ImageFieldOptions;
         return (
           <>
             <Avatar
               avatarUrl={value}
-              onImageChange={options.handleImageChange}
-              type={options.type}
+              onImageChange={imageOptions.handleImageChange}
+              type={imageOptions.type}
             />
             {label && (
               <VStack className={'items-center'}>
@@ -128,10 +135,11 @@ export const FormField = <T extends FieldValues>({
         );
       }
       case 'location-dropdown': {
+        const locationDropDownOptions = { ...options } as BaseFieldOptions;
         return (
           <LocationSearchSelect
             onSelect={onChange}
-            disabled={options.isDisabled}
+            disabled={locationDropDownOptions.isDisabled}
             value={value}
             ref={fieldRef}
           />
@@ -149,7 +157,10 @@ export const FormField = <T extends FieldValues>({
         field: { onChange, onBlur, value },
         fieldState: { error },
       }) => (
-        <FormControl isInvalid={!!error}>
+        <FormControl
+          isInvalid={!!error}
+          isDisabled={options?.isDisabled || false}
+        >
           <VStack space={'xs'}>
             <FormControlLabel>
               <FormControlLabelText
@@ -159,7 +170,6 @@ export const FormField = <T extends FieldValues>({
               </FormControlLabelText>
             </FormControlLabel>
             <RenderFieldContent
-              options={{ PassedOptions }}
               value={value}
               onChange={onChange}
               onBlur={onBlur}

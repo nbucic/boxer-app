@@ -6,7 +6,7 @@ import { SearchSelectBase } from '@/components/form/SearchSelectBase';
 interface Props {
   value?: string | null; // location_id
   onSelect: (locationId: string | null) => void;
-  disabled: boolean;
+  disabled?: boolean;
 }
 
 export interface LocationSearchSelectRef {

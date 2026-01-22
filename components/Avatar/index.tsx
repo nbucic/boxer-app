@@ -139,6 +139,7 @@ const Avatar = ({ type = 'avatar', avatarUrl, onImageChange }: Props) => {
       }
 
       const image = result.assets[0];
+      debugger;
       onImageChange(image);
     } catch (e) {
       console.error('Error picking image:', e);

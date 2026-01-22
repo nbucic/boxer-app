@@ -3,7 +3,7 @@ import { Image, TouchableOpacity, View } from 'react-native';
 import { Action, ActionItem } from '@/components/swipeable/Action';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
 import { SwipeableMethods } from 'react-native-gesture-handler/ReanimatedSwipeable';
-import React, { memo, ReactElement, ReactNode } from 'react';
+import React, { memo, ReactElement, ReactNode, useRef } from 'react';
 import tw from 'twrnc';
 import clsx from 'clsx';
 import { HStack } from '@/components/ui/hstack';
@@ -33,6 +33,7 @@ type ListProps =
 
 export type SwipeablePropsItems = {
   setRef: (ref: SwipeableMethods | null) => void;
+  onSwipeStart: (ref: SwipeableMethods | null) => void;
   renderLeftActions?: ActionItem[];
   renderRightActions?: ActionItem[];
 };
@@ -116,10 +117,15 @@ export const ListView = memo((props: ListViewProps) => {
 
   if (props.listType === 'swipeable') {
     const swipeProperties = props.swipeProperties;
+    const rowRef = useRef<SwipeableMethods | null>(null);
     return (
       <Swipeable
         containerStyle={tw.style(borderAndMargins)}
-        ref={swipeProperties.setRef}
+        ref={(ref) => {
+          rowRef.current = ref;
+          swipeProperties.setRef(ref);
+        }}
+        onSwipeableWillOpen={() => swipeProperties.onSwipeStart(rowRef.current)}
         overshootFriction={8}
         leftThreshold={80}
         rightThreshold={80}

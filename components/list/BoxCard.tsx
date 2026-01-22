@@ -39,8 +39,8 @@ export const BoxCard = memo((props: BoxCardProps) => {
       <ListView
         {...properties}
         infotainment={
-          <VStack className={'gap-1 justify-between'}>
-            <NameItem name={box.name} key={'name'} className={'p-3'} />
+          <VStack space={'sm'}>
+            <NameItem name={box.name} key={'name'} />
             <InfoItem
               icon={MapPinnedIcon}
               text={box.location?.name}

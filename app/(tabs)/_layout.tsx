@@ -61,7 +61,7 @@ export default function TabLayout() {
         tabBarShowLabel: false,
         tabBarStyle: tw.style(
           'bg-background-0',
-          'h-10 border-t border-outline-100 shadow-sm'
+          'h-11 border-t border-outline-100 shadow-sm'
         ),
         tabBarActiveTintColor: tw.color('primary-500'),
         tabBarInactiveTintColor: tw.color('typography-400'),
