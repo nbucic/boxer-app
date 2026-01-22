@@ -32,7 +32,7 @@ export const LocationSearchSelect = forwardRef<LocationSearchSelectRef, Props>(
         }}
         disabled={disabled}
         title={'Search for a location...'}
-        placeholder={'Select a location'}
+        placeholder={'Filter locations'}
         ref={ref}
       />
     );

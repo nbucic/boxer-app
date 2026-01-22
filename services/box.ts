@@ -147,7 +147,10 @@ export const updateBox = async (
   id: string,
   formData: BoxFormData
 ): Promise<void> => {
-  const extractedData = await handleNewImageIfAny({ id, data: formData });
+  const { photo_added, ...extractedData } = await handleNewImageIfAny({
+    id,
+    data: formData,
+  });
 
   const { error } = await supabase
     .from(TABLE_NAME)

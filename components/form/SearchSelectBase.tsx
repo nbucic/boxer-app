@@ -5,12 +5,10 @@ import React, {
   useState,
 } from 'react';
 import {
-  ActivityIndicator,
   FlatList,
   KeyboardAvoidingView,
   Modal,
   Platform,
-  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -23,6 +21,8 @@ import { Button, ButtonText } from '@/components/ui/button';
 import { useQuery } from '@tanstack/react-query';
 import { SelectSearchable } from '@/types';
 import clsx from 'clsx';
+import { Input, InputField, InputIcon, InputSlot } from '@/components/ui/input';
+import { DataLoader } from '@/components/layout/DataLoader';
 
 const INITIAL_BOXES_SHOWN = 5;
 
@@ -101,10 +101,11 @@ export const SearchSelectBase = forwardRef<
         <TouchableOpacity
           activeOpacity={0.7}
           className={clsx(
-            'flex-row items-center h-12 px-4 rounded-xl border',
-            'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800',
-            modalVisible && 'border-blue-500 ring-1 ring-blue-500',
-            disabled && 'opacity-50 bg-gray-100'
+            'border-outline-100 bg-background-0',
+            'border-background-300 flex-row overflow-hidden content-center items-center',
+            'h-11 rounded border px-3',
+            modalVisible && 'border-primary-500 shadow-soft-1',
+            disabled && 'opacity-50 bg-background-50'
           )}
           onPress={() => {
             setModalVisible(true);
@@ -113,9 +114,9 @@ export const SearchSelectBase = forwardRef<
         >
           <Text
             className={clsx(
-              'flex-1 text-base',
-              value ? 'text-gray-900 dark:text-white' : 'text-gray-400',
-              'overflow-hidden overflow-ellipsis whitespace-nowrap'
+              'flex-1 text-lg web:outline-0',
+              value ? 'text-typography-900' : 'text-typography-400',
+              'web:data-[disabled=true]:cursor-not-allowed overflow-hidden overflow-ellipsis whitespace-nowrap'
             )}
             {...(Platform.OS === 'android' && {
               numberOfLines: 1,
@@ -125,10 +126,7 @@ export const SearchSelectBase = forwardRef<
             {value || placeholder}
           </Text>
           {!disabled && (
-            <ChevronDownIcon
-              size={20}
-              className={'text-gray-400 dark:text-gray-500'}
-            />
+            <ChevronDownIcon size={20} className={'text-typography-400'} />
           )}
         </TouchableOpacity>
 
@@ -139,96 +137,87 @@ export const SearchSelectBase = forwardRef<
           onRequestClose={() => setModalVisible(false)}
         >
           <KeyboardAvoidingView
-            behavior={'height'}
-            className={'flex-1 justify-end bg-black/60'}
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            className={
+              'flex-1 bg-background-900/40 backdrop-blur-xl justify-end'
+            }
           >
             <VStack
               className={
-                'bg-white dark:bg-gray-900 rounded-t-[32px] h-[80%] shadow-2xl'
+                'bg-background-0 rounded-t-3xl border-t border-outline-50 pb-safe shadow-2xl px-6'
               }
             >
-              {/* Header */}
+              {/* Handle bar for visual cue */}
               <View className={'items-center pt-3 pb-1'}>
-                <View
-                  className={
-                    'w-12 h-1.5 rounded-full bg-gray-200 dark:bg-gray-700'
-                  }
-                />
+                <View className={'w-12 h-1.5 bg-outline-200 rounded-full'} />
               </View>
 
-              <HStack className={'justify-between items-center px-6 py-4'}>
-                <Heading
-                  size={'md'}
-                  className={'text-gray-900 dark:text-white'}
-                >
-                  {title}
-                </Heading>
+              {/* Header */}
+              <HStack className={'justify-between items-center py-4'}>
+                <VStack>
+                  <Heading size={'xl'} className={'text-typography-900'}>
+                    {title}
+                  </Heading>
+                </VStack>
                 <TouchableOpacity
                   onPress={() => setModalVisible(false)}
-                  className={'p-2 rounded-full bg-gray-100 dark:bg-gray-800'}
+                  className={'bg-background-100 p-2 rounded-full'}
                 >
-                  <XIcon size={20} className={'text-gray-500'} />
+                  <XIcon size={20} className={'text-typography-600'} />
                 </TouchableOpacity>
               </HStack>
 
-              {/* Search bar container */}
-              <View className={'px-6 py-4'}>
-                <HStack
-                  className={
-                    'items-center px-5 rounded-xl bg-gray-100 dark:bg-gray-900 border border-background-300'
-                  }
+              {/* Search bar - glossy card style */}
+              <View className={'py-2'}>
+                <Input
+                  variant={'outline'}
+                  size={'lg'}
+                  className={'border-outline-100'}
                 >
-                  <SearchIcon size={18} className={'text-gray-400'} />
-                  <TextInput
-                    className={
-                      'flex-1 h-11 ml-3 text-base text-gray-900 dark:text-white'
-                    }
+                  <InputSlot className={'p-3'}>
+                    <InputIcon as={SearchIcon} />
+                  </InputSlot>
+                  <InputField
                     placeholder={placeholder}
-                    placeholderTextColor={'#9ca3af'}
                     value={search}
                     onChangeText={setSearch}
                     autoFocus={true}
                   />
                   {search.length > 0 && (
-                    <TouchableOpacity onPress={() => setSearch('')}>
-                      <XIcon size={16} className={'text-gray-400'} />
-                    </TouchableOpacity>
+                    <InputSlot className={'p-3'} onPress={() => setSearch('')}>
+                      <InputIcon as={XIcon} />
+                    </InputSlot>
                   )}
-                </HStack>
+                </Input>
               </View>
 
-              {/* List content */}
+              {/* Results list */}
               <View className={'flex-1'}>
                 {isFetching && search.length > 0 ? (
-                  <ActivityIndicator className={'mt-10'} color={'#3b82f6'} />
+                  <DataLoader />
                 ) : (
                   <FlatList
                     data={data}
-                    contentContainerClassName={'px-6 py-4'}
                     keyExtractor={(item) => item.id.toString()}
                     renderItem={({ item }: { item: SelectSearchable }) => (
                       <TouchableOpacity
                         onPress={() => handleSelection(item.id)}
                         className={
-                          'py-2 border-b border-gray-100 dark:border-gray-800 active:bg-gray-50 dark:active:bg-gray-800'
+                          'p-4 border-b border-outline-50 active:bg-background-50 hover:bg-background-50'
                         }
                       >
-                        <Text
-                          className={
-                            'text-base text-gray-700 dark:text-gray-300'
-                          }
-                        >
+                        <Text className={'text-lg text-typography-700'}>
                           {item.name}
                         </Text>
                       </TouchableOpacity>
                     )}
                     ListEmptyComponent={
                       !isFetching ? (
-                        <View className={'items-center mt-10'}>
-                          <Text className={'text-gray-400'}>
+                        <VStack className={'items-center mt-10 space-y-2'}>
+                          <Text className={'text-typography-400'}>
                             No results found
                           </Text>
-                        </View>
+                        </VStack>
                       ) : null
                     }
                   />
@@ -236,31 +225,22 @@ export const SearchSelectBase = forwardRef<
               </View>
 
               {/* Footer */}
-              <HStack
-                space={'md'}
-                className={clsx(
-                  'p-6 border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900',
-                  'justify-between'
-                )}
-              >
+              <HStack space={'md'} className={'justify-between py-4'}>
                 <Button
                   variant={'outline'}
-                  className={
-                    'flex-1 border-gray-200 dark:border-gray-700 h-12 rounded-xl max-w-40'
-                  }
+                  size={'lg'}
+                  className={'border-outline-200 rounded'}
                   onPress={() => handleSelection(null)}
                 >
-                  <ButtonText className={'text-red-500'}>
+                  <ButtonText className={'text-error-500 font-bold'}>
                     Clear selection
                   </ButtonText>
                 </Button>
                 <Button
-                  className={
-                    'flex-1 bg-gray-900 dark:bg-white h-12 rounded-xl max-w-40'
-                  }
+                  className={'bg-primary-500 rounded shadow-soft-1'}
                   onPress={() => setModalVisible(false)}
                 >
-                  <ButtonText className={'text-white dark:text-black'}>
+                  <ButtonText className={'text-white font-bold'}>
                     Cancel
                   </ButtonText>
                 </Button>

@@ -76,6 +76,7 @@ const RoundedBox = ({
             source={{ uri }}
             accessibilityLabel={'image'}
             className={'w-full h-full'}
+            resizeMode={'contain'}
           />
         ) : (
           <View className={'flex-1 justify-center items-center'}>

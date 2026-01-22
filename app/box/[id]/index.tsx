@@ -1,7 +1,7 @@
-import { useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { getBox } from '@/services/box';
-import { Text } from 'react-native';
+import { Image, Text, View } from 'react-native';
 import { VStack } from '@/components/ui/vstack';
 import { fetchAllTools } from '@/services/tool';
 import { ToolCard } from '@/components/list/ToolCard';
@@ -13,6 +13,7 @@ import { DataLoader } from '@/components/layout/DataLoader';
 import { DataError } from '@/components/layout/DataError';
 import { ScreenContainer } from '@/components/layout/ScreenContainer';
 import { EmptyList } from '@/components/list/EmptyList';
+import { FAB } from '@/components/common/FAB';
 
 export default function BoxDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -70,17 +71,15 @@ export default function BoxDetailsScreen() {
         </Text>
       )}
       <VStack className="flex-1 gap-4">
-        {/*
         {box?.image_url ? (
           <Image
             source={{ uri: box.image_url }}
             className={'w-full aspect-square rounded-lg'}
-            resizeMode={'cover'}
+            resizeMode={'contain'}
           />
         ) : (
           <View className={'w-full h-full rounded-lg bg-neutral-200'} />
         )}
-*/}
         <ItemsList
           data={tools || []}
           renderItem={({ item }) => (
@@ -104,6 +103,7 @@ export default function BoxDetailsScreen() {
           }
         />
       </VStack>
+      <FAB onPress={() => router.push(`/tool/create?boxId=${id}`)} />
     </ScreenContainer>
   );
 }

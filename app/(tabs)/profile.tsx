@@ -1,7 +1,7 @@
 import { Alert, Platform, Pressable, RefreshControl, View } from 'react-native';
 import { Icon } from '@/components/ui/icon';
 import { VStack } from '@/components/ui/vstack';
-import { Controller, useForm } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { Text } from '@/components/ui/text';
 import {
   getCurrentUser,
@@ -14,7 +14,6 @@ import { Button, ButtonText } from '@/components/ui/button';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useState } from 'react';
 import { ImagePickerAsset } from 'expo-image-picker';
-import Avatar from '@/components/Avatar';
 import { Computer, Moon, Smartphone, Sun } from 'lucide-react-native';
 import { Divider } from '@/components/ui/divider';
 import { supabase } from '@/lib/supabase';
@@ -34,7 +33,7 @@ type ProfileFormData = User & {
 };
 
 export default function Profile() {
-  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [publicImageUrl, setPublicImageUrl] = useState<string | null>(null);
   const queryClient = useQueryClient();
   const { setColorScheme, colorScheme } = useColorScheme();
 
@@ -70,13 +69,13 @@ export default function Profile() {
   useEffect(() => {
     if (data) {
       reset({ ...data, new_avatar_asset: null });
-      setAvatarPreview(data.avatar_url);
+      setPublicImageUrl(data.avatar_url);
     }
   }, [data, reset]);
 
   const handleImageChange = (image: ImagePickerAsset) => {
     setValue('new_avatar_asset', image, { shouldDirty: true });
-    setAvatarPreview(image.uri);
+    setPublicImageUrl(image.uri);
   };
 
   const onUpdateProfile = (formData: ProfileFormData) => {
@@ -124,15 +123,12 @@ export default function Profile() {
       <VStack space={'xl'} className={'px-6'}>
         <GlassCard title={'Account Information'}>
           <HStack className={'justify-center py-2'}>
-            <Controller
+            <FormField
               control={control}
-              name="new_avatar_asset"
-              render={() => (
-                <Avatar
-                  avatarUrl={avatarPreview}
-                  onImageChange={handleImageChange}
-                />
-              )}
+              name={'new_avatar_asset'}
+              rules={{ required: 'Photo is required' }}
+              options={{ handleImageChange, preview: publicImageUrl }}
+              type={'image'}
             />
           </HStack>
 
@@ -142,7 +138,7 @@ export default function Profile() {
               name={'email'}
               label={'Email address'}
               placeholder={'email@example.com'}
-              isDisabled={true}
+              options={{ isDisabled: true }}
             />
 
             <FormField
