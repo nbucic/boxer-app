@@ -4,7 +4,7 @@ import { getLocation, getLocations } from '@/services/location';
 import { SearchSelectBase } from '@/components/form/SearchSelectBase';
 
 interface Props {
-  value?: string | null; // location_id
+  value?: string | null;
   onSelect: (locationId: string | null) => void;
   disabled?: boolean;
 }

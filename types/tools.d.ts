@@ -21,6 +21,5 @@ export type Tool = SelectSearchable &
 export type ToolWithBox = Tool & { box: BoxDetails };
 
 export type ToolFormData = ToolBase & {
-  new_tool_asset?: ImagePickerAsset | null;
-  photo_added: boolean;
+  new_asset?: ImagePickerAsset | null;
 };

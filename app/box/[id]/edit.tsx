@@ -1,14 +1,13 @@
-import { VStack } from '@/components/ui/vstack';
-import { Alert, TextInput } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useForm } from 'react-hook-form';
-import { HStack } from '@/components/ui/hstack';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createNewBox, getBoxEditData, updateBox } from '@/services/box';
-import { BoxFormData } from '@/types/box';
-import { useEffect, useRef } from 'react';
+import { TextInput } from 'react-native';
+import { VStack } from '@/components/ui/vstack';
 import { ImagePickerAsset } from 'expo-image-picker';
-import { LocationSearchSelectRef } from '@/components/form/LocationSearchSelect';
+import { useEffect, useRef } from 'react';
+import { useForm } from 'react-hook-form';
+import { BoxFormData } from '@/types/box';
+import { showAlert } from '@/lib/helpers/alert';
 import { ListHeader } from '@/components/list/ListHeader';
 import { DataLoader } from '@/components/layout/DataLoader';
 import { DataError } from '@/components/layout/DataError';
@@ -16,6 +15,7 @@ import { ScreenContainer } from '@/components/layout/ScreenContainer';
 import { GlassCard } from '@/components/layout/GlassCard';
 import { FormField } from '@/components/common/FormField';
 import { FormActions } from '@/components/form/FormActions';
+import { LocationSearchSelectRef } from '@/components/form/LocationSearchSelect';
 
 export default function EditBoxScreen() {
   const {
@@ -96,22 +96,15 @@ export default function EditBoxScreen() {
       router.navigate('/boxes');
     },
     onError: (e: Error) => {
-      Alert.alert(
-        'Error',
-        `Failed to ${isEditMode ? 'update' : 'create'} box: ${e.message}`
-      );
+      showAlert({
+        title: 'Error',
+        message: `Failed to ${isEditMode} ? 'update' : 'create'} tool: ${e.message}`,
+      });
     },
   });
 
-  // Effect to set the public image URL when existingBox data is available
-  useEffect(() => {
-    if (existingBox) {
-      reset({ ...existingBox, new_box_asset: null });
-    }
-  }, [existingBox, reset]);
-
   const handleImageChange = (image: ImagePickerAsset) => {
-    setValue('new_box_asset', image, { shouldDirty: true });
+    setValue('new_asset', image, { shouldDirty: true });
     setValue('image_url', image.uri, { shouldDirty: true });
   };
 
@@ -141,51 +134,46 @@ export default function EditBoxScreen() {
     >
       <VStack space={'2xl'}>
         <GlassCard>
-          <HStack className={'justify-center py-2'}>
-            <FormField
-              control={control}
-              name={'image_url'}
-              rules={{ required: 'Photo is required' }}
-              label={'Box photo'}
-              options={{
-                handleImageChange,
-                type: 'box',
-              }}
-              type={'image'}
-            />
-          </HStack>
+          <FormField
+            control={control}
+            name={'image_url'}
+            rules={{ required: 'Photo is required' }}
+            label={'Box photo'}
+            options={{
+              handleImageChange,
+              type: 'box',
+            }}
+            type={'image'}
+          />
 
-          <VStack space={'xl'}>
-            <FormField
-              control={control}
-              name={'name'}
-              label={'Name the box'}
-              placeholder={'Wrenches box'}
-              rules={{ required: 'Name is required' }}
-            />
+          <FormField
+            control={control}
+            name={'name'}
+            label={'Name the box'}
+            placeholder={'Wrenches box'}
+            rules={{ required: 'Name is required' }}
+          />
 
-            <FormField
-              control={control}
-              name={'location_id'}
-              label={'Location'}
-              rules={{ required: 'Store this box somewhere 🤷' }}
-              options={{
-                // isDisabled: true,
-                isDisabled: !!locationId,
-              }}
-              type={'location-dropdown'}
-              fieldRef={locationInputRef}
-            />
+          <FormField
+            control={control}
+            name={'location_id'}
+            label={'Location'}
+            rules={{ required: 'Store this box somewhere 🤷' }}
+            options={{
+              isDisabled: !!locationId,
+            }}
+            type={'location-dropdown'}
+            fieldRef={locationInputRef}
+          />
 
-            <FormField
-              control={control}
-              name={'description'}
-              label={'Brief description (optional)'}
-              placeholder={"Briefly describe the box you're creating "}
-              type={'text-area'}
-              fieldRef={descriptionInputRef}
-            />
-          </VStack>
+          <FormField
+            control={control}
+            name={'description'}
+            label={'Brief description (optional)'}
+            placeholder={"Briefly describe the box you're creating "}
+            type={'text-area'}
+            fieldRef={descriptionInputRef}
+          />
         </GlassCard>
 
         <FormActions
