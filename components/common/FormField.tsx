@@ -17,6 +17,7 @@ import Avatar from '@/components/Avatar';
 import { ImagePickerAsset } from 'expo-image-picker';
 import { Text } from 'react-native';
 import { LocationSearchSelect } from '@/components/form/LocationSearchSelect';
+import { BoxSearchSelect } from '@/components/form/BoxSearchSelect';
 
 interface BaseFieldOptions {
   isDisabled?: boolean;
@@ -115,23 +116,11 @@ export const FormField = <T extends FieldValues>({
       case 'image': {
         const imageOptions = { ...options } as ImageFieldOptions;
         return (
-          <>
-            <Avatar
-              avatarUrl={value}
-              onImageChange={imageOptions.handleImageChange}
-              type={imageOptions.type}
-            />
-            {label && (
-              <VStack className={'items-center'}>
-                <Text className={'text-sm font-semibold text-typography-700'}>
-                  {label}
-                </Text>
-                <Text className={'text-xs text-typography-500'}>
-                  Tap to change the image
-                </Text>
-              </VStack>
-            )}
-          </>
+          <Avatar
+            avatarUrl={value}
+            onImageChange={imageOptions.handleImageChange}
+            type={imageOptions.type}
+          />
         );
       }
       case 'location-dropdown': {
@@ -142,6 +131,16 @@ export const FormField = <T extends FieldValues>({
             disabled={locationDropDownOptions.isDisabled}
             value={value}
             ref={fieldRef}
+          />
+        );
+      }
+      case 'box-dropdown': {
+        const boxDropDownOptions = { ...options } as BaseFieldOptions;
+        return (
+          <BoxSearchSelect
+            onSelect={onChange}
+            disabled={boxDropDownOptions.isDisabled}
+            value={value}
           />
         );
       }
@@ -162,18 +161,42 @@ export const FormField = <T extends FieldValues>({
           isDisabled={options?.isDisabled || false}
         >
           <VStack space={'xs'}>
-            <FormControlLabel>
-              <FormControlLabelText
-                className={'text-typography-600 font-medium ml-1 font-sans'}
-              >
-                {label}
-              </FormControlLabelText>
-            </FormControlLabel>
+            {type !== 'image' && (
+              <FormControlLabel>
+                <FormControlLabelText
+                  className={
+                    'text-sm font-sans font-medium text-typography-700 ml-1'
+                  }
+                >
+                  {label}
+                </FormControlLabelText>
+              </FormControlLabel>
+            )}
             <RenderFieldContent
               value={value}
               onChange={onChange}
               onBlur={onBlur}
             />
+            {type === 'image' && (
+              <FormControlLabel className={'justify-center'}>
+                <FormControlLabelText
+                  className={
+                    'text-sm font-sans font-medium text-typography-700'
+                  }
+                >
+                  <VStack className={'items-center'}>
+                    <Text
+                      className={'text-sm font-semibold text-typography-700'}
+                    >
+                      {label}
+                    </Text>
+                    <Text className={'text-xs text-typography-500'}>
+                      Tap to change the image
+                    </Text>
+                  </VStack>
+                </FormControlLabelText>
+              </FormControlLabel>
+            )}
             {error && (
               <FormControlError>
                 <FormControlErrorIcon as={AlertCircleIcon} />

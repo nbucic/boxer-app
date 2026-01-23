@@ -32,11 +32,12 @@ interface Props<T> {
   searchQuery: {
     queryKey: string;
     queryFn: ({
-      search,
-      limit,
+      filter: { search, limit },
     }: {
-      search?: string;
-      limit?: number;
+      filter: {
+        search?: string;
+        limit?: number;
+      };
     }) => Promise<T[]>;
   };
   disabled: boolean;
@@ -82,12 +83,13 @@ export const SearchSelectBase = forwardRef<
 
     const { data, isFetching } = useQuery({
       queryKey: [searchQuery.queryKey, debouncedSearch],
-      queryFn: () => {
-        return searchQuery.queryFn({
-          search: debouncedSearch,
-          limit: INITIAL_BOXES_SHOWN,
-        });
-      },
+      queryFn: () =>
+        searchQuery.queryFn({
+          filter: {
+            search: debouncedSearch,
+            limit: INITIAL_BOXES_SHOWN,
+          },
+        }),
       initialData: [],
     });
 
@@ -178,7 +180,7 @@ export const SearchSelectBase = forwardRef<
                     <InputIcon as={SearchIcon} />
                   </InputSlot>
                   <InputField
-                    placeholder={placeholder}
+                    placeholder={'Filter items ...'}
                     value={search}
                     onChangeText={setSearch}
                     autoFocus={true}

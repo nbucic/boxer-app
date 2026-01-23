@@ -43,7 +43,7 @@ export default function ToolDetailsScreen() {
       scrollable={false}
       header={
         <ListHeader
-          title={tool.name + '-'}
+          title={tool.name}
           subtitle={tool.description || undefined}
           subtitleIcon={ScrollTextIcon}
           backButton={'/'}

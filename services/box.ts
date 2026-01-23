@@ -1,44 +1,93 @@
 import { supabase } from '@/lib/supabase';
-import { Platform } from 'react-native';
 import {
-  getBoxStorageInformation,
   getSignedUrlForImage,
   handleImageUploadToTheBucket,
 } from '@/lib/helpers/supabase/storage';
 import { Box, BoxFormData } from '@/types/box';
 import { handleErrors } from '@/lib/helpers/supabase';
-import { createCommonSearchQuery } from '@/services/index';
+import { PostgrestError } from '@supabase/supabase-js';
 
 const TABLE_NAME = 'boxes';
 const BUCKET_NAME = 'boxes';
 const squareImageOptions = { width: 300, height: 300 };
 
-type fetchBoxesFilterProp = {
+type filterProp = {
   location?: string;
+  search?: string;
+  limit?: number;
 };
 
-export const fetchAllBoxes = async ({
-  filter,
+type optionsProp = {
+  includeLocation?: boolean;
+};
+
+export const getBox = async (
+  id: string,
+  includeLocation: boolean = true
+): Promise<Box> => {
+  let selection = ['*'];
+  if (includeLocation) {
+    selection.push('location:locations (id, name)');
+  }
+  const {
+    data,
+    error,
+  }: { data: any; error: null } | { data: any; error: PostgrestError } =
+    await supabase
+      .from(TABLE_NAME)
+      .select(selection.join(', '))
+      .eq('id', id)
+      .single();
+
+  handleErrors(error, 'Get box error:');
+
+  return {
+    ...data,
+    image_url: await getSignedUrlForImage({
+      url: data.image_url,
+      bucket: BUCKET_NAME,
+      options: squareImageOptions,
+    }),
+  };
+};
+
+export const getBoxEditData = async (id: string) => getBox(id, false);
+
+export const getBoxes = async ({
+  filter = {},
+  options = { includeLocation: false },
 }: {
-  filter?: fetchBoxesFilterProp;
+  filter?: filterProp;
+  options?: optionsProp;
 }): Promise<Box[]> => {
+  const { location, search, limit } = filter;
+  const { includeLocation = false } = options;
+  let selectColumns = ['*'];
+  if (includeLocation) {
+    selectColumns.push('location:locations (id, name)');
+  }
   let query = supabase
     .from(TABLE_NAME)
-    .select(
-      `
-    *,
-    location:locations (
-      id,
-      name
-    )`
-    )
+    .select(selectColumns.join(', '))
     .order('updated_at', { ascending: false });
 
-  if (filter?.location) {
-    query = query.eq('location_id', filter.location);
+  if (location) {
+    query = query.eq('location_id', location);
   }
 
-  const { data, error } = await query;
+  if (search) {
+    query = query.or(`name.ilike.%${search}%,description.ilike.%${search}%`);
+  }
+
+  if (limit) {
+    query = query.limit(limit);
+  }
+
+  const {
+    data,
+    error,
+  }: { data: any; error: null } | { data: null; error: PostgrestError } =
+    await query;
 
   handleErrors(error, 'Fetch all boxes error:');
 
@@ -59,63 +108,8 @@ export const fetchAllBoxes = async ({
   );
 };
 
-export const getBox = async (
-  id: string,
-  includeLocation: boolean = true
-): Promise<Box> => {
-  let selection = '*';
-  if (includeLocation) {
-    selection = `
-    *,
-    location:locations (
-      id,
-      name
-    )`;
-  }
-  const { data, error }: { data: any; error: any | undefined } = await supabase
-    .from(TABLE_NAME)
-    .select(selection)
-    .eq('id', id)
-    .single();
-
-  handleErrors(error, 'Get box error:');
-
-  return {
-    ...data,
-    image_url: await getSignedUrlForImage({
-      url: data.image_url,
-      bucket: BUCKET_NAME,
-      options: squareImageOptions,
-    }),
-  };
-};
-
-export const getBoxEditData = async (id: string): Promise<Box> => {
-  return getBox(id, false);
-};
-
-export const getBoxes = async ({
-  search,
-  limit,
-}: { search?: string; limit?: number } = {}): Promise<Box[]> => {
-  return createCommonSearchQuery(TABLE_NAME, search, limit);
-};
-
-export const getBoxWithoutLocation = async (id: string): Promise<Box> => {
-  const { data, error } = await supabase
-    .from(TABLE_NAME)
-    .select()
-    .eq('id', id)
-    .limit(1)
-    .single();
-
-  handleErrors(error, 'Get box without location:');
-
-  return data;
-};
-
 export const createNewBox = async (formData: BoxFormData): Promise<void> => {
-  const { new_box_asset, photo_added, ...data } = formData;
+  const { new_asset, ...data } = formData;
 
   const { data: supabaseResponse, error: createError } = await supabase
     .from(TABLE_NAME)
@@ -128,15 +122,15 @@ export const createNewBox = async (formData: BoxFormData): Promise<void> => {
   const boxId = supabaseResponse?.id;
 
   if (boxId) {
-    const uploadedImagePath = await handleImageUploadToTheBucket({
+    const image_url = await handleImageUploadToTheBucket({
       id: boxId,
-      asset: new_box_asset!,
+      asset: new_asset!,
       bucket: BUCKET_NAME,
     });
 
     const { error: upsertError } = await supabase
       .from(TABLE_NAME)
-      .update({ image_url: uploadedImagePath })
+      .update({ image_url: image_url })
       .eq('id', boxId);
 
     handleErrors(upsertError, 'Updating the box with the image error:');
@@ -147,15 +141,17 @@ export const updateBox = async (
   id: string,
   formData: BoxFormData
 ): Promise<void> => {
-  const { photo_added, ...extractedData } = await handleNewImageIfAny({
-    id,
-    data: formData,
-  });
+  const { new_asset, ...data } = formData;
 
-  const { error } = await supabase
-    .from(TABLE_NAME)
-    .update(extractedData)
-    .eq('id', id);
+  if (new_asset) {
+    data.image_url = await handleImageUploadToTheBucket({
+      id,
+      asset: new_asset,
+      bucket: BUCKET_NAME,
+    });
+  }
+
+  const { error } = await supabase.from(TABLE_NAME).update(data).eq('id', id);
 
   handleErrors(error, 'Update box error:');
 };
@@ -164,44 +160,4 @@ export const deleteBox = async (id: string): Promise<void> => {
   const { error } = await supabase.from(TABLE_NAME).delete().eq('id', id);
 
   handleErrors(error, 'Cannot delete box:');
-};
-
-const handleNewImageIfAny = async ({
-  id,
-  data,
-}: {
-  id: string;
-  data: BoxFormData;
-}) => {
-  const { new_box_asset, ...extractedData } = data;
-
-  if (new_box_asset) {
-    const arrayBuffer = await fetch(new_box_asset.uri).then((res) =>
-      res.arrayBuffer()
-    );
-
-    const extension =
-      Platform.OS === 'web'
-        ? (new_box_asset.mimeType?.split('/')[1] ?? 'jpeg')
-        : (new_box_asset.uri?.split('.').pop()?.toLowerCase() ?? 'jpeg');
-
-    const { bucket, path } = await getBoxStorageInformation({
-      id,
-      extension,
-    });
-    const { data: uploadData, error: uploadError } = await supabase.storage
-      .from(bucket)
-      .upload(path as string, arrayBuffer, {
-        contentType: new_box_asset.mimeType ?? `image/${extension}`,
-        upsert: true,
-      });
-
-    handleErrors(uploadError, 'Image upload to the bucket error:');
-
-    extractedData.image_url = uploadData?.path;
-  } else {
-    delete extractedData.image_url;
-  }
-
-  return extractedData;
 };

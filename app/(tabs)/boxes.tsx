@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { deleteBox, fetchAllBoxes } from '@/services/box';
+import { deleteBox, getBoxes } from '@/services/box';
 import { useCallback, useState } from 'react';
 import { ItemsList } from '@/components/box/ItemsList';
 import { BoxCard } from '@/components/list/BoxCard';
@@ -28,7 +28,7 @@ export default function Boxes() {
     statusContent,
   } = useListScreen<BoxType>({
     queryKey: ['boxes'],
-    fetchDataFn: () => fetchAllBoxes({}),
+    fetchDataFn: () => getBoxes({}),
     deleteItemFn: deleteBox,
     layoutStorageKey: LAYOUT_STORAGE_KEY,
     itemName: 'Box',

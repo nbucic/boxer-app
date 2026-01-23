@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { getLocation } from '@/services/location';
 import { Text } from 'react-native';
 import { VStack } from '@/components/ui/vstack';
-import { fetchAllBoxes } from '@/services/box';
+import { getBoxes } from '@/services/box';
 import { BoxCard } from '@/components/list/BoxCard';
 import { BoxIcon, ScrollTextIcon } from 'lucide-react-native';
 import { ListHeader } from '@/components/list/ListHeader';
@@ -38,7 +38,11 @@ const LocationDetailsScreen = () => {
     error: boxesError,
   } = useQuery({
     queryKey: ['boxes', 'location', id],
-    queryFn: () => fetchAllBoxes({ filter: { location: id } }),
+    queryFn: () =>
+      getBoxes({
+        filter: { location: id },
+        options: { includeLocation: true },
+      }),
     enabled: !!id,
   });
 

@@ -1,23 +1,56 @@
-import { Tool, ToolFormData, ToolWithBox } from '@/types/tools';
 import { supabase } from '@/lib/supabase';
-import { handleErrors } from '@/lib/helpers/supabase';
 import {
   getSignedUrlForImage,
   handleImageUploadToTheBucket,
 } from '@/lib/helpers/supabase/storage';
+import { Tool, ToolFormData, ToolWithBox } from '@/types/tools';
+import { handleErrors } from '@/lib/helpers/supabase';
 
 const TABLE_NAME = 'tools';
 const BUCKET_NAME = 'tools';
 const squareImageOptions = { width: 300, height: 300 };
 
-type fetchToolsFilterProp = {
+type filterProp = {
   box?: string;
 };
 
-export const fetchAllTools = async ({
+export const getTool = async (
+  id: string,
+  includeBox: boolean = true
+): Promise<ToolWithBox> => {
+  let selection = '*';
+  if (includeBox) {
+    selection = `
+    *,
+    box:boxes (
+      id, 
+      name
+    )`;
+  }
+  const { data, error }: { data: any; error: any | undefined } = await supabase
+    .from(TABLE_NAME)
+    .select(selection)
+    .eq('id', id)
+    .single();
+
+  handleErrors(error, 'Get tool error:');
+
+  return {
+    ...data,
+    image_url: await getSignedUrlForImage({
+      url: data.image_url,
+      bucket: BUCKET_NAME,
+      options: squareImageOptions,
+    }),
+  };
+};
+
+export const getToolEditData = async (id: string) => await getTool(id, false);
+
+export const getTools = async ({
   filter,
 }: {
-  filter?: fetchToolsFilterProp;
+  filter?: filterProp;
 }): Promise<Tool[]> => {
   let query = supabase
     .from(TABLE_NAME)
@@ -54,43 +87,8 @@ export const fetchAllTools = async ({
   );
 };
 
-export const getTool = async (
-  id: string,
-  includeBox: boolean = true
-): Promise<ToolWithBox> => {
-  let selection = '*';
-  if (includeBox) {
-    selection = `
-    *,
-    box:boxes (
-      id, 
-      name
-    )`;
-  }
-  const { data, error }: { data: any; error: any | undefined } = await supabase
-    .from(TABLE_NAME)
-    .select(selection)
-    .eq('id', id)
-    .single();
-
-  handleErrors(error, 'Get tool error:');
-
-  return {
-    ...data,
-    image_url: await getSignedUrlForImage({
-      url: data.image_url,
-      bucket: BUCKET_NAME,
-      options: squareImageOptions,
-    }),
-  };
-};
-
-export const getToolEditData = async (id: string) => await getTool(id, false);
-
 export const createNewTool = async (formData: ToolFormData): Promise<void> => {
-  const { new_tool_asset, photo_added, ...data } = formData;
-
-  debugger;
+  const { new_asset, ...data } = formData;
 
   const { data: supabaseResponse, error: createError } = await supabase
     .from(TABLE_NAME)
@@ -103,15 +101,15 @@ export const createNewTool = async (formData: ToolFormData): Promise<void> => {
   const toolId = supabaseResponse?.id;
 
   if (toolId) {
-    const uploadedImagePath = await handleImageUploadToTheBucket({
+    const image_url = await handleImageUploadToTheBucket({
       id: toolId,
-      asset: new_tool_asset!,
+      asset: new_asset!,
       bucket: BUCKET_NAME,
     });
 
     const { error: upsertError } = await supabase
       .from(TABLE_NAME)
-      .update({ image_url: uploadedImagePath })
+      .update({ image_url: image_url })
       .eq('id', toolId);
 
     handleErrors(upsertError, 'Updating the tool with the image error:');
@@ -122,17 +120,21 @@ export const updateTool = async (
   id: string,
   formData: ToolFormData
 ): Promise<void> => {
-  const { new_tool_asset, photo_added, ...data } = formData;
-  if (new_tool_asset) {
+  debugger;
+  const { new_asset, ...data } = formData;
+
+  if (new_asset) {
     data.image_url = await handleImageUploadToTheBucket({
-      id,
-      asset: new_tool_asset,
-      bucket: process.env.EXPO_PUBLIC_SUPABASE_STORAGE_TOOLS_BUCKET!,
+      id: id,
+      asset: new_asset,
+      bucket: BUCKET_NAME,
     });
   }
 
+  debugger;
   const { error } = await supabase.from(TABLE_NAME).update(data).eq('id', id);
 
+  debugger;
   handleErrors(error, 'Update tool error:');
 };
 

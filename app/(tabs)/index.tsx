@@ -1,7 +1,7 @@
 import { router } from 'expo-router';
 import { ItemsList } from '@/components/box/ItemsList';
 import { ListHeader } from '@/components/list/ListHeader';
-import { deleteTool, fetchAllTools } from '@/services/tool';
+import { deleteTool, getTools } from '@/services/tool';
 import { ToolCard } from '@/components/list/ToolCard';
 import { Tool, ToolWithBox } from '@/types/tools';
 import { EmptyList } from '@/components/list/EmptyList';
@@ -26,7 +26,7 @@ export default function Index() {
     statusContent,
   } = useListScreen<Tool>({
     queryKey: ['tools'],
-    fetchDataFn: () => fetchAllTools({}),
+    fetchDataFn: () => getTools({}),
     deleteItemFn: deleteTool,
     layoutStorageKey: LAYOUT_STORAGE_KEY,
     itemName: 'Tool',

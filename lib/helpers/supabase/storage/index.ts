@@ -14,23 +14,6 @@ interface IAvatarStorageInformationResponse {
   path?: string;
 }
 
-export const getBoxStorageInformation = async ({
-  id,
-  extension,
-}: {
-  id: string;
-  extension: string;
-}): Promise<{ bucket: string; path: string }> => {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  return {
-    bucket: process.env.EXPO_PUBLIC_SUPABASE_STORAGE_BOXES_BUCKET!,
-    path: `${user?.id}/${id}.${extension}`,
-  };
-};
-
 const getBucketPrefixPath = async () => {
   const {
     data: { user },

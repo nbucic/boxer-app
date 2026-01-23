@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { getBox } from '@/services/box';
 import { Image, Text, View } from 'react-native';
 import { VStack } from '@/components/ui/vstack';
-import { fetchAllTools } from '@/services/tool';
+import { getTools } from '@/services/tool';
 import { ToolCard } from '@/components/list/ToolCard';
 import { ListHeader } from '@/components/list/ListHeader';
 import { BoxIcon, ScrollTextIcon } from 'lucide-react-native';
@@ -38,7 +38,7 @@ export default function BoxDetailsScreen() {
     error: toolsError,
   } = useQuery({
     queryKey: ['tools', 'box', id],
-    queryFn: () => fetchAllTools({ filter: { box: id } }),
+    queryFn: () => getTools({ filter: { box: id } }),
     enabled: !!id,
   });
 

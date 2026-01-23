@@ -1,12 +1,12 @@
 import { forwardRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { getBoxes, getBoxWithoutLocation } from '@/services/box';
+import { getBox, getBoxes } from '@/services/box';
 import { SearchSelectBase } from '@/components/form/SearchSelectBase';
 
 interface Props {
   value?: string | null;
   onSelect: (boxId: string | null) => void;
-  disabled: boolean;
+  disabled?: boolean;
 }
 
 export interface BoxSearchSelectRef {
@@ -18,7 +18,7 @@ export const BoxSearchSelect = forwardRef<BoxSearchSelectRef, Props>(
   ({ value, onSelect, disabled = false }, ref) => {
     const { data: selectedBox } = useQuery({
       queryKey: ['box', value],
-      queryFn: () => getBoxWithoutLocation(value!),
+      queryFn: () => getBox(value!),
       enabled: !!value,
     });
 
