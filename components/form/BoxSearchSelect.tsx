@@ -1,6 +1,6 @@
 import { forwardRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { getBox, getBoxes } from '@/services/box';
+import { boxService } from '@/services/box';
 import { SearchSelectBase } from '@/components/form/SearchSelectBase';
 
 interface Props {
@@ -18,7 +18,7 @@ export const BoxSearchSelect = forwardRef<BoxSearchSelectRef, Props>(
   ({ value, onSelect, disabled = false }, ref) => {
     const { data: selectedBox } = useQuery({
       queryKey: ['box', value],
-      queryFn: () => getBox(value!),
+      queryFn: () => boxService.get(value!),
       enabled: !!value,
     });
 
@@ -27,8 +27,8 @@ export const BoxSearchSelect = forwardRef<BoxSearchSelectRef, Props>(
         value={selectedBox?.name}
         onSelect={onSelect}
         searchQuery={{
-          queryKey: 'boxes',
-          queryFn: getBoxes,
+          queryKey: ['boxes'],
+          queryFn: boxService.getList,
         }}
         disabled={disabled}
         title={'Search for a box...'}
@@ -38,3 +38,5 @@ export const BoxSearchSelect = forwardRef<BoxSearchSelectRef, Props>(
     );
   }
 );
+
+BoxSearchSelect.displayName = 'Box Search Select';

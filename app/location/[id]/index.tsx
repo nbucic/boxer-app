@@ -1,9 +1,9 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
-import { getLocation } from '@/services/location';
+import { locationService } from '@/services/location';
 import { Text } from 'react-native';
 import { VStack } from '@/components/ui/vstack';
-import { getBoxes } from '@/services/box';
+import { boxService } from '@/services/box';
 import { BoxCard } from '@/components/list/BoxCard';
 import { BoxIcon, ScrollTextIcon } from 'lucide-react-native';
 import { ListHeader } from '@/components/list/ListHeader';
@@ -17,10 +17,6 @@ import { EmptyList } from '@/components/list/EmptyList';
 
 const LocationDetailsScreen = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
-  if (!id) {
-    router.replace('/');
-    return null;
-  }
 
   const {
     data: location,
@@ -28,7 +24,7 @@ const LocationDetailsScreen = () => {
     error: locationError,
   } = useQuery({
     queryKey: ['location', id],
-    queryFn: () => getLocation(id),
+    queryFn: () => locationService.get(id),
     enabled: !!id,
   });
 
@@ -39,10 +35,10 @@ const LocationDetailsScreen = () => {
   } = useQuery({
     queryKey: ['boxes', 'location', id],
     queryFn: () =>
-      getBoxes({
-        filter: { location: id },
-        options: { includeLocation: true },
-      }),
+      boxService.getList(
+        { location: id },
+        { include: 'location:locations (id, name)' }
+      ),
     enabled: !!id,
   });
 

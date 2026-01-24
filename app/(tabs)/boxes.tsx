@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { deleteBox, getBoxes } from '@/services/box';
+import { boxService } from '@/services/box';
 import { useCallback, useState } from 'react';
 import { ItemsList } from '@/components/box/ItemsList';
 import { BoxCard } from '@/components/list/BoxCard';
@@ -26,13 +26,17 @@ export default function Boxes() {
     closeTheSwipedRef,
     onSwipeStart,
     statusContent,
+    scrollOffset,
+    scrollHandler,
   } = useListScreen<BoxType>({
     queryKey: ['boxes'],
-    fetchDataFn: () => getBoxes({}),
-    deleteItemFn: deleteBox,
+    fetchDataFn: () =>
+      boxService.getList({}, { include: 'location:locations (id, name)' }),
+    deleteItemFn: (id: any) => boxService.delete(id),
     layoutStorageKey: LAYOUT_STORAGE_KEY,
     itemName: 'Box',
     loadingDataMessage: 'Getting your boxes ready ...',
+    hideFabWhenScrolling: true,
   });
 
   const [shareModalBox, setShareModalBox] = useState<BoxType | null>(null);
@@ -49,7 +53,8 @@ export default function Boxes() {
     statusContent() ?? (
       <ScreenContainer scrollable={false}>
         <ItemsList
-          data={data || []}
+          data={data}
+          onScroll={scrollHandler}
           renderItem={({ item }) => {
             return (
               <BoxCard
@@ -123,7 +128,10 @@ export default function Boxes() {
           />
         )}
 
-        <FAB onPress={() => router.push('/box/create')} />
+        <FAB
+          onPress={() => router.push('/box/create')}
+          scrollOffset={scrollOffset}
+        />
       </ScreenContainer>
     )
   );

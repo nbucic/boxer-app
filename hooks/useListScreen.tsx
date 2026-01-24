@@ -6,14 +6,19 @@ import { SwipeableMethods } from 'react-native-gesture-handler/ReanimatedSwipeab
 import { showAlert } from '@/lib/helpers/alert';
 import { DataLoader } from '@/components/layout/DataLoader';
 import { DataError } from '@/components/layout/DataError';
+import {
+  useAnimatedScrollHandler,
+  useSharedValue,
+} from 'react-native-reanimated';
 
 interface UseListScreenProps<T> {
   queryKey: string[];
   fetchDataFn: () => Promise<T[]>;
-  deleteItemFn: (id: string) => Promise<void>;
+  deleteItemFn: any;
   layoutStorageKey: string;
   itemName: string;
   loadingDataMessage: string;
+  hideFabWhenScrolling?: boolean;
 }
 
 export const useListScreen = <T extends { id: string; name: string }>(
@@ -26,12 +31,19 @@ export const useListScreen = <T extends { id: string; name: string }>(
     layoutStorageKey,
     itemName,
     loadingDataMessage = '',
+    hideFabWhenScrolling = false,
   } = props;
 
   const queryClient = useQueryClient();
   const activeSwipeableRef = useRef<SwipeableMethods | null>(null);
   const [layout, setLayout] = useState<Layout>('list');
   const [isLoadingLayout, setIsLoadingLayout] = useState<boolean>(true);
+  const scrollOffset = useSharedValue(0);
+  const scrollHandler = useAnimatedScrollHandler({
+    onScroll: (event) => {
+      scrollOffset.value = event.contentOffset.y;
+    },
+  });
 
   const { data, status, error, isFetching, refetch, isRefetching } = useQuery({
     queryKey: queryKey,
@@ -39,8 +51,8 @@ export const useListScreen = <T extends { id: string; name: string }>(
     placeholderData: (previousData) => previousData,
   });
 
-  const deleteMutation = useMutation({
-    mutationFn: deleteItemFn,
+  const { mutate } = useMutation({
+    mutationFn: (id: string) => deleteItemFn(id),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: queryKey });
     },
@@ -81,10 +93,10 @@ export const useListScreen = <T extends { id: string; name: string }>(
         title: `Delete ${itemName}`,
         message: `Are you sure you want to delete ${name}?`,
         onCancel: () => activeSwipeableRef.current?.close(),
-        onConfirm: () => deleteMutation.mutate(id),
+        onConfirm: () => mutate(id),
       });
     },
-    [deleteMutation, itemName]
+    [mutate, itemName]
   );
 
   // Toggle helper for the UI
@@ -101,13 +113,13 @@ export const useListScreen = <T extends { id: string; name: string }>(
       setIsLoadingLayout(false);
     };
     void initialLayout();
-  }, []);
+  }, [layoutStorageKey]);
 
   useEffect(() => {
     if (!isLoadingLayout) {
       void AsyncStorage.setItem(layoutStorageKey, layout);
     }
-  }, [layout, isLoadingLayout]);
+  }, [layout, isLoadingLayout, layoutStorageKey]);
 
   return {
     data: data || [],
@@ -120,5 +132,6 @@ export const useListScreen = <T extends { id: string; name: string }>(
     closeTheSwipedRef,
     onSwipeStart,
     statusContent,
+    ...(hideFabWhenScrolling ? { scrollOffset, scrollHandler } : {}),
   };
 };

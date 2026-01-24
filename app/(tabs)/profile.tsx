@@ -3,16 +3,11 @@ import { Icon } from '@/components/ui/icon';
 import { VStack } from '@/components/ui/vstack';
 import { useForm } from 'react-hook-form';
 import { Text } from '@/components/ui/text';
-import {
-  getCurrentUser,
-  updateCurrentUser,
-  UpdateUserPayload,
-  User,
-} from '@/services/user';
+import { getCurrentUser, updateCurrentUser } from '@/services/user';
 import { HStack } from '@/components/ui/hstack';
 import { Button, ButtonText } from '@/components/ui/button';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useCallback, useEffect } from 'react';
+import { useEffect } from 'react';
 import { ImagePickerAsset } from 'expo-image-picker';
 import { Computer, Moon, Smartphone, Sun } from 'lucide-react-native';
 import { Divider } from '@/components/ui/divider';
@@ -27,10 +22,7 @@ import { FormField } from '@/components/common/FormField';
 import { FormActions } from '@/components/form/FormActions';
 import { GlassCard } from '@/components/layout/GlassCard';
 import { ScreenContainer } from '@/components/layout/ScreenContainer';
-
-type ProfileFormData = User & {
-  new_avatar_asset: ImagePickerAsset | null;
-};
+import { User, UserFormData } from '@/types/user';
 
 export default function Profile() {
   const queryClient = useQueryClient();
@@ -50,12 +42,12 @@ export default function Profile() {
     handleSubmit,
     reset,
     setValue,
-  } = useForm<ProfileFormData>({
-    defaultValues: { email: '', full_name: '', new_avatar_asset: null },
+  } = useForm<UserFormData>({
+    defaultValues: { email: '', full_name: '', avatar_url: null },
   });
 
   const { mutate, isPending } = useMutation({
-    mutationFn: (data: UpdateUserPayload) => updateCurrentUser(data),
+    mutationFn: (data: UserFormData) => updateCurrentUser(data),
     onSuccess: () => {
       Alert.alert('Success', 'Profile updated successfully!');
       void queryClient.invalidateQueries({ queryKey: ['user'] });
@@ -67,24 +59,14 @@ export default function Profile() {
 
   useEffect(() => {
     if (data) {
-      reset({ ...data, new_avatar_asset: null });
+      reset(data);
     }
   }, [data, reset]);
 
   const handleImageChange = (image: ImagePickerAsset) => {
-    setValue('new_avatar_asset', image, { shouldDirty: true });
+    setValue('new_asset', image, { shouldDirty: true });
     setValue('avatar_url', image.uri, { shouldDirty: true });
   };
-
-  const onUpdateProfile = (formData: ProfileFormData) => {
-    if (!data?.id) return;
-
-    mutate(formData);
-  };
-
-  const onRefresh = useCallback(() => {
-    void refetch();
-  }, [refetch]);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -109,7 +91,7 @@ export default function Profile() {
     <ScreenContainer
       refreshControl={
         Platform.OS !== 'web' ? (
-          <RefreshControl refreshing={isRefetching} onRefresh={onRefresh} />
+          <RefreshControl refreshing={isRefetching} onRefresh={refetch} />
         ) : undefined
       }
     >
@@ -152,7 +134,7 @@ export default function Profile() {
         </GlassCard>
 
         <FormActions
-          onSave={handleSubmit(onUpdateProfile)}
+          onSave={handleSubmit((data) => mutate(data))}
           isPending={isPending}
           isValid={isValid}
           isDirty={isDirty}

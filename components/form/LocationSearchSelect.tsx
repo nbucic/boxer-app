@@ -1,6 +1,6 @@
 import { forwardRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { getLocation, getLocations } from '@/services/location';
+import { locationService } from '@/services/location';
 import { SearchSelectBase } from '@/components/form/SearchSelectBase';
 
 interface Props {
@@ -18,7 +18,7 @@ export const LocationSearchSelect = forwardRef<LocationSearchSelectRef, Props>(
   ({ value, onSelect, disabled = false }, ref) => {
     const { data: selectedLocation } = useQuery({
       queryKey: ['location', value],
-      queryFn: () => getLocation(value!),
+      queryFn: () => locationService.get(value!),
       enabled: !!value,
     });
 
@@ -27,8 +27,8 @@ export const LocationSearchSelect = forwardRef<LocationSearchSelectRef, Props>(
         value={selectedLocation?.name}
         onSelect={onSelect}
         searchQuery={{
-          queryKey: 'locations',
-          queryFn: getLocations,
+          queryKey: ['locations'],
+          queryFn: locationService.getList,
         }}
         disabled={disabled}
         title={'Search for a location...'}
@@ -38,3 +38,5 @@ export const LocationSearchSelect = forwardRef<LocationSearchSelectRef, Props>(
     );
   }
 );
+
+LocationSearchSelect.displayName = 'Location Search Select';

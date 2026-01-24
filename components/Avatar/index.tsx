@@ -9,6 +9,7 @@ import {
 import { useState } from 'react';
 import * as ImagePicker from 'expo-image-picker';
 import { showAlert } from '@/lib/helpers/alert';
+import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
 
 type ImageProps = {
   uri?: string;
@@ -129,7 +130,7 @@ const Avatar = ({ type = 'avatar', avatarUrl, onImageChange }: Props) => {
         cameraType: ImagePicker.CameraType.back,
         allowsMultipleSelection: false,
         allowsEditing: true,
-        quality: 1,
+        shape: type === 'avatar' ? 'oval' : 'rectangle',
         exif: false,
         aspect: [1, 1],
       });
@@ -138,9 +139,17 @@ const Avatar = ({ type = 'avatar', avatarUrl, onImageChange }: Props) => {
         return;
       }
 
-      const image = result.assets[0];
-      debugger;
-      onImageChange(image);
+      const imageManipulator = ImageManipulator.manipulate(
+        result.assets[0].uri
+      );
+      imageManipulator.resize({ width: 500 });
+      const renderedImage = await imageManipulator.renderAsync();
+      const resizedImage = await renderedImage.saveAsync({
+        format: SaveFormat.WEBP,
+        compress: 0.8,
+      });
+
+      onImageChange(resizedImage);
     } catch (e) {
       console.error('Error picking image:', e);
       Alert.alert('Error', 'Could not pick image.');

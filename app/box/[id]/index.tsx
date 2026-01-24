@@ -1,9 +1,9 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
-import { getBox } from '@/services/box';
+import { boxService } from '@/services/box';
 import { Image, Text, View } from 'react-native';
 import { VStack } from '@/components/ui/vstack';
-import { getTools } from '@/services/tool';
+import { toolService } from '@/services/tool';
 import { ToolCard } from '@/components/list/ToolCard';
 import { ListHeader } from '@/components/list/ListHeader';
 import { BoxIcon, ScrollTextIcon } from 'lucide-react-native';
@@ -28,7 +28,7 @@ export default function BoxDetailsScreen() {
     error: boxError,
   } = useQuery({
     queryKey: ['box', id],
-    queryFn: () => getBox(id),
+    queryFn: () => boxService.get(id),
     enabled: !!id,
   });
 
@@ -38,7 +38,8 @@ export default function BoxDetailsScreen() {
     error: toolsError,
   } = useQuery({
     queryKey: ['tools', 'box', id],
-    queryFn: () => getTools({ filter: { box: id } }),
+    queryFn: () =>
+      toolService.getList({ box: id }, { include: 'box:boxes (id, name)' }),
     enabled: !!id,
   });
 

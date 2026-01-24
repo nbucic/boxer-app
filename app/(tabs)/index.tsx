@@ -1,9 +1,9 @@
 import { router } from 'expo-router';
 import { ItemsList } from '@/components/box/ItemsList';
 import { ListHeader } from '@/components/list/ListHeader';
-import { deleteTool, getTools } from '@/services/tool';
+import { toolService } from '@/services/tool';
 import { ToolCard } from '@/components/list/ToolCard';
-import { Tool, ToolWithBox } from '@/types/tools';
+import { Tool } from '@/types/tools';
 import { EmptyList } from '@/components/list/EmptyList';
 import { EditIcon, TrashIcon, WrenchIcon } from 'lucide-react-native';
 import { useListScreen } from '@/hooks/useListScreen';
@@ -24,24 +24,29 @@ export default function Index() {
     closeTheSwipedRef,
     onSwipeStart,
     statusContent,
+    scrollOffset,
+    scrollHandler,
   } = useListScreen<Tool>({
     queryKey: ['tools'],
-    fetchDataFn: () => getTools({}),
-    deleteItemFn: deleteTool,
+    fetchDataFn: () =>
+      toolService.getList({}, { include: 'box:boxes (id, name)' }),
+    deleteItemFn: (id: string) => toolService.delete(id),
     layoutStorageKey: LAYOUT_STORAGE_KEY,
     itemName: 'Tool',
     loadingDataMessage: 'Finding all your tools across the boxes...',
+    hideFabWhenScrolling: true,
   });
 
   return (
     statusContent() ?? (
       <ScreenContainer scrollable={false}>
         <ItemsList
-          data={data || []}
+          data={data}
+          onScroll={scrollHandler}
           renderItem={({ item }) => {
             return (
               <ToolCard
-                item={item as ToolWithBox}
+                item={item as Tool}
                 listType={'swipeable'}
                 layout={layout}
                 swipeProperties={{
@@ -99,7 +104,10 @@ export default function Index() {
           numColumns={layout === 'list' ? 1 : 2}
         />
 
-        <FAB onPress={() => router.push('/tool/create')} />
+        <FAB
+          onPress={() => router.push('/tool/create')}
+          scrollOffset={scrollOffset}
+        />
       </ScreenContainer>
     )
   );

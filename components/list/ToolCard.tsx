@@ -1,4 +1,4 @@
-import { Tool, ToolWithBox } from '@/types/tools';
+import { Tool } from '@/types/tools';
 import React, { memo, useCallback } from 'react';
 import { useSharedValue } from 'react-native-reanimated';
 import {
@@ -12,10 +12,7 @@ import { VStack } from '@/components/ui/vstack';
 import { NameItem } from '@/components/common/NameItem';
 import { useFocusEffect } from 'expo-router';
 
-type ToolCardProps = { item: ToolWithBox } & (
-  | LayoutListProps
-  | LayoutGridProps
-);
+type ToolCardProps = { item: Tool } & (LayoutListProps | LayoutGridProps);
 
 export const ToolCard = memo((props: ToolCardProps) => {
   const isFlipped = useSharedValue(0);
@@ -78,3 +75,5 @@ export const ToolCard = memo((props: ToolCardProps) => {
     );
   }
 });
+
+ToolCard.displayName = 'Tool Card';

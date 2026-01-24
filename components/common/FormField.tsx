@@ -10,8 +10,8 @@ import {
 import { VStack } from '@/components/ui/vstack';
 import { AlertCircleIcon, EyeIcon, EyeOffIcon } from '@/components/ui/icon';
 import { Input, InputField, InputIcon, InputSlot } from '@/components/ui/input';
-import clsx from 'clsx';
-import React, { useState } from 'react';
+import { clsx } from 'clsx';
+import React, { RefObject, useState } from 'react';
 import { Textarea, TextareaInput } from '@/components/ui/textarea';
 import Avatar from '@/components/Avatar';
 import { ImagePickerAsset } from 'expo-image-picker';
@@ -26,6 +26,9 @@ interface BaseFieldOptions {
 interface TextFieldOptions extends BaseFieldOptions {
   isSecuredField?: boolean;
   keyboardType?: 'default' | 'email-address' | 'numeric' | 'phone-pad' | 'url';
+  autoSubmit?: boolean;
+  onSubmit?: () => void;
+  nextFieldRef?: RefObject<any>;
 }
 
 interface ImageFieldOptions extends BaseFieldOptions {
@@ -64,21 +67,29 @@ export const FormField = <T extends FieldValues>({
     switch (type) {
       case 'text': {
         const textOptions = { ...options } as TextFieldOptions;
+        const handleAction = () => {
+          if (textOptions.autoSubmit && textOptions.onSubmit) {
+            textOptions.onSubmit();
+          } else if (textOptions.nextFieldRef?.current) {
+            textOptions.nextFieldRef.current.focus();
+          }
+        };
+
         return (
           <Input
             variant={'outline'}
             size={'lg'}
-            className={clsx('border-outline-100')}
+            className={clsx(
+              'border-outline-100',
+              !options?.isDisabled && 'bg-background-0'
+            )}
           >
             <InputField
               placeholder={placeholder}
               onBlur={onBlur}
               onChangeText={onChange}
               value={value}
-              className={clsx(
-                'text-typography-900',
-                !options?.isDisabled && 'bg-background-0'
-              )}
+              className={'text-typography-900'}
               type={
                 textOptions.isSecuredField && !showPassword
                   ? 'password'
@@ -87,10 +98,15 @@ export const FormField = <T extends FieldValues>({
               autoCapitalize={'none'}
               keyboardType={textOptions.keyboardType as any}
               ref={fieldRef}
+              returnKeyType={textOptions.autoSubmit ? 'done' : 'next'}
+              onSubmitEditing={handleAction}
+              submitBehavior={
+                textOptions.autoSubmit ? 'blurAndSubmit' : undefined
+              }
             />
             {textOptions.isSecuredField && (
               <InputSlot
-                className={'pr-3'}
+                className={'px-3'}
                 onPress={() => setShowPassword(!showPassword)}
               >
                 <InputIcon as={showPassword ? EyeIcon : EyeOffIcon} />

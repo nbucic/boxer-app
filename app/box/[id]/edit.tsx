@@ -1,6 +1,6 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { createNewBox, getBoxEditData, updateBox } from '@/services/box';
+import { boxService } from '@/services/box';
 import { TextInput } from 'react-native';
 import { VStack } from '@/components/ui/vstack';
 import { ImagePickerAsset } from 'expo-image-picker';
@@ -39,7 +39,7 @@ export default function EditBoxScreen() {
     error: errorExistingBox,
   } = useQuery({
     queryKey: ['boxes', boxId],
-    queryFn: () => getBoxEditData(boxId!),
+    queryFn: () => boxService.getEditData(boxId!),
     enabled: isEditMode,
   });
 
@@ -85,11 +85,11 @@ export default function EditBoxScreen() {
     } else if (locationId) {
       setValue('location_id', locationId, { shouldDirty: false });
     }
-  }, [existingBox, reset]);
+  }, [existingBox, locationId, reset, setValue]);
 
   const { mutate, isPending } = useMutation({
     mutationFn: async (data: BoxFormData) =>
-      isEditMode ? updateBox(boxId!, data) : createNewBox(data),
+      isEditMode ? boxService.update(boxId!, data) : boxService.create(data),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['boxes'] });
       router.dismissAll();
