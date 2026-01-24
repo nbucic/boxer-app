@@ -1,9 +1,5 @@
 import { router } from 'expo-router';
-import {
-  deleteLocation,
-  getLocations,
-  isLocationEmpty,
-} from '@/services/location';
+import { locationService } from '@/services/location';
 import { ListHeader } from '@/components/list/ListHeader';
 import { ItemsList } from '@/components/box/ItemsList';
 import { Location } from '@/types/location';
@@ -27,8 +23,8 @@ export default function Locations() {
     statusContent,
   } = useListScreen<Location>({
     queryKey: ['locations'],
-    fetchDataFn: () => getLocations({}),
-    deleteItemFn: deleteLocation,
+    fetchDataFn: () => locationService.getList(),
+    deleteItemFn: (id: string) => locationService.delete(id),
     layoutStorageKey: '@locations_layout',
     itemName: 'Location',
     loadingDataMessage: 'Finding all your locations ...',
@@ -36,7 +32,7 @@ export default function Locations() {
 
   const handleDeleteAttempt = async (id: string, name: string) => {
     try {
-      const locationEmpty = await isLocationEmpty(id);
+      const locationEmpty = await locationService.isEmpty(id);
 
       if (!locationEmpty) {
         showAlert({
@@ -51,7 +47,7 @@ export default function Locations() {
     } catch (e) {
       showAlert({
         title: 'Error',
-        message: 'An error occurred white checking for boxes.',
+        message: `An error occurred white checking for boxes: ${(e as Error).message}`,
       });
     }
   };

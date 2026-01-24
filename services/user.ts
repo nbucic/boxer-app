@@ -1,22 +1,10 @@
 import { supabase } from '@/lib/supabase';
-import { ImagePickerAsset } from 'expo-image-picker';
-import { Platform } from 'react-native';
 import {
-  getAvatarStorageInformation,
   getSignedUrlForImage,
+  handleImageUploadToTheBucket,
 } from '@/lib/helpers/supabase/storage';
 import { handleErrors } from '@/lib/helpers/supabase';
-
-export interface User {
-  id: string;
-  email?: string;
-  full_name?: string;
-  avatar_url: string | null;
-}
-
-export interface UpdateUserPayload extends User {
-  new_avatar_asset?: ImagePickerAsset | null;
-}
+import { User, UserFormData } from '@/types/user';
 
 export const getCurrentUser = async (): Promise<User> => {
   const {
@@ -48,49 +36,19 @@ export const getCurrentUser = async (): Promise<User> => {
 };
 
 export const updateCurrentUser = async (
-  data: UpdateUserPayload
+  formData: UserFormData
 ): Promise<void> => {
-  const { id, full_name } = data;
-  if (!data.new_avatar_asset) {
-    const { error } = await supabase
-      .from('profiles')
-      .upsert({ id, full_name, updated_at: new Date() });
+  const { new_asset, email, ...data } = formData;
 
-    if (error) {
-      console.log({ error });
-      throw error;
-    }
-  } else {
-    const image = data.new_avatar_asset;
-    const arrayBuffer = await fetch(image.uri).then((res) => res.arrayBuffer());
-
-    const extension =
-      Platform.OS === 'web'
-        ? (image.mimeType?.split('/')[1] ?? 'jpeg')
-        : (image.uri?.split('.').pop()?.toLowerCase() ?? 'jpeg');
-
-    const { bucket, path } = getAvatarStorageInformation({
-      userId: data.id,
-      extension: extension,
+  if (new_asset) {
+    data.avatar_url = await handleImageUploadToTheBucket({
+      imageName: 'avatar',
+      asset: new_asset,
+      bucket: 'avatar',
     });
-
-    const { data: uploadData, error: uploadError } = await supabase.storage
-      .from(bucket)
-      .upload(path as string, arrayBuffer, {
-        contentType: image.mimeType ?? `image/${extension}`,
-        upsert: true,
-      });
-
-    const { error } = await supabase.from('profiles').upsert({
-      id,
-      full_name,
-      avatar_url: uploadData?.path,
-      updated_at: new Date(),
-    });
-
-    if (uploadError || error) {
-      console.log({ uploadError });
-      throw uploadError;
-    }
   }
+
+  const { error: upsertError } = await supabase.from('profiles').upsert(data);
+
+  handleErrors(upsertError, 'Update user error:');
 };

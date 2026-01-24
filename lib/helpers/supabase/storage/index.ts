@@ -1,18 +1,8 @@
 import { supabase } from '@/lib/supabase';
 import { handleErrors } from '@/lib/helpers/supabase';
-import { Platform } from 'react-native';
 import { ImagePickerAsset } from 'expo-image-picker';
 import { StorageApiError, StorageError } from '@supabase/storage-js';
-
-interface IAvatarStorageInformationRequest {
-  userId?: string;
-  extension?: string;
-}
-
-interface IAvatarStorageInformationResponse {
-  bucket: string;
-  path?: string;
-}
+import { Bucket } from '@/services/base';
 
 const getBucketPrefixPath = async () => {
   const {
@@ -22,31 +12,13 @@ const getBucketPrefixPath = async () => {
   return `${user?.id}`;
 };
 
-export const getAvatarStorageInformation = ({
-  userId,
-  extension,
-}: IAvatarStorageInformationRequest): IAvatarStorageInformationResponse => {
-  let response: IAvatarStorageInformationResponse = {
-    bucket: process.env.EXPO_PUBLIC_SUPABASE_STORAGE_AVATAR_BUCKET || '',
-  };
-
-  if (userId && extension) {
-    response = {
-      path: `${userId}/avatar.${extension}`,
-      ...response,
-    };
-  }
-
-  return response;
-};
-
 export const getSignedUrlForImage = async ({
   url,
   bucket = 'boxes',
   options = {},
 }: {
   url: string | null | undefined;
-  bucket?: 'boxes' | 'tools' | 'avatar';
+  bucket?: Bucket;
   options?: {
     height?: number;
     quality?: number;
@@ -79,27 +51,21 @@ export const getSignedUrlForImage = async ({
 };
 
 export const handleImageUploadToTheBucket = async ({
-  id,
+  imageName,
   asset,
   bucket,
 }: {
-  id: string;
+  imageName: string;
   asset: ImagePickerAsset;
   bucket: string;
 }) => {
-  const arrayBuffer = await fetch(asset.uri).then((res) => res.arrayBuffer());
-
-  const extension =
-    Platform.OS === 'web'
-      ? (asset.mimeType?.split('/')[1] ?? 'jpeg')
-      : (asset.uri?.split('.').pop()?.toLowerCase() ?? 'jpeg');
-
-  const path = `${await getBucketPrefixPath()}/${id}.${extension}`;
+  const response = await fetch(asset.uri).then((res) => res.blob());
+  const path = `${await getBucketPrefixPath()}/${imageName}.webp`;
 
   const { data: uploadData, error: uploadError } = await supabase.storage
     .from(bucket)
-    .upload(path as string, arrayBuffer, {
-      contentType: asset.mimeType ?? `image/${extension}`,
+    .upload(path, response, {
+      contentType: `image/webp`,
       upsert: true,
     });
 

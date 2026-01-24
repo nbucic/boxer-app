@@ -1,6 +1,6 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
-import { getTool } from '@/services/tool';
+import { toolService } from '@/services/tool';
 import { Image, Text, View } from 'react-native';
 import { VStack } from '@/components/ui/vstack';
 import { ListHeader } from '@/components/list/ListHeader';
@@ -22,7 +22,7 @@ export default function ToolDetailsScreen() {
     error: toolError,
   } = useQuery({
     queryKey: ['tool', id],
-    queryFn: () => getTool(id),
+    queryFn: () => toolService.get(id),
     enabled: !!id,
   });
 

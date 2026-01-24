@@ -16,6 +16,7 @@ export type Tool = SelectSearchable &
     user_id: string | null;
     created_at: string;
     updated_at: string;
+    box: BoxDetails;
   };
 
 export type ToolWithBox = Tool & { box: BoxDetails };

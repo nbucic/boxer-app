@@ -1,6 +1,6 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { createNewTool, getToolEditData, updateTool } from '@/services/tool';
+import { toolService } from '@/services/tool';
 import { TextInput } from 'react-native';
 import { VStack } from '@/components/ui/vstack';
 import { ImagePickerAsset } from 'expo-image-picker';
@@ -32,7 +32,7 @@ export default function EditToolScreen() {
     error: errorExistingTool,
   } = useQuery({
     queryKey: ['tools', toolId],
-    queryFn: () => getToolEditData(toolId!),
+    queryFn: () => toolService.getEditData(toolId!),
     enabled: isEditMode,
   });
 
@@ -57,11 +57,11 @@ export default function EditToolScreen() {
     } else if (boxId) {
       setValue('box_id', boxId, { shouldDirty: false });
     }
-  }, [existingTool, reset]);
+  }, [boxId, existingTool, reset, setValue]);
 
   const { mutate, isPending } = useMutation({
     mutationFn: async (data: ToolFormData) =>
-      isEditMode ? updateTool(toolId!, data) : createNewTool(data),
+      isEditMode ? toolService.update(toolId!, data) : toolService.create(data),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['tools'] });
       router.dismissAll();

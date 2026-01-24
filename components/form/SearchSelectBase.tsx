@@ -1,17 +1,5 @@
-import React, {
-  forwardRef,
-  useEffect,
-  useImperativeHandle,
-  useState,
-} from 'react';
-import {
-  FlatList,
-  KeyboardAvoidingView,
-  Modal,
-  Platform,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import React, { forwardRef, useEffect, useImperativeHandle, useState, } from 'react';
+import { FlatList, KeyboardAvoidingView, Modal, Platform, TouchableOpacity, View, } from 'react-native';
 import { Text } from '@/components/ui/text';
 import { ChevronDownIcon, SearchIcon, XIcon } from 'lucide-react-native';
 import { VStack } from '@/components/ui/vstack';
@@ -20,9 +8,10 @@ import { Heading } from '@/components/ui/heading';
 import { Button, ButtonText } from '@/components/ui/button';
 import { useQuery } from '@tanstack/react-query';
 import { SelectSearchable } from '@/types';
-import clsx from 'clsx';
+import { clsx } from 'clsx';
 import { Input, InputField, InputIcon, InputSlot } from '@/components/ui/input';
 import { DataLoader } from '@/components/layout/DataLoader';
+import { FilterProp, OptionsProp } from '@/services/base';
 
 const INITIAL_BOXES_SHOWN = 5;
 
@@ -30,15 +19,8 @@ interface Props<T> {
   value?: string | null;
   onSelect: (id: string | null) => void;
   searchQuery: {
-    queryKey: string;
-    queryFn: ({
-      filter: { search, limit },
-    }: {
-      filter: {
-        search?: string;
-        limit?: number;
-      };
-    }) => Promise<T[]>;
+    queryKey: string[];
+    queryFn: (filter?: FilterProp, options?: OptionsProp) => Promise<T[]>;
   };
   disabled: boolean;
   title: string;
@@ -254,3 +236,5 @@ export const SearchSelectBase = forwardRef<
     );
   }
 );
+
+SearchSelectBase.displayName = 'Search Select Base';

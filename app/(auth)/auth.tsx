@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabase';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { VStack } from '@/components/ui/vstack';
 import { Text } from '@/components/ui/text';
 import { HStack } from '@/components/ui/hstack';
@@ -22,6 +22,8 @@ interface Props {
 
 const Auth = () => {
   const [loading, setLoading] = useState(false);
+  const passwordRef = useRef(null);
+
   const {
     control,
     handleSubmit,
@@ -33,6 +35,7 @@ const Auth = () => {
       password: '',
     },
   });
+
   const signInWithEmail = async (data: Props) => {
     setLoading(true);
     const { error } = await supabase.auth.signInWithPassword(data as Props);
@@ -116,7 +119,10 @@ const Auth = () => {
             name={'email'}
             label={'Email'}
             placeholder={'name@example.com'}
-            options={{ keyboardType: 'email-address' }}
+            options={{
+              keyboardType: 'email-address',
+              nextFieldRef: passwordRef,
+            }}
             rules={{
               required: 'Email is required',
               pattern: {
@@ -131,7 +137,12 @@ const Auth = () => {
             name={'password'}
             label={'Password'}
             placeholder={'Enter your password'}
-            options={{ isSecuredField: true }}
+            options={{
+              isSecuredField: true,
+              autoSubmit: true,
+              onSubmit: handleSubmit(signInWithEmail),
+            }}
+            fieldRef={passwordRef}
             rules={{ required: 'Password is required' }}
           />
 
@@ -148,7 +159,9 @@ const Auth = () => {
 
       <VStack space={'md'} className={'mt-8'}>
         <HStack space={'xs'} className={'justify-center items-center'}>
-          <Text className={'text-typography-500'}>Don't have an account?</Text>
+          <Text className={'text-typography-500'}>
+            Don&#39;t have an account?
+          </Text>
           <Button
             variant={'link'}
             onPress={handleSubmit(signUpWithEmail)}

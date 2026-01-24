@@ -2,11 +2,7 @@ import { VStack } from '@/components/ui/vstack';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useForm } from 'react-hook-form';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import {
-  createNewLocation,
-  getLocation,
-  updateLocation,
-} from '@/services/location';
+import { locationService } from '@/services/location';
 import { useEffect } from 'react';
 import { LocationFormData } from '@/types/location';
 import { showAlert } from '@/lib/helpers/alert';
@@ -30,7 +26,7 @@ export default function EditLocationScreen() {
     error: errorExistingLocation,
   } = useQuery({
     queryKey: ['locations', locationId],
-    queryFn: () => getLocation(locationId!),
+    queryFn: () => locationService.get(locationId!),
     enabled: isEditMode,
   });
 
@@ -54,7 +50,9 @@ export default function EditLocationScreen() {
 
   const { mutate, isPending } = useMutation({
     mutationFn: (data: LocationFormData) =>
-      isEditMode ? updateLocation(locationId!, data) : createNewLocation(data),
+      isEditMode
+        ? locationService.update(locationId!, data)
+        : locationService.create(data),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['locations'] });
       router.dismissAll();
