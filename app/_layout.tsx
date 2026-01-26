@@ -5,6 +5,8 @@ import { Stack } from 'expo-router';
 import { AuthProvider, useAuth } from '@/context/AuthContext';
 import { ActivityIndicator, View } from 'react-native';
 import { useInitialTheme } from '@/hooks/useInitialTheme';
+import { validateEnvironment } from '@/lib/env-validator';
+import { MaintenanceScreen } from '@/components/layout/Maintenance';
 
 const queryClient = new QueryClient();
 
@@ -45,6 +47,11 @@ const AppLayout = () => {
 
 export default function RootLayout() {
   const { theme } = useInitialTheme();
+  const { isValid, missingKeys } = validateEnvironment();
+
+  if (!isValid) {
+    return <MaintenanceScreen missingVars={missingKeys} />;
+  }
 
   return (
     <GluestackUIProvider mode={theme}>
