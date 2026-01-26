@@ -8,12 +8,12 @@ import { useForm } from 'react-hook-form';
 import { AuthWeakPasswordError } from '@supabase/auth-js';
 import { router } from 'expo-router';
 import { getDeepLink } from '@/components/DeepLink';
-import { showAlert } from '@/lib/helpers/alert';
 import { Heading } from '@/components/ui/heading';
 import { ScreenContainer } from '@/components/layout/ScreenContainer';
 import { GlassCard } from '@/components/layout/GlassCard';
 import { FormField } from '@/components/common/FormField';
 import { FormActions } from '@/components/form/FormActions';
+import { Alert } from '@/lib/helpers/alert/Alert';
 
 interface Props {
   email: string;
@@ -42,7 +42,7 @@ const Auth = () => {
 
     if (error) {
       console.log({ error });
-      showAlert({
+      Alert({
         title: 'Authentication Error',
         message: error.message,
       });
@@ -92,7 +92,7 @@ const Auth = () => {
     }
 
     if (!session) {
-      showAlert({
+      Alert({
         title: 'Successful signup',
         message: 'Please check your inbox for email verification',
       });

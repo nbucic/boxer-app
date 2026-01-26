@@ -1,11 +1,9 @@
-import { Alert, Platform } from 'react-native';
+import { Alert as RAAlert, Platform } from 'react-native';
 
-type BaseAlertProps = {
+type ShowAlertType = {
   title: string;
   message: string;
-};
-
-type AlertVariations =
+} & (
   | {
       onConfirm?: never;
       onCancel?: never;
@@ -17,11 +15,10 @@ type AlertVariations =
   | {
       onConfirm: () => void;
       onCancel: () => void;
-    };
+    }
+);
 
-type ShowAlertType = BaseAlertProps & AlertVariations;
-
-export const showAlert = (props: ShowAlertType) => {
+export const Alert = (props: ShowAlertType) => {
   // Case 1: Both Confirm and Cancel are provided
   if (props.onConfirm && props.onCancel) {
     switch (Platform.OS) {
@@ -33,7 +30,7 @@ export const showAlert = (props: ShowAlertType) => {
         }
         return;
       default:
-        Alert.alert(
+        RAAlert.alert(
           props.title,
           props.message,
           [
@@ -56,7 +53,7 @@ export const showAlert = (props: ShowAlertType) => {
         }
         break;
       default:
-        Alert.alert(
+        RAAlert.alert(
           props.title,
           props.message,
           [
@@ -79,7 +76,7 @@ export const showAlert = (props: ShowAlertType) => {
         window.alert(`${props.title}\n\n${props.message}`);
         break;
       default:
-        Alert.alert(props.title, props.message);
+        RAAlert.alert(props.title, props.message);
         break;
     }
   }

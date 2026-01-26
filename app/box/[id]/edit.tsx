@@ -7,7 +7,6 @@ import { ImagePickerAsset } from 'expo-image-picker';
 import { useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { BoxFormData } from '@/types/box';
-import { showAlert } from '@/lib/helpers/alert';
 import { ListHeader } from '@/components/list/ListHeader';
 import { DataLoader } from '@/components/layout/DataLoader';
 import { DataError } from '@/components/layout/DataError';
@@ -16,6 +15,7 @@ import { GlassCard } from '@/components/layout/GlassCard';
 import { FormField } from '@/components/common/FormField';
 import { FormActions } from '@/components/form/FormActions';
 import { LocationSearchSelectRef } from '@/components/form/LocationSearchSelect';
+import { Alert } from '@/lib/helpers/alert/Alert';
 
 export default function EditBoxScreen() {
   const {
@@ -96,7 +96,7 @@ export default function EditBoxScreen() {
       router.navigate('/boxes');
     },
     onError: (e: Error) => {
-      showAlert({
+      Alert({
         title: 'Error',
         message: `Failed to ${isEditMode} ? 'update' : 'create'} tool: ${e.message}`,
       });

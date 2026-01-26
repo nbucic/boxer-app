@@ -1,4 +1,4 @@
-import { Alert, Image, TouchableOpacity, View } from 'react-native';
+import { Image, TouchableOpacity, View } from 'react-native';
 import { Icon } from '@/components/ui/icon';
 import {
   LucideIcon,
@@ -8,8 +8,8 @@ import {
 } from 'lucide-react-native';
 import { useState } from 'react';
 import * as ImagePicker from 'expo-image-picker';
-import { showAlert } from '@/lib/helpers/alert';
 import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
+import { Alert } from '@/lib/helpers/alert/Alert';
 
 type ImageProps = {
   uri?: string;
@@ -109,7 +109,11 @@ type Props = {
   onImageChange: (image: ImagePicker.ImagePickerAsset) => void;
 };
 
-const Avatar = ({ type = 'avatar', avatarUrl, onImageChange }: Props) => {
+export const Picture = ({
+  type = 'avatar',
+  avatarUrl,
+  onImageChange,
+}: Props) => {
   const [isUploading, setIsUploading] = useState(false);
 
   const pickImage = async () => {
@@ -117,7 +121,7 @@ const Avatar = ({ type = 'avatar', avatarUrl, onImageChange }: Props) => {
     const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
 
     if (!permissionResult.granted) {
-      showAlert({
+      Alert({
         title: 'Permission denied',
         message: 'Permission to access camera roll is required.',
       });
@@ -152,7 +156,10 @@ const Avatar = ({ type = 'avatar', avatarUrl, onImageChange }: Props) => {
       onImageChange(resizedImage);
     } catch (e) {
       console.error('Error picking image:', e);
-      Alert.alert('Error', 'Could not pick image.');
+      Alert({
+        title: 'Error',
+        message: 'Could not pick image.',
+      });
     } finally {
       setIsUploading(false);
     }
@@ -180,5 +187,3 @@ const Avatar = ({ type = 'avatar', avatarUrl, onImageChange }: Props) => {
     </>
   );
 };
-
-export default Avatar;

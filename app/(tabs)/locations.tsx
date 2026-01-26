@@ -1,9 +1,9 @@
 import { locationService } from '@/services/location';
 import { Location } from '@/types/location';
 import { LocationCard } from '@/components/list/LocationCard';
-import { showAlert } from '@/lib/helpers/alert';
 import { LocationEditIcon } from 'lucide-react-native';
 import { EntityListScreen } from '@/components/screens/EntityListScreen';
+import { Alert } from '@/lib/helpers/alert/Alert';
 
 export default function Locations() {
   const handleDeleteAttempt = async (
@@ -15,7 +15,7 @@ export default function Locations() {
       const locationEmpty = await locationService.isEmpty(id);
 
       if (!locationEmpty) {
-        showAlert({
+        Alert({
           title: 'Cannot Delete Location',
           message:
             'This location is still associated with one or more boxes. Please move or delete the boxes before deleting the location.',
@@ -24,7 +24,7 @@ export default function Locations() {
         defaultHandler();
       }
     } catch (e) {
-      showAlert({
+      Alert({
         title: 'Error',
         message: `An error occurred while checking for boxes: ${(e as Error).message}`,
       });

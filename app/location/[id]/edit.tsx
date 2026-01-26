@@ -5,7 +5,6 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { locationService } from '@/services/location';
 import { useEffect } from 'react';
 import { LocationFormData } from '@/types/location';
-import { showAlert } from '@/lib/helpers/alert';
 import { ListHeader } from '@/components/list/ListHeader';
 import { DataLoader } from '@/components/layout/DataLoader';
 import { DataError } from '@/components/layout/DataError';
@@ -13,6 +12,7 @@ import { FormField } from '@/components/common/FormField';
 import { FormActions } from '@/components/form/FormActions';
 import { GlassCard } from '@/components/layout/GlassCard';
 import { ScreenContainer } from '@/components/layout/ScreenContainer';
+import { Alert } from '@/lib/helpers/alert/Alert';
 
 export default function EditLocationScreen() {
   const { id: locationId } = useLocalSearchParams<{ id: string }>();
@@ -59,7 +59,7 @@ export default function EditLocationScreen() {
       router.navigate('/(tabs)/locations');
     },
     onError: (e: Error) => {
-      showAlert({
+      Alert({
         title: 'Error',
         message: `Failed to ${isEditMode ? 'update' : 'create'} location: ${e.message}`,
       });

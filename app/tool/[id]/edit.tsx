@@ -7,7 +7,6 @@ import { ImagePickerAsset } from 'expo-image-picker';
 import { useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { ToolFormData } from '@/types/tools';
-import { showAlert } from '@/lib/helpers/alert';
 import { ListHeader } from '@/components/list/ListHeader';
 import { DataLoader } from '@/components/layout/DataLoader';
 import { DataError } from '@/components/layout/DataError';
@@ -15,6 +14,7 @@ import { ScreenContainer } from '@/components/layout/ScreenContainer';
 import { GlassCard } from '@/components/layout/GlassCard';
 import { FormField } from '@/components/common/FormField';
 import { FormActions } from '@/components/form/FormActions';
+import { Alert } from '@/lib/helpers/alert/Alert';
 
 export default function EditToolScreen() {
   const { id: toolId, boxId } = useLocalSearchParams<{
@@ -68,7 +68,7 @@ export default function EditToolScreen() {
       router.navigate('/');
     },
     onError: (e: Error) => {
-      showAlert({
+      Alert({
         title: 'Error',
         message: `Failed to ${isEditMode} ? 'update' : 'create'} tool: ${e.message}`,
       });

@@ -3,13 +3,13 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Layout } from '@/types';
 import { SwipeableMethods } from 'react-native-gesture-handler/ReanimatedSwipeable';
-import { showAlert } from '@/lib/helpers/alert';
 import { DataLoader } from '@/components/layout/DataLoader';
 import { DataError } from '@/components/layout/DataError';
 import {
   useAnimatedScrollHandler,
   useSharedValue,
 } from 'react-native-reanimated';
+import { Alert } from '@/lib/helpers/alert/Alert';
 
 interface UseListScreenProps<T> {
   queryKey: string[];
@@ -57,7 +57,7 @@ export const useListScreen = <T extends { id: string; name: string }>(
       void queryClient.invalidateQueries({ queryKey: queryKey });
     },
     onError: (e: Error) => {
-      showAlert({
+      Alert({
         title: 'Error',
         message: `Failed to delete ${itemName}: ${e.message}`,
       });
@@ -89,7 +89,7 @@ export const useListScreen = <T extends { id: string; name: string }>(
 
   const handleDelete = useCallback(
     (id: string, name: string) => {
-      showAlert({
+      Alert({
         title: `Delete ${itemName}`,
         message: `Are you sure you want to delete ${name}?`,
         onCancel: () => activeSwipeableRef.current?.close(),

@@ -13,7 +13,7 @@ import { Input, InputField, InputIcon, InputSlot } from '@/components/ui/input';
 import { clsx } from 'clsx';
 import React, { RefObject, useState } from 'react';
 import { Textarea, TextareaInput } from '@/components/ui/textarea';
-import Avatar from '@/components/Avatar';
+import { Picture } from '@/components/Picture';
 import { ImagePickerAsset } from 'expo-image-picker';
 import { Text } from 'react-native';
 import { LocationSearchSelect } from '@/components/form/LocationSearchSelect';
@@ -132,7 +132,7 @@ export const FormField = <T extends FieldValues>({
       case 'image': {
         const imageOptions = { ...options } as ImageFieldOptions;
         return (
-          <Avatar
+          <Picture
             avatarUrl={value}
             onImageChange={imageOptions.handleImageChange}
             type={imageOptions.type}
