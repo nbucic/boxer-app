@@ -14,7 +14,7 @@ import {
 interface UseListScreenProps<T> {
   queryKey: string[];
   fetchDataFn: () => Promise<T[]>;
-  deleteItemFn: any;
+  deleteItemFn: (id: string) => Promise<void>;
   layoutStorageKey: string;
   itemName: string;
   loadingDataMessage: string;

@@ -1,23 +1,20 @@
 import { ListRenderItem, Platform, RefreshControl } from 'react-native';
-import { Box } from '@/types/box';
-import { Location } from '@/types/location';
 import { ComponentType, ReactElement } from 'react';
-import { ToolWithBox } from '@/types/tools';
 import { SelectSearchable } from '@/types';
 import Animated from 'react-native-reanimated';
 
-interface ItemsListProps {
-  data: SelectSearchable[];
+interface ItemsListProps<T extends SelectSearchable> {
+  data: T[];
   isRefetching?: boolean;
   refetch?: () => void;
   listHeaderComponent?: ComponentType<any> | ReactElement | null | undefined;
-  renderItem: ListRenderItem<Box | Location | ToolWithBox>;
+  renderItem: ListRenderItem<T>;
   listEmptyComponent?: ComponentType<any> | ReactElement | null | undefined;
   numColumns?: number;
   onScroll?: (event: any) => void;
 }
 
-export const ItemsList = ({
+export const ItemsList = <T extends SelectSearchable>({
   data,
   isRefetching,
   refetch,
@@ -26,7 +23,7 @@ export const ItemsList = ({
   listEmptyComponent,
   numColumns = 1,
   onScroll,
-}: ItemsListProps) => {
+}: ItemsListProps<T>) => {
   return (
     <Animated.FlatList
       data={data}

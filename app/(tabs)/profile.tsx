@@ -1,5 +1,4 @@
-import { Alert, Platform, Pressable, RefreshControl, View } from 'react-native';
-import { Icon } from '@/components/ui/icon';
+import { Alert, Platform, RefreshControl } from 'react-native';
 import { VStack } from '@/components/ui/vstack';
 import { useForm } from 'react-hook-form';
 import { Text } from '@/components/ui/text';
@@ -9,7 +8,6 @@ import { Button, ButtonText } from '@/components/ui/button';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { ImagePickerAsset } from 'expo-image-picker';
-import { Computer, Moon, Smartphone, Sun } from 'lucide-react-native';
 import { Divider } from '@/components/ui/divider';
 import { supabase } from '@/lib/supabase';
 import { useColorScheme } from 'nativewind';
@@ -23,6 +21,7 @@ import { FormActions } from '@/components/form/FormActions';
 import { GlassCard } from '@/components/layout/GlassCard';
 import { ScreenContainer } from '@/components/layout/ScreenContainer';
 import { User, UserFormData } from '@/types/user';
+import { ThemeSelector } from '@/components/profile/ThemeSelector';
 
 export default function Profile() {
   const queryClient = useQueryClient();
@@ -75,11 +74,9 @@ export default function Profile() {
   const setTheme = (theme: Theme) => {
     setColorScheme(theme);
     void AsyncStorage.setItem(THEME_STORAGE_KEY, theme);
-    // window.location.reload();
   };
 
   if (isFetching && !data) {
-    // if (true) {
     return <DataLoader text={'Crafting your profile data...'} />;
   }
 
@@ -145,43 +142,7 @@ export default function Profile() {
 
         {/* 2. PERSONALIZATION (Segmented Control Look) */}
         <GlassCard title={'Personalization'}>
-          <View
-            className={
-              'bg-background-50 p-1.5 rounded-xl flex-row border border-outline-100'
-            }
-          >
-            {(['light', 'dark', 'system'] as Theme[]).map((t) => {
-              const isActive = colorScheme === t;
-              return (
-                <Pressable
-                  key={t}
-                  onPress={() => setTheme(t)}
-                  className={`flex-1 flex-row items-center justify-center py-3 rounded-lg ${
-                    isActive ? 'bg-background-0 shadow-sm ' : 'bg-transparent'
-                  }`}
-                >
-                  <Icon
-                    as={
-                      t === 'light'
-                        ? Sun
-                        : t === 'dark'
-                          ? Moon
-                          : Platform.OS === 'web'
-                            ? Computer
-                            : Smartphone
-                    }
-                    size={'xs'}
-                    className={`${isActive ? 'text-primary-500' : 'text-typography-400'}`}
-                  />
-                  <Text
-                    className={`ml-2 text-xs font-bold ${isActive ? 'text-typography-900' : 'text-typography-400'}`}
-                  >
-                    {t.toUpperCase()}
-                  </Text>
-                </Pressable>
-              );
-            })}
-          </View>
+          <ThemeSelector currentTheme={colorScheme!} onThemeChange={setTheme} />
         </GlassCard>
 
         <Divider className={'my-4 bg-outline-100'} />

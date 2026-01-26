@@ -10,51 +10,54 @@ type iconsType = {
   iconFocused: keyof typeof Ionicons.glyphMap;
 };
 
-const TabIcon = ({
-  focused,
-  icon,
-  iconFocused,
-  color,
-}: {
-  focused: boolean;
-  color: string;
-} & iconsType) => {
-  const iconName = focused ? iconFocused : icon;
+const TabIcon = React.memo(
+  ({
+    focused,
+    icon,
+    iconFocused,
+    color,
+  }: {
+    focused: boolean;
+    color: string;
+  } & iconsType) => {
+    const iconName = focused ? iconFocused : icon;
 
-  return <Ionicons name={iconName} style={{ color }} size={24} />;
+    return <Ionicons name={iconName} style={{ color }} size={24} />;
+  }
+);
+
+const screens: Array<{ name: string } & iconsType> = [
+  {
+    name: 'index',
+    icon: 'home-outline',
+    iconFocused: 'home',
+  },
+  {
+    name: 'boxes',
+    icon: 'cube-outline',
+    iconFocused: 'cube',
+  },
+  {
+    name: 'locations',
+    icon: 'location-outline',
+    iconFocused: 'location',
+  },
+  {
+    name: 'profile',
+    icon: 'person-outline',
+    iconFocused: 'person',
+  },
+];
+
+const hapticTabListener = {
+  tabPress: () => {
+    if (Platform.OS !== 'web') {
+      void Haptics.selectionAsync();
+    }
+  },
 };
+
 export default function TabLayout() {
-  const screens: Array<{ name: string } & iconsType> = [
-    {
-      name: 'index',
-      icon: 'home-outline',
-      iconFocused: 'home',
-    },
-    {
-      name: 'boxes',
-      icon: 'cube-outline',
-      iconFocused: 'cube',
-    },
-    {
-      name: 'locations',
-      icon: 'location-outline',
-      iconFocused: 'location',
-    },
-    {
-      name: 'profile',
-      icon: 'person-outline',
-      iconFocused: 'person',
-    },
-  ];
-
-  const hapticTabListener = {
-    tabPress: () => {
-      if (Platform.OS !== 'web') {
-        void Haptics.selectionAsync();
-      }
-    },
-  };
-
   return (
     <Tabs
       screenOptions={{
@@ -87,3 +90,5 @@ export default function TabLayout() {
     </Tabs>
   );
 }
+
+TabIcon.displayName = 'TabIcon';

@@ -3,13 +3,13 @@ import { Text } from '@/components/ui/text';
 import { Icon } from '@/components/ui/icon';
 import clsx from 'clsx';
 import { LucideIcon } from 'lucide-react-native';
-import { router } from 'expo-router';
+import { Href, router } from 'expo-router';
 
 interface EmptyListProps {
   title: string;
   subtitle?: string;
   titleIcon?: LucideIcon;
-  linkLocation: string;
+  linkLocation: Href;
   linkCallToAction: string;
   topMargin?: boolean;
 }
@@ -44,7 +44,7 @@ export const EmptyList = ({
         {subtitle}
       </Text>
       <TouchableOpacity
-        onPress={() => router.push(linkLocation as any)}
+        onPress={() => router.push(linkLocation)}
         className={
           'px-6 py-3 bg-blue-600 rounded-lg shadow-md hover:bg-blue-700 transition-colors'
         }
