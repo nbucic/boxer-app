@@ -35,8 +35,12 @@ export const ItemsList = <T extends SelectSearchable>({
       indicatorStyle={'black'}
       numColumns={numColumns}
       refreshControl={
-        Platform.OS !== 'web' && refetch && isRefetching ? (
-          <RefreshControl refreshing={isRefetching} onRefresh={refetch} />
+        Platform.OS !== 'web' && refetch ? (
+          <RefreshControl
+            refreshing={!!isRefetching}
+            onRefresh={refetch}
+            colors={['#3B82F6']}
+          />
         ) : undefined
       }
       onScroll={onScroll}

@@ -10,6 +10,8 @@ import { FAB } from '@/components/common/FAB';
 import { Layout } from '@/types';
 import { useQueryClient } from '@tanstack/react-query';
 import { SwipeAction, SwipeProperties } from '@/types/swipe';
+import { SwipeableMethods } from 'react-native-gesture-handler/ReanimatedSwipeable';
+import { RefreshControl } from 'react-native';
 
 interface EntityListScreenConfig<T extends { id: string; name: string }> {
   // Query configuration
@@ -183,7 +185,7 @@ export function EntityListScreen<T extends { id: string; name: string }>(
           data={data}
           onScroll={scrollHandler}
           renderItem={({ item }) => {
-            // Prefetch data when item is rendered (visible in viewport)
+            // Prefetch data when an item is rendered (visible in viewport)
             handlePrefetch(item.id);
 
             return renderCard({

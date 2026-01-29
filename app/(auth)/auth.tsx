@@ -38,7 +38,7 @@ const Auth = () => {
 
   const signInWithEmail = async (data: Props) => {
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword(data as Props);
+    const { error } = await supabase.auth.signInWithPassword(data);
 
     if (error) {
       console.log({ error });
@@ -102,13 +102,16 @@ const Auth = () => {
   };
 
   return (
-    <ScreenContainer extraClasses={{ scrollableView: 'justify-center py-10' }}>
+    <ScreenContainer
+      scrollable={false}
+      extraClasses={{ scrollableView: 'justify-center py-10 px-6' }}
+    >
       <VStack space={'xs'} className={'mb-10'}>
-        <Heading size={'3xl'} className={'text-typography-900'}>
+        <Heading size={'3xl'} className={'text-typography-900 text-center'}>
           Un-Box your tools
         </Heading>
-        <Text className={'text-typography-500'}>
-          Sign in to your account or create a now one
+        <Text className={'text-typography-500 text-center'}>
+          Sign in to your account or create a new one
         </Text>
       </VStack>
 

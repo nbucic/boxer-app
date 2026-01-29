@@ -3,8 +3,9 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from 'react-native';
 
-const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
-const supabasePublishableKey = process.env.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+const supabaseUrl: string = process.env.EXPO_PUBLIC_SUPABASE_URL || '';
+const supabasePublishableKey: string =
+  process.env.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY || '';
 
 // A simple no-op storage adapter for the server.
 // noinspection JSUnusedGlobalSymbols,JSUnusedLocalSymbols
@@ -27,16 +28,17 @@ const storage = isServer
     ? undefined // Supabase will use localStorage by default.
     : AsyncStorage;
 
-export const supabase: SupabaseClient | null =
-  supabaseUrl && supabasePublishableKey
-    ? createClient(supabaseUrl, supabasePublishableKey, {
-        auth: {
-          storage: storage,
-          // Disable auth features on the server
-          autoRefreshToken: !isServer,
-          persistSession: !isServer,
-          // Only detect session in URL on the web client
-          detectSessionInUrl: !isServer && Platform.OS === 'web',
-        },
-      })
-    : (null as any);
+export const supabase: SupabaseClient = createClient(
+  supabaseUrl,
+  supabasePublishableKey,
+  {
+    auth: {
+      storage: storage,
+      // Disable auth features on the server
+      autoRefreshToken: !isServer,
+      persistSession: !isServer,
+      // Only detect session in URL on the web client
+      detectSessionInUrl: !isServer && Platform.OS === 'web',
+    },
+  }
+);

@@ -49,7 +49,10 @@ export const ScreenContainer = ({
       {children}
     </ScrollView>
   ) : (
-    <Box className={'flex-1'} style={{ paddingBottom: insets.bottom + 20 }}>
+    <Box
+      className={clsx('flex-1', extraClasses?.scrollableView)}
+      style={{ paddingBottom: insets.bottom + 20 }}
+    >
       {children}
     </Box>
   );

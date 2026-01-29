@@ -9,7 +9,11 @@ export const DataLoader = (props: DataLoaderProps) => {
     <View
       className={'flex-1 justify-center items-center bg-background-0 gap-y-2'}
     >
-      <ActivityIndicator size="large" className={'primary-500'} />
+      <ActivityIndicator
+        size="large"
+        className={'primary-500'}
+        color={'#3B82F6'}
+      />
       <Text className={'text-typography-500'}>{props.text}</Text>
     </View>
   );
