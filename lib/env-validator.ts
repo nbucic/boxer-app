@@ -1,22 +1,24 @@
 const envMap = {
   EXPO_PUBLIC_SUPABASE_URL: process.env.EXPO_PUBLIC_SUPABASE_URL,
-  EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY: process.env.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
-  EXPO_PUBLIC_SUPABASE_STORAGE_AVATAR_BUCKET: process.env.EXPO_PUBLIC_SUPABASE_STORAGE_AVATAR_BUCKET,
-  EXPO_PUBLIC_SUPABASE_STORAGE_BOXES_BUCKET: process.env.EXPO_PUBLIC_SUPABASE_STORAGE_BOXES_BUCKET,
-  EXPO_PUBLIC_SUPABASE_STORAGE_TOOLS_BUCKET: process.env.EXPO_PUBLIC_SUPABASE_STORAGE_TOOLS_BUCKET,
+  EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY:
+    process.env.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
+  EXPO_PUBLIC_SUPABASE_STORAGE_AVATAR_BUCKET:
+    process.env.EXPO_PUBLIC_SUPABASE_STORAGE_AVATAR_BUCKET,
+  EXPO_PUBLIC_SUPABASE_STORAGE_BOXES_BUCKET:
+    process.env.EXPO_PUBLIC_SUPABASE_STORAGE_BOXES_BUCKET,
+  EXPO_PUBLIC_SUPABASE_STORAGE_TOOLS_BUCKET:
+    process.env.EXPO_PUBLIC_SUPABASE_STORAGE_TOOLS_BUCKET,
 };
 
-// TODO: reinstate isProduction check once ensured .env properties are fetched
-// const isProduction = process.env.NODE_ENV === 'production';
+const isProduction = process.env.NODE_ENV === 'production';
 
-export const validateEnvironment = () =>{
-
-  console.log(Object.entries(envMap).map(([key, value]) => `${key}: ${value}`));
-  const missingKeys = Object.entries(envMap).filter(([_, value]) =>!value || value.trim() === '').map(([key]) => key);
+export const validateEnvironment = () => {
+  const missingKeys = Object.entries(envMap)
+    .filter(([_, value]) => !value || value.trim() === '')
+    .map(([key]) => key);
 
   return {
     isValid: missingKeys.length === 0,
-    missingKeys,
-    // missingKeys: isProduction ? [] : missingKeys,
-  }
+    missingKeys: isProduction ? [] : missingKeys,
+  };
 };

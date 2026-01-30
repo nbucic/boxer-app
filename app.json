@@ -35,7 +35,12 @@
       "favicon": "./assets/icons/box-64.png"
     },
     "plugins": [
-      "expo-router",
+      [
+        "expo-router",
+        {
+          "sitemap": false
+        }
+      ],
       [
         "expo-splash-screen",
         {
