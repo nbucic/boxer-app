@@ -1,13 +1,14 @@
-import { GluestackUIProvider } from '@/components/ui/gluestack-ui-provider';
 import './global.css';
+import { ActivityIndicator, View } from 'react-native';
+import { AuthProvider, useAuth } from '@/context/AuthContext';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { GluestackUIProvider } from '@/components/ui/gluestack-ui-provider';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Stack } from 'expo-router';
-import { AuthProvider, useAuth } from '@/context/AuthContext';
-import { ActivityIndicator, View } from 'react-native';
-import { useInitialTheme } from '@/hooks/useInitialTheme';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { validateEnvironment } from '@/lib/env-validator';
 import { MaintenanceScreen } from '@/components/layout/Maintenance';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { useInitialTheme } from '@/hooks/useInitialTheme';
+import { validateEnvironment } from '@/lib/env-validator';
 
 const queryClient = new QueryClient();
 
@@ -55,14 +56,16 @@ export default function RootLayout() {
   }
 
   return (
-    <GestureHandlerRootView className={'flex-1'}>
-      <GluestackUIProvider mode={theme}>
-        <QueryClientProvider client={queryClient}>
-          <AuthProvider>
-            <AppLayout />
-          </AuthProvider>
-        </QueryClientProvider>
-      </GluestackUIProvider>
-    </GestureHandlerRootView>
+    <SafeAreaProvider>
+      <GestureHandlerRootView className={'flex-1'}>
+        <GluestackUIProvider mode={theme}>
+          <QueryClientProvider client={queryClient}>
+            <AuthProvider>
+              <AppLayout />
+            </AuthProvider>
+          </QueryClientProvider>
+        </GluestackUIProvider>
+      </GestureHandlerRootView>
+    </SafeAreaProvider>
   );
 }

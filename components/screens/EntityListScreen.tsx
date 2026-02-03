@@ -11,7 +11,6 @@ import { Layout } from '@/types';
 import { useQueryClient } from '@tanstack/react-query';
 import { SwipeAction, SwipeProperties } from '@/types/swipe';
 import { SwipeableMethods } from 'react-native-gesture-handler/ReanimatedSwipeable';
-import { RefreshControl } from 'react-native';
 
 interface EntityListScreenConfig<T extends { id: string; name: string }> {
   // Query configuration
