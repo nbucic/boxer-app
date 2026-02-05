@@ -1,4 +1,4 @@
-import { Text, TouchableOpacity } from 'react-native';
+import { Platform, Text, TouchableOpacity } from 'react-native';
 import { router } from 'expo-router';
 import React from 'react';
 import clsx from 'clsx';
@@ -12,9 +12,11 @@ type Props = {
 export const NameItem = ({ name, clickable = null, className }: Props) => {
   const IconAndTextElements = () => (
     <Text
-      className={'text-lg font-bold text-typography-900 leading-tight'}
-      numberOfLines={1}
-      ellipsizeMode={'tail'}
+      className={
+        'text-lg font-bold text-typography-900 leading-tight overflow-ellipsis overflow-hidden whitespace-nowrap'
+      }
+      {...(Platform.OS === 'android' ? { numberOfLines: 1 } : undefined)}
+      {...(Platform.OS === 'android' ? { ellipsizeMode: 'tail' } : undefined)}
     >
       {name}
     </Text>

@@ -4,7 +4,6 @@ import { Platform, Pressable, View } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
-import { BlurView } from 'expo-blur';
 import { Icon } from '@/components/ui/icon';
 import {
   BoxesIcon,
@@ -39,36 +38,23 @@ const screens: Array<iconProps> = [
   },
 ];
 
-const CustomTabBarIcon = React.memo(
-  ({ icon, color }: { icon: LucideIcon; color: string }) => {
-    return <Icon as={icon} className={clsx(color, 'h-8 w-full')} size={'xl'} />;
-  }
-);
-
 const CustomTabBar = ({ state, navigation }: BottomTabBarProps) => {
   const insets = useSafeAreaInsets();
 
   return (
     <View
       className={
-        'absolute bottom-5 left-2 right-2 overflow-hidden rounded-full'
+        'absolute bottom-5 left-2 right-2 overflow-hidden rounded-full bg-background-950'
       }
       style={{
-        paddingBottom: insets.bottom,
+        marginBottom: insets.bottom + (Platform.OS === 'web' ? 0 : 0),
       }}
     >
-      <BlurView
-        intensity={95}
-        tint={'default'}
-        className={'absolute inset-0 bg-background-0/80 rounded'}
-        experimentalBlurMethod={'dimezisBlurView'}
-      />
-
       <View
-        className={'absolute top-0 left-5 right-5 h-[1px] bg-outline-100/50'}
+        className={'absolute top-0 left-2 right-2 h-[1px] bg-outline-100/50'}
       />
 
-      <View className={'flex-row items-center justify-around w-full h-16'}>
+      <View className={'flex-row items-center justify-around w-full h-12'}>
         {state.routes.map((route, index) => {
           const screenConfig = screens.find((s) => s.name === route.name);
           if (!screenConfig) return null;
@@ -100,7 +86,7 @@ const CustomTabBar = ({ state, navigation }: BottomTabBarProps) => {
               }
             >
               <CustomTabBarIcon
-                color={isFocused ? 'text-primary-500' : 'text-typography-950'}
+                color={isFocused ? 'text-primary-500' : 'text-typography-0'}
                 icon={screenConfig.icon}
               />
             </Pressable>
@@ -110,6 +96,12 @@ const CustomTabBar = ({ state, navigation }: BottomTabBarProps) => {
     </View>
   );
 };
+
+const CustomTabBarIcon = React.memo(
+  ({ icon, color }: { icon: LucideIcon; color: string }) => {
+    return <Icon as={icon} className={clsx(color, 'w-full')} size={'xl'} />;
+  }
+);
 
 export default function TabLayout() {
   return (

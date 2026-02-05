@@ -1,10 +1,11 @@
+import { Platform } from 'react-native';
 import { HStack } from '@/components/ui/hstack';
 import { Icon } from '@/components/ui/icon';
 import { Text } from '@/components/ui/text';
 import { Href, Link } from 'expo-router';
 import { LucideIcon } from 'lucide-react-native';
-import clsx from 'clsx';
 import { ReactNode } from 'react';
+import clsx from 'clsx';
 
 type InfoItemProps = { icon: LucideIcon; className?: string } & (
   | {
@@ -29,8 +30,8 @@ export const InfoItem = (props: InfoItemProps) => {
           'text-typography-500',
           className
         )}
-        numberOfLines={1}
-        ellipsizeMode={'tail'}
+        {...(Platform.OS === 'android' ? { numberOfLines: 1 } : undefined)}
+        {...(Platform.OS === 'android' ? { ellipsizeMode: 'tail' } : undefined)}
       >
         {text}
       </Text>

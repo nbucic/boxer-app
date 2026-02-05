@@ -26,7 +26,7 @@ export default function Index() {
       renderCard={({ item, layout, swipeProperties }) => (
         <ToolCard
           item={item}
-          listType="swipeable"
+          listType={'swipeable'}
           layout={layout}
           swipeProperties={swipeProperties}
         />

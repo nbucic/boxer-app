@@ -1,0 +1,155 @@
+diff --git a/node_modules/react-native-gesture-handler/lib/typescript/components/Swipeable.d.ts b/node_modules/react-native-gesture-handler/lib/typescript/components/Swipeable.d.ts
+index 44480ae..7d0b7a1 100644
+--- a/node_modules/react-native-gesture-handler/lib/typescript/components/Swipeable.d.ts
++++ b/node_modules/react-native-gesture-handler/lib/typescript/components/Swipeable.d.ts
+@@ -59,17 +59,7 @@ export interface SwipeableProps extends Pick<PanGestureHandlerProps, SwipeableEx
+      * a native feel, try 8 or above.
+      */
+     overshootFriction?: number;
+-    /**
+-     * @deprecated Use `direction` argument of onSwipeableOpen()
+-     *
+-     * Called when left action panel gets open.
+-     */
+     onSwipeableLeftOpen?: () => void;
+-    /**
+-     * @deprecated Use `direction` argument of onSwipeableOpen()
+-     *
+-     * Called when right action panel gets open.
+-     */
+     onSwipeableRightOpen?: () => void;
+     /**
+      * Called when action panel gets open (either right or left).
+@@ -79,17 +69,7 @@ export interface SwipeableProps extends Pick<PanGestureHandlerProps, SwipeableEx
+      * Called when action panel is closed.
+      */
+     onSwipeableClose?: (direction: 'left' | 'right', swipeable: Swipeable) => void;
+-    /**
+-     * @deprecated Use `direction` argument of onSwipeableWillOpen()
+-     *
+-     * Called when left action panel starts animating on open.
+-     */
+     onSwipeableLeftWillOpen?: () => void;
+-    /**
+-     * @deprecated Use `direction` argument of onSwipeableWillOpen()
+-     *
+-     * Called when right action panel starts animating on open.
+-     */
+     onSwipeableRightWillOpen?: () => void;
+     /**
+      * Called when action panel starts animating on open (either right or left).
+@@ -148,11 +128,6 @@ type SwipeableState = {
+     rightOffset?: number;
+     rowWidth?: number;
+ };
+-/**
+- * @deprecated use Reanimated version of Swipeable instead
+- *
+- * This component allows for implementing swipeable rows or similar interaction.
+- */
+ export default class Swipeable extends Component<SwipeableProps, SwipeableState> {
+     static defaultProps: {
+         friction: number;
+diff --git a/node_modules/react-native-gesture-handler/src/components/Swipeable.tsx b/node_modules/react-native-gesture-handler/src/components/Swipeable.tsx
+index 21ad3e1..b4f858a 100644
+--- a/node_modules/react-native-gesture-handler/src/components/Swipeable.tsx
++++ b/node_modules/react-native-gesture-handler/src/components/Swipeable.tsx
+@@ -106,18 +106,8 @@ export interface SwipeableProps
+    */
+   overshootFriction?: number;
+ 
+-  /**
+-   * @deprecated Use `direction` argument of onSwipeableOpen()
+-   *
+-   * Called when left action panel gets open.
+-   */
+   onSwipeableLeftOpen?: () => void;
+ 
+-  /**
+-   * @deprecated Use `direction` argument of onSwipeableOpen()
+-   *
+-   * Called when right action panel gets open.
+-   */
+   onSwipeableRightOpen?: () => void;
+ 
+   /**
+@@ -133,18 +123,8 @@ export interface SwipeableProps
+     swipeable: Swipeable
+   ) => void;
+ 
+-  /**
+-   * @deprecated Use `direction` argument of onSwipeableWillOpen()
+-   *
+-   * Called when left action panel starts animating on open.
+-   */
+   onSwipeableLeftWillOpen?: () => void;
+ 
+-  /**
+-   * @deprecated Use `direction` argument of onSwipeableWillOpen()
+-   *
+-   * Called when right action panel starts animating on open.
+-   */
+   onSwipeableRightWillOpen?: () => void;
+ 
+   /**
+@@ -222,12 +202,6 @@ type SwipeableState = {
+   rowWidth?: number;
+ };
+ 
+-/**
+- * @deprecated use Reanimated version of Swipeable instead
+- *
+- * This component allows for implementing swipeable rows or similar interaction.
+- */
+-
+ export default class Swipeable extends Component<
+   SwipeableProps,
+   SwipeableState
+diff --git a/node_modules/react-native-gesture-handler/src/handlers/PanGestureHandler.ts b/node_modules/react-native-gesture-handler/src/handlers/PanGestureHandler.ts
+index c69465a..4b90247 100644
+--- a/node_modules/react-native-gesture-handler/src/handlers/PanGestureHandler.ts
++++ b/node_modules/react-native-gesture-handler/src/handlers/PanGestureHandler.ts
+@@ -82,9 +82,6 @@ export interface PanGestureConfig extends CommonPanProperties {
+   failOffsetXEnd?: number;
+ }
+ 
+-/**
+- * @deprecated PanGestureHandler will be removed in the future version of Gesture Handler. Use `Gesture.Pan()` instead.
+- */
+ export interface PanGestureHandlerProps
+   extends BaseGestureHandlerProps<PanGestureHandlerEventPayload>,
+     CommonPanProperties {
+@@ -140,9 +137,6 @@ export const panHandlerName = 'PanGestureHandler';
+  */
+ export type PanGestureHandler = typeof PanGestureHandler;
+ 
+-/**
+- * @deprecated PanGestureHandler will be removed in the future version of Gesture Handler. Use `Gesture.Pan()` instead.
+- */
+ // eslint-disable-next-line @typescript-eslint/no-redeclare -- backward compatibility; see description on the top of gestureHandlerCommon.ts file
+ export const PanGestureHandler = createHandler<
+   PanGestureHandlerProps,
+diff --git a/node_modules/react-native-gesture-handler/src/handlers/TapGestureHandler.ts b/node_modules/react-native-gesture-handler/src/handlers/TapGestureHandler.ts
+index 80307ff..6ead02b 100644
+--- a/node_modules/react-native-gesture-handler/src/handlers/TapGestureHandler.ts
++++ b/node_modules/react-native-gesture-handler/src/handlers/TapGestureHandler.ts
+@@ -66,9 +66,6 @@ export interface TapGestureConfig {
+   maxDist?: number;
+ }
+ 
+-/**
+- * @deprecated TapGestureHandler will be removed in the future version of Gesture Handler. Use `Gesture.Tap()` instead.
+- */
+ export interface TapGestureHandlerProps
+   extends BaseGestureHandlerProps<TapGestureHandlerEventPayload>,
+     TapGestureConfig {}
+@@ -80,9 +77,6 @@ export const tapHandlerName = 'TapGestureHandler';
+  */
+ export type TapGestureHandler = typeof TapGestureHandler;
+ 
+-/**
+- * @deprecated TapGestureHandler will be removed in the future version of Gesture Handler. Use `Gesture.Tap()` instead.
+- */
+ // eslint-disable-next-line @typescript-eslint/no-redeclare -- backward compatibility; see description on the top of gestureHandlerCommon.ts file
+ export const TapGestureHandler = createHandler<
+   TapGestureHandlerProps,

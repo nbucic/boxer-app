@@ -75,7 +75,7 @@ export const ListHeader = (props: ListHeaderProps) => {
             className={
               'text-typography-900 leading-tight overflow-ellipsis overflow-hidden whitespace-nowrap'
             }
-            numberOfLines={1}
+            {...(Platform.OS === 'android' ? { numberOfLines: 1 } : undefined)}
           >
             {title}
           </Heading>
@@ -91,7 +91,9 @@ export const ListHeader = (props: ListHeaderProps) => {
                 className={
                   'text-typography-500 text-sm overflow-ellipsis overflow-hidden whitespace-nowrap '
                 }
-                numberOfLines={1}
+                {...(Platform.OS === 'android'
+                  ? { numberOfLines: 1 }
+                  : undefined)}
               >
                 {subtitle}
               </Text>

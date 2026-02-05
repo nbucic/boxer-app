@@ -1,6 +1,6 @@
 /** @type {import('tailwindcss').Config} */
-const { colors } = require('./constants/theme');
 
+const { theme } = require('./constants/theme');
 module.exports = {
   darkMode: process.env.DARK_MODE ? process.env.DARK_MODE : 'class',
   content: [
@@ -20,7 +20,7 @@ module.exports = {
   ],
   theme: {
     extend: {
-      colors: colors,
+      colors: theme.colors,
       fontFamily: {
         heading: undefined,
         body: undefined,
@@ -47,6 +47,7 @@ module.exports = {
         'soft-2': '0px 0px 20px rgba(38, 38, 38, 0.2)',
         'soft-3': '0px 0px 30px rgba(38, 38, 38, 0.1)',
         'soft-4': '0px 0px 40px rgba(38, 38, 38, 0.1)',
+        ...theme.shadows,
       },
     },
   },

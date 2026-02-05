@@ -1,13 +1,19 @@
 import { RelativePathString, router } from 'expo-router';
-import { Image, TouchableOpacity, View } from 'react-native';
+import {
+  Image,
+  Platform,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { Action, ActionItem } from '@/components/swipeable/Action';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
 import { SwipeableMethods } from 'react-native-gesture-handler/ReanimatedSwipeable';
 import React, { memo, ReactElement, ReactNode, useRef } from 'react';
-import tw from 'twrnc';
 import clsx from 'clsx';
 import { HStack } from '@/components/ui/hstack';
 import { ChevronRight } from 'lucide-react-native';
+import { theme } from '@/constants/theme';
 
 type ListViewOptions = {
   showPicture?: boolean;
@@ -60,9 +66,6 @@ const listViewOptions: ListViewOptions = {
 export const ListView = memo((props: ListViewProps) => {
   const { item, itemType, infotainment } = props;
   const options: ListViewOptions = { ...listViewOptions, ...props?.options };
-  const borderAndMargins = clsx(
-    'my-1.5 mx-4 border border-blue-300 rounded-md shadow-sm overflow-hidden bg-background-0'
-  );
 
   const InternalToolListView = () => {
     const urlPrefix = itemType.toLowerCase();
@@ -120,7 +123,8 @@ export const ListView = memo((props: ListViewProps) => {
     const rowRef = useRef<SwipeableMethods | null>(null);
     return (
       <Swipeable
-        containerStyle={tw.style(borderAndMargins)}
+        useNativeAnimations={Platform.OS !== 'web'}
+        containerStyle={stylesheet.swipeable}
         ref={(ref) => {
           rowRef.current = ref;
           swipeProperties.setRef(ref);
@@ -147,9 +151,29 @@ export const ListView = memo((props: ListViewProps) => {
     );
   } else {
     return (
-      <View className={borderAndMargins}>
+      <View
+        className={
+          'my-1.5 mx-4 border border-blue-300 rounded-md shadow-list-view-card-dark overflow-hidden bg-background-0'
+        }
+      >
         <InternalToolListView />
       </View>
     );
   }
+});
+
+const stylesheet = StyleSheet.create({
+  swipeable: {
+    marginTop: '0.375rem' as any,
+    marginBottom: '0.375rem' as any,
+    marginLeft: '1rem' as any,
+    marginRight: '1rem' as any,
+    borderWidth: '0.0625rem' as any,
+    borderRadius: '0.375rem',
+    borderColor: theme.colors.primary[300],
+    boxShadow: theme.shadows['list-view-card-dark'],
+    overflow: 'hidden',
+    backgroundColor: theme.colors.background.dark,
+    elevation: 5,
+  },
 });

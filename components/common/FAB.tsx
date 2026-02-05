@@ -6,12 +6,19 @@ import Animated, {
   useAnimatedStyle,
   withSpring,
 } from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useSegments } from 'expo-router';
 
 interface FABProps {
   onPress?: () => void;
   scrollOffset?: SharedValue<number>;
 }
 export const FAB = ({ onPress, scrollOffset }: FABProps) => {
+  const insets = useSafeAreaInsets();
+  const segments = useSegments();
+
+  const hasTabs = segments.includes('(tabs)' as never);
+  const bottomPosition = insets.bottom + 20 + (hasTabs ? 60 : 0);
   const animatedStyle = useAnimatedStyle(() => {
     if (!scrollOffset) {
       return { transform: [{ translateY: 0 }], opacity: 1 };
@@ -34,7 +41,7 @@ export const FAB = ({ onPress, scrollOffset }: FABProps) => {
       style={[
         {
           position: 'absolute',
-          bottom: 40,
+          bottom: bottomPosition,
           right: 20,
         },
         animatedStyle,
