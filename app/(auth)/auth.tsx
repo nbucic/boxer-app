@@ -13,7 +13,7 @@ import { ScreenContainer } from '@/components/layout/ScreenContainer';
 import { GlassCard } from '@/components/layout/GlassCard';
 import { FormField } from '@/components/common/FormField';
 import { FormActions } from '@/components/form/FormActions';
-import { Alert } from '@/lib/helpers/alert/Alert';
+import { useConfirm } from '@/hooks/useConfirm';
 
 interface Props {
   email: string;
@@ -21,6 +21,7 @@ interface Props {
 }
 
 const Auth = () => {
+  const { confirm, ConfirmDialog } = useConfirm();
   const [loading, setLoading] = useState(false);
   const passwordRef = useRef(null);
 
@@ -41,8 +42,7 @@ const Auth = () => {
     const { error } = await supabase.auth.signInWithPassword(data);
 
     if (error) {
-      console.log({ error });
-      Alert({
+      confirm({
         title: 'Authentication Error',
         message: error.message,
       });
@@ -92,7 +92,7 @@ const Auth = () => {
     }
 
     if (!session) {
-      Alert({
+      confirm({
         title: 'Successful signup',
         message: 'Please check your inbox for email verification',
       });
@@ -176,6 +176,7 @@ const Auth = () => {
           </Button>
         </HStack>
       </VStack>
+      <ConfirmDialog />
     </ScreenContainer>
   );
 };

@@ -62,10 +62,10 @@ const LocationDetailsScreen = () => {
       scrollable={false}
       header={
         <ListHeader
-          title={location.name}
+          backButton={'/locations'}
           subtitle={location.description ?? undefined}
           subtitleIcon={ScrollTextIcon}
-          backButton={'/locations'}
+          title={location.name}
         />
       }
     >

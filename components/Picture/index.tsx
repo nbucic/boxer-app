@@ -9,7 +9,7 @@ import {
 import { useState } from 'react';
 import * as ImagePicker from 'expo-image-picker';
 import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
-import { Alert } from '@/lib/helpers/alert/Alert';
+import { useNotify } from '@/hooks/useNotify';
 
 type ImageProps = {
   uri?: string;
@@ -114,6 +114,7 @@ export const Picture = ({
   avatarUrl,
   onImageChange,
 }: Props) => {
+  const notify = useNotify();
   const [isUploading, setIsUploading] = useState(false);
 
   const pickImage = async () => {
@@ -121,17 +122,22 @@ export const Picture = ({
     const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
 
     if (!permissionResult.granted) {
-      Alert({
-        title: 'Permission denied',
-        message: 'Permission to access camera roll is required.',
-      });
+      notify.warn(
+        'Permission denied',
+        'Permission to access camera roll is required.'
+      );
       return;
     }
 
     try {
+      const cameraType =
+        type === 'avatar'
+          ? ImagePicker.CameraType.front
+          : ImagePicker.CameraType.back;
+
       const result = await ImagePicker.launchCameraAsync({
         mediaTypes: 'images',
-        cameraType: ImagePicker.CameraType.back,
+        cameraType,
         allowsMultipleSelection: false,
         allowsEditing: true,
         shape: type === 'avatar' ? 'oval' : 'rectangle',
@@ -155,11 +161,7 @@ export const Picture = ({
 
       onImageChange(resizedImage);
     } catch (e) {
-      console.error('Error picking image:', e);
-      Alert({
-        title: 'Error',
-        message: 'Could not pick image.',
-      });
+      notify.error('Error', 'Could not pick image.');
     } finally {
       setIsUploading(false);
     }

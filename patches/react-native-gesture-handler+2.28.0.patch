@@ -1,3 +1,33 @@
+diff --git a/node_modules/react-native-gesture-handler/lib/commonjs/components/Swipeable.js b/node_modules/react-native-gesture-handler/lib/commonjs/components/Swipeable.js
+index 5b3d7e1..94a941e 100644
+--- a/node_modules/react-native-gesture-handler/lib/commonjs/components/Swipeable.js
++++ b/node_modules/react-native-gesture-handler/lib/commonjs/components/Swipeable.js
+@@ -340,8 +340,9 @@ class Swipeable extends _react.Component {
+           touchAction: "pan-y",
+           onHandlerStateChange: this.onTapHandlerStateChange,
+           children: /*#__PURE__*/(0, _jsxRuntime.jsx)(_reactNative.Animated.View, {
+-            pointerEvents: rowState === 0 ? 'auto' : 'box-only',
++            testID: 'swipeable-commonjs',
+             style: [{
++              pointerEvents: rowState === 0 ? 'auto' : 'box-only',
+               transform: [{
+                 translateX: this.transX
+               }]
+diff --git a/node_modules/react-native-gesture-handler/lib/module/components/Swipeable.js b/node_modules/react-native-gesture-handler/lib/module/components/Swipeable.js
+index ceef4c0..c31ad79 100644
+--- a/node_modules/react-native-gesture-handler/lib/module/components/Swipeable.js
++++ b/node_modules/react-native-gesture-handler/lib/module/components/Swipeable.js
+@@ -335,8 +335,9 @@ export default class Swipeable extends Component {
+           touchAction: "pan-y",
+           onHandlerStateChange: this.onTapHandlerStateChange,
+           children: /*#__PURE__*/_jsx(Animated.View, {
+-            pointerEvents: rowState === 0 ? 'auto' : 'box-only',
++            testId: 'swipeable-module',
+             style: [{
++              pointerEvents: rowState === 0 ? 'auto' : 'box-only',
+               transform: [{
+                 translateX: this.transX
+               }]
 diff --git a/node_modules/react-native-gesture-handler/lib/typescript/components/Swipeable.d.ts b/node_modules/react-native-gesture-handler/lib/typescript/components/Swipeable.d.ts
 index 44480ae..7d0b7a1 100644
 --- a/node_modules/react-native-gesture-handler/lib/typescript/components/Swipeable.d.ts

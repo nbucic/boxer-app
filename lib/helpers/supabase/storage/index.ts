@@ -3,6 +3,7 @@ import { handleErrors } from '@/lib/helpers/supabase';
 import { ImagePickerAsset } from 'expo-image-picker';
 import { StorageApiError, StorageError } from '@supabase/storage-js';
 import { Bucket } from '@/services/base';
+import { Platform } from 'react-native';
 
 const getBucketPrefixPath = async () => {
   const {
@@ -59,13 +60,29 @@ export const handleImageUploadToTheBucket = async ({
   asset: ImagePickerAsset;
   bucket: string;
 }) => {
-  const response = await fetch(asset.uri).then((res) => res.blob());
+  let response: any;
+
+  if (Platform.OS === 'web') {
+    response = await fetch(asset.uri).then((res) => res.blob());
+  } else {
+    const formData = new FormData();
+
+    const fileToUpload = {
+      uri: asset.uri,
+      type: asset.mimeType || 'image/webp',
+      name: `${imageName}.webp`,
+    };
+
+    formData.append('files', fileToUpload as any);
+    response = formData;
+  }
+
   const path = `${await getBucketPrefixPath()}/${imageName}.webp`;
 
   const { data: uploadData, error: uploadError } = await supabase.storage
     .from(bucket)
     .upload(path, response, {
-      contentType: `image/webp`,
+      contentType: Platform.OS === 'web' ? 'image/webp' : 'multipart/form-data',
       upsert: true,
     });
 

@@ -45,3 +45,9 @@ app-example
 # IDE
 .vscode
 .idea
+
+# Android builds
+*.apk
+*.ap_
+*.aab
+build/

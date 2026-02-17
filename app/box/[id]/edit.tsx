@@ -15,7 +15,7 @@ import { GlassCard } from '@/components/layout/GlassCard';
 import { FormField } from '@/components/common/FormField';
 import { FormActions } from '@/components/form/FormActions';
 import { LocationSearchSelectRef } from '@/components/form/LocationSearchSelect';
-import { Alert } from '@/lib/helpers/alert/Alert';
+import { useConfirm } from '@/hooks/useConfirm';
 
 export default function EditBoxScreen() {
   const {
@@ -27,6 +27,7 @@ export default function EditBoxScreen() {
     focus?: 'location' | 'description';
     locationId?: string;
   }>();
+  const { confirm, ConfirmDialog } = useConfirm();
   const queryClient = useQueryClient();
   const isEditMode = !!boxId;
   const locationInputRef = useRef<LocationSearchSelectRef>(null);
@@ -96,7 +97,7 @@ export default function EditBoxScreen() {
       router.navigate('/boxes');
     },
     onError: (e: Error) => {
-      Alert({
+      confirm({
         title: 'Error',
         message: `Failed to ${isEditMode} ? 'update' : 'create'} tool: ${e.message}`,
       });
@@ -187,6 +188,7 @@ export default function EditBoxScreen() {
           saveLabel={isEditMode ? 'Update' : 'Create'}
         />
       </VStack>
+      <ConfirmDialog />
     </ScreenContainer>
   );
 }

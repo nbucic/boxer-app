@@ -9,7 +9,8 @@ import {
   useAnimatedScrollHandler,
   useSharedValue,
 } from 'react-native-reanimated';
-import { Alert } from '@/lib/helpers/alert/Alert';
+import { useConfirm } from '@/hooks/useConfirm';
+import { useNotify } from '@/hooks/useNotify';
 
 interface UseListScreenProps<T> {
   queryKey: string[];
@@ -19,6 +20,7 @@ interface UseListScreenProps<T> {
   itemName: string;
   loadingDataMessage: string;
   hideFabWhenScrolling?: boolean;
+  confirm: ReturnType<typeof useConfirm>['confirm'];
 }
 
 export const useListScreen = <T extends { id: string; name: string }>(
@@ -32,9 +34,11 @@ export const useListScreen = <T extends { id: string; name: string }>(
     itemName,
     loadingDataMessage = '',
     hideFabWhenScrolling = false,
+    confirm,
   } = props;
 
   const queryClient = useQueryClient();
+  const notify = useNotify();
   const activeSwipeableRef = useRef<SwipeableMethods | null>(null);
   const [layout, setLayout] = useState<Layout>('list');
   const [isLoadingLayout, setIsLoadingLayout] = useState<boolean>(true);
@@ -57,10 +61,7 @@ export const useListScreen = <T extends { id: string; name: string }>(
       void queryClient.invalidateQueries({ queryKey: queryKey });
     },
     onError: (e: Error) => {
-      Alert({
-        title: 'Error',
-        message: `Failed to delete ${itemName}: ${e.message}`,
-      });
+      notify.error('Error', `Failed to delete ${itemName}: ${e.message}`);
     },
   });
 
@@ -89,14 +90,15 @@ export const useListScreen = <T extends { id: string; name: string }>(
 
   const handleDelete = useCallback(
     (id: string, name: string) => {
-      Alert({
+      const rowToClose = activeSwipeableRef.current;
+      confirm({
         title: `Delete ${itemName}`,
         message: `Are you sure you want to delete ${name}?`,
-        onCancel: () => activeSwipeableRef.current?.close(),
+        onClose: () => rowToClose?.close(),
         onConfirm: () => mutate(id),
       });
     },
-    [mutate, itemName]
+    [mutate, itemName, confirm]
   );
 
   // Toggle helper for the UI

@@ -3,14 +3,7 @@ import { Heading } from '@/components/ui/heading';
 import { HStack } from '@/components/ui/hstack';
 import { VStack } from '@/components/ui/vstack';
 import { Button, ButtonIcon, ButtonText } from '@/components/ui/button';
-import {
-  Alert,
-  Linking,
-  Modal,
-  Platform,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { Linking, Modal, Platform, TouchableOpacity, View } from 'react-native';
 import * as Print from 'expo-print';
 import { Box as BoxType } from '@/types/box';
 import Svg from 'react-native-svg';
@@ -21,6 +14,7 @@ import { QRCodeDisplay } from '@/components/QRCode/Display';
 import { Text } from '@/components/ui/text';
 import { Box } from '@/components/ui/box';
 import { GlassCard } from '@/components/layout/GlassCard';
+import { useConfirm } from '@/hooks/useConfirm';
 
 export default function ShareBox({
   box,
@@ -31,6 +25,7 @@ export default function ShareBox({
   isOpen: boolean;
   onClose: () => void;
 }) {
+  const { confirm, ConfirmDialog } = useConfirm();
   const qrCodeRef = useRef<Svg>(null);
 
   const handleShare = useCallback(async () => {
@@ -59,8 +54,10 @@ export default function ShareBox({
           }
         );*/
       } catch (error) {
-        console.error('Error sharing file:', error);
-        Alert.alert('Sharing Error', 'Failed to open the share sheet.');
+        confirm({
+          title: 'Sharing Error',
+          message: 'Failed to open the share sheet.',
+        });
       }
     };
 
@@ -82,12 +79,15 @@ export default function ShareBox({
         const fileUri = file.uri;
         await shareLocalFile(fileUri);
       } catch (error) {
-        console.error('Error sharing', error);
+        confirm({ title: 'Error sharing', message: (error as Error).message });
       } finally {
         try {
           file.delete();
         } catch (cleanupError) {
-          console.warn('Failed to clean up temporary file:', cleanupError);
+          confirm({
+            title: 'Failed to clean up temporary file:',
+            message: (cleanupError as Error).message,
+          });
         }
       }
     });
@@ -131,7 +131,7 @@ export default function ShareBox({
           html,
         });
       } catch (error) {
-        console.error('Error printing', error);
+        confirm({ title: 'Error printing', message: (error as Error).message });
       }
     });
   }, [box.name]);
@@ -218,6 +218,7 @@ export default function ShareBox({
           </HStack>
         </VStack>
       </View>
+      <ConfirmDialog />
     </Modal>
   );
 }

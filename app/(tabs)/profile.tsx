@@ -1,4 +1,4 @@
-import { Alert, Platform, RefreshControl } from 'react-native';
+import { Platform, RefreshControl } from 'react-native';
 import { VStack } from '@/components/ui/vstack';
 import { useForm } from 'react-hook-form';
 import { Text } from '@/components/ui/text';
@@ -22,9 +22,11 @@ import { GlassCard } from '@/components/layout/GlassCard';
 import { ScreenContainer } from '@/components/layout/ScreenContainer';
 import { User, UserFormData } from '@/types/user';
 import { ThemeSelector } from '@/components/profile/ThemeSelector';
+import { useNotify } from '@/hooks/useNotify';
 
 export default function Profile() {
   const queryClient = useQueryClient();
+  const notify = useNotify();
   const { setColorScheme, colorScheme } = useColorScheme();
 
   const { data, status, error, isFetching, refetch, isRefetching } = useQuery<
@@ -48,11 +50,11 @@ export default function Profile() {
   const { mutate, isPending } = useMutation({
     mutationFn: (data: UserFormData) => updateCurrentUser(data),
     onSuccess: () => {
-      Alert.alert('Success', 'Profile updated successfully!');
+      notify.success('Profile updated!', 'Changes are live.');
       void queryClient.invalidateQueries({ queryKey: ['user'] });
     },
     onError: (e: Error) => {
-      Alert.alert('Error', `Failed to update profile: ${e.message}`);
+      notify.error('Update failed', e.message);
     },
   });
 
@@ -140,7 +142,6 @@ export default function Profile() {
 
         <Divider className={'my-2 bg-outline-100'} />
 
-        {/* 2. PERSONALIZATION (Segmented Control Look) */}
         <GlassCard title={'Personalization'}>
           <ThemeSelector currentTheme={colorScheme!} onThemeChange={setTheme} />
         </GlassCard>
@@ -151,7 +152,6 @@ export default function Profile() {
           title={'Danger zone'}
           className={'border-error-100 bg-error-0'}
         >
-          {/* 3. SIGN OUT (Solid Red Button) */}
           <Button action={'negative'} size={'lg'} onPress={handleSignOut}>
             <ButtonText className={'text-typography-0'}>Sign Out</ButtonText>
           </Button>

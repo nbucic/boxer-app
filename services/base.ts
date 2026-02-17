@@ -176,7 +176,6 @@ export abstract class BaseService<T> {
       .delete()
       .eq('id', id);
 
-    debugger;
     handleErrors(error, `Delete ${this.TABLE_NAME} error:`);
   }
 

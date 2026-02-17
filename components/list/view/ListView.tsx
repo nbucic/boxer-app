@@ -9,11 +9,13 @@ import {
 import { Action, ActionItem } from '@/components/swipeable/Action';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
 import { SwipeableMethods } from 'react-native-gesture-handler/ReanimatedSwipeable';
-import React, { memo, ReactElement, ReactNode, useRef } from 'react';
+import React, { memo, ReactElement, ReactNode, useRef, useState } from 'react';
 import clsx from 'clsx';
 import { HStack } from '@/components/ui/hstack';
 import { ChevronRight } from 'lucide-react-native';
 import { theme } from '@/constants/theme';
+import { rem } from '@/constants/utils';
+import { useInitialTheme } from '@/hooks/useInitialTheme';
 
 type ListViewOptions = {
   showPicture?: boolean;
@@ -64,13 +66,41 @@ const listViewOptions: ListViewOptions = {
 };
 
 export const ListView = memo((props: ListViewProps) => {
+  const { theme: initialTheme } = useInitialTheme();
   const { item, itemType, infotainment } = props;
+  const [isSwiped, setIsSwiped] = useState<boolean>(false);
   const options: ListViewOptions = { ...listViewOptions, ...props?.options };
+
+  const stylesheet = StyleSheet.create({
+    swipeable: {
+      marginTop: rem(0.375),
+      marginBottom: rem(0.375),
+      marginLeft: rem(1),
+      marginRight: rem(1),
+      borderWidth: rem(0.0625),
+      borderRadius: rem(0.375),
+      borderColor: theme.colors.primary[300],
+      boxShadow: theme.shadows['list-view-card-dark'],
+      overflow: 'hidden',
+      backgroundColor:
+        initialTheme === 'light'
+          ? theme.colors.background.light
+          : theme.colors.background.dark,
+      elevation: 5,
+    },
+  });
 
   const InternalToolListView = () => {
     const urlPrefix = itemType.toLowerCase();
     return (
-      <HStack className={'bg-background-0 min-h-20 items-center'}>
+      <HStack
+        className={clsx(
+          'bg-background-0 min-h-20 items-center',
+          isSwiped
+            ? 'border-l border-r border-primary-300'
+            : 'border-l-0 border-r-0'
+        )}
+      >
         {/* 1. Image section */}
         {options.showPicture && (
           <View className={'w-20 h-20 shrink-0 bg-background-100'}>
@@ -111,7 +141,7 @@ export const ListView = memo((props: ListViewProps) => {
               'p-2 bg-background-0 hover:bg-background-100 active:bg-background-100'
             )}
           >
-            <ChevronRight className={'w-5 h5 text-primary-500'} />
+            <ChevronRight className={'w-5 h-5 text-primary-500'} />
           </TouchableOpacity>
         </View>
       </HStack>
@@ -129,21 +159,19 @@ export const ListView = memo((props: ListViewProps) => {
           rowRef.current = ref;
           swipeProperties.setRef(ref);
         }}
-        onSwipeableWillOpen={() => swipeProperties.onSwipeStart(rowRef.current)}
+        onSwipeableWillOpen={() => {
+          swipeProperties.onSwipeStart(rowRef.current);
+          setIsSwiped(true);
+        }}
+        onSwipeableWillClose={() => setIsSwiped(false)}
         overshootFriction={8}
         leftThreshold={80}
         rightThreshold={80}
         renderLeftActions={() => (
-          <Action
-            items={swipeProperties.renderLeftActions || []}
-            place={'left'}
-          />
+          <Action items={swipeProperties.renderLeftActions} />
         )}
         renderRightActions={() => (
-          <Action
-            items={swipeProperties.renderRightActions || []}
-            place={'right'}
-          />
+          <Action items={swipeProperties.renderRightActions} />
         )}
       >
         <InternalToolListView />
@@ -160,20 +188,4 @@ export const ListView = memo((props: ListViewProps) => {
       </View>
     );
   }
-});
-
-const stylesheet = StyleSheet.create({
-  swipeable: {
-    marginTop: '0.375rem' as any,
-    marginBottom: '0.375rem' as any,
-    marginLeft: '1rem' as any,
-    marginRight: '1rem' as any,
-    borderWidth: '0.0625rem' as any,
-    borderRadius: '0.375rem',
-    borderColor: theme.colors.primary[300],
-    boxShadow: theme.shadows['list-view-card-dark'],
-    overflow: 'hidden',
-    backgroundColor: theme.colors.background.dark,
-    elevation: 5,
-  },
 });

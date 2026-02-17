@@ -62,11 +62,10 @@ export const ScreenContainer = ({
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
       className={'flex-1 bg-background-0'}
+      style={{ paddingTop: insets.top }}
     >
       {header}
-      <Box className={containerClass} style={{ paddingTop: insets.top }}>
-        {content}
-      </Box>
+      <Box className={containerClass}>{content}</Box>
     </KeyboardAvoidingView>
   );
 };

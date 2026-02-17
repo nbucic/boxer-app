@@ -11,6 +11,7 @@ import { Layout } from '@/types';
 import { useQueryClient } from '@tanstack/react-query';
 import { SwipeAction, SwipeProperties } from '@/types/swipe';
 import { SwipeableMethods } from 'react-native-gesture-handler/ReanimatedSwipeable';
+import { useConfirm } from '@/hooks/useConfirm';
 
 interface EntityListScreenConfig<T extends { id: string; name: string }> {
   // Query configuration
@@ -63,7 +64,8 @@ interface EntityListScreenConfig<T extends { id: string; name: string }> {
   customDeleteHandler?: (
     id: string,
     name: string,
-    defaultHandler: () => void
+    defaultHandler: () => void,
+    confirm: ReturnType<typeof useConfirm>['confirm']
   ) => void;
 }
 
@@ -93,6 +95,7 @@ export function EntityListScreen<T extends { id: string; name: string }>(
   } = config;
 
   const queryClient = useQueryClient();
+  const { confirm, ConfirmDialog } = useConfirm();
 
   const {
     data,
@@ -115,6 +118,7 @@ export function EntityListScreen<T extends { id: string; name: string }>(
     itemName,
     loadingDataMessage,
     hideFabWhenScrolling: true,
+    confirm,
   });
 
   // Prefetch item data for faster edit screen loading
@@ -140,8 +144,9 @@ export function EntityListScreen<T extends { id: string; name: string }>(
   };
 
   const handleDeleteClick = (id: string, name: string) => {
+    const performDelete = () => handleDelete(id, name);
     if (customDeleteHandler) {
-      customDeleteHandler(id, name, () => handleDelete(id, name));
+      customDeleteHandler(id, name, performDelete, confirm);
     } else {
       handleDelete(id, name);
     }
@@ -226,6 +231,7 @@ export function EntityListScreen<T extends { id: string; name: string }>(
           onPress={() => router.push(createRoute)}
           scrollOffset={scrollOffset}
         />
+        <ConfirmDialog />
       </ScreenContainer>
     )
   );

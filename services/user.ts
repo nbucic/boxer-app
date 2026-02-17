@@ -46,6 +46,8 @@ export const updateCurrentUser = async (
       asset: new_asset,
       bucket: 'avatar',
     });
+  } else {
+    delete data.avatar_url;
   }
 
   const { error: upsertError } = await supabase.from('profiles').upsert(data);

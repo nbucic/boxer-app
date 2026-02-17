@@ -12,11 +12,10 @@ export type ActionItem = {
 };
 
 type ActionProps = {
-  items: ActionItem[];
-  place: 'left' | 'right';
+  items?: ActionItem[];
 };
 
-export const Action = ({ items }: ActionProps) => (
+export const Action = ({ items = [] }: ActionProps) => (
   <View className={'flex flex-row justify-start'}>
     <HStack>
       {items.map((item, index) => {

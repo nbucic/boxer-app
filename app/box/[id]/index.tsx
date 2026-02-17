@@ -74,7 +74,7 @@ export default function BoxDetailsScreen() {
         {box?.image_url ? (
           <Image
             source={{ uri: box.image_url }}
-            className={'w-full aspect-square rounded-lg'}
+            className={'w-full aspect-square'}
             resizeMode={'contain'}
           />
         ) : (

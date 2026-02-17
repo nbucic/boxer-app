@@ -12,10 +12,11 @@ import { FormField } from '@/components/common/FormField';
 import { FormActions } from '@/components/form/FormActions';
 import { GlassCard } from '@/components/layout/GlassCard';
 import { ScreenContainer } from '@/components/layout/ScreenContainer';
-import { Alert } from '@/lib/helpers/alert/Alert';
+import { useConfirm } from '@/hooks/useConfirm';
 
 export default function EditLocationScreen() {
   const { id: locationId } = useLocalSearchParams<{ id: string }>();
+  const { confirm, ConfirmDialog } = useConfirm();
   const queryClient = useQueryClient();
   const isEditMode = !!locationId;
 
@@ -59,7 +60,7 @@ export default function EditLocationScreen() {
       router.navigate('/(tabs)/locations');
     },
     onError: (e: Error) => {
-      Alert({
+      confirm({
         title: 'Error',
         message: `Failed to ${isEditMode ? 'update' : 'create'} location: ${e.message}`,
       });
@@ -84,12 +85,12 @@ export default function EditLocationScreen() {
       header={
         <ListHeader
           backButton={true}
-          title={isEditMode ? `Edit ${existingLocation?.name}` : 'New location'}
           subtitle={
             isEditMode
               ? 'Update details for this place'
               : 'Add a new spot to organize your boxes'
           }
+          title={isEditMode ? `Edit ${existingLocation?.name}` : 'New location'}
         />
       }
     >
@@ -129,6 +130,7 @@ export default function EditLocationScreen() {
           saveLabel={isEditMode ? 'Update' : 'Create'}
         />
       </VStack>
+      <ConfirmDialog />
     </ScreenContainer>
   );
 }

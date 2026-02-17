@@ -14,13 +14,14 @@ import { ScreenContainer } from '@/components/layout/ScreenContainer';
 import { GlassCard } from '@/components/layout/GlassCard';
 import { FormField } from '@/components/common/FormField';
 import { FormActions } from '@/components/form/FormActions';
-import { Alert } from '@/lib/helpers/alert/Alert';
+import { useConfirm } from '@/hooks/useConfirm';
 
 export default function EditToolScreen() {
   const { id: toolId, boxId } = useLocalSearchParams<{
     id: string;
     boxId?: string;
   }>();
+  const { confirm, ConfirmDialog } = useConfirm();
   const queryClient = useQueryClient();
   const isEditMode = !!toolId;
   const descriptionInputRef = useRef<TextInput>(null);
@@ -68,7 +69,7 @@ export default function EditToolScreen() {
       router.navigate('/');
     },
     onError: (e: Error) => {
-      Alert({
+      confirm({
         title: 'Error',
         message: `Failed to ${isEditMode} ? 'update' : 'create'} tool: ${e.message}`,
       });
@@ -153,6 +154,7 @@ export default function EditToolScreen() {
           saveLabel={isEditMode ? 'Update' : 'Create'}
         />
       </VStack>
+      <ConfirmDialog />
     </ScreenContainer>
   );
 }
