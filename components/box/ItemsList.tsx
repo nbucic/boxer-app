@@ -1,4 +1,9 @@
-import { ListRenderItem, Platform, RefreshControl } from 'react-native';
+import {
+  FlatList,
+  ListRenderItem,
+  Platform,
+  RefreshControl,
+} from 'react-native';
 import { ComponentType, ReactElement } from 'react';
 import { SelectSearchable } from '@/types';
 import Animated from 'react-native-reanimated';
@@ -25,7 +30,7 @@ export const ItemsList = <T extends SelectSearchable>({
   onScroll,
 }: ItemsListProps<T>) => {
   return (
-    <Animated.FlatList
+    <FlatList
       data={data}
       key={`items-${numColumns}`}
       keyExtractor={(item) => item.id.toString()}

@@ -24,7 +24,10 @@
               "pathPrefix": "/"
             }
           ],
-          "category": ["BROWSABLE", "DEFAULT"]
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
         }
       ],
       "edgeToEdgeEnabled": true,
@@ -76,6 +79,9 @@
       "eas": {
         "projectId": "6d2d4084-28e2-44c2-8ce9-fd45a1a2ac05"
       }
+    },
+    "ios": {
+      "bundleIdentifier": "com.nbucic.boxerapp"
     }
   }
 }

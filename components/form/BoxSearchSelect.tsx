@@ -1,4 +1,4 @@
-import { forwardRef } from 'react';
+import { forwardRef, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { boxService } from '@/services/box';
 import { SearchSelectBase } from '@/components/form/SearchSelectBase';

@@ -2,7 +2,6 @@ import { Tabs } from 'expo-router';
 import React from 'react';
 import { Platform, Pressable, View } from 'react-native';
 import * as Haptics from 'expo-haptics';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { Icon } from '@/components/ui/icon';
 import {
@@ -39,16 +38,11 @@ const screens: Array<iconProps> = [
 ];
 
 const CustomTabBar = ({ state, navigation }: BottomTabBarProps) => {
-  const insets = useSafeAreaInsets();
-
   return (
     <View
       className={
         'absolute bottom-5 left-2 right-2 overflow-hidden rounded-full bg-background-950'
       }
-      style={{
-        marginBottom: insets.bottom + (Platform.OS === 'web' ? 0 : 0),
-      }}
     >
       <View
         className={'absolute top-0 left-2 right-2 h-[1px] bg-outline-100/50'}

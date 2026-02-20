@@ -1,13 +1,9 @@
 import { ReactElement, ReactNode } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import clsx from 'clsx';
-import {
-  KeyboardAvoidingView,
-  Platform,
-  RefreshControlProps,
-  ScrollView,
-} from 'react-native';
+import { RefreshControlProps } from 'react-native';
 import { Box } from '@/components/ui/box';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 
 interface ScreenContainerProps {
   children: ReactNode;
@@ -31,41 +27,38 @@ export const ScreenContainer = ({
 }: ScreenContainerProps) => {
   const insets = useSafeAreaInsets();
 
-  const containerClass = clsx(
-    'flex-1 bg-background-0',
-    !noPadding && 'px-6',
-    extraClasses?.contentView
-  );
-
-  const content = scrollable ? (
-    <ScrollView
-      className={clsx('flex-1', extraClasses?.scrollableView)}
-      contentContainerStyle={{ paddingBottom: insets.bottom + 20 }}
-      automaticallyAdjustKeyboardInsets={true}
-      keyboardDismissMode={'on-drag'}
-      refreshControl={refreshControl}
-      testID={'scroll-view'}
-    >
-      {children}
-    </ScrollView>
-  ) : (
-    <Box
-      className={clsx('flex-1', extraClasses?.scrollableView)}
-      style={{ paddingBottom: insets.bottom }}
-    >
-      {children}
-    </Box>
-  );
-
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
+    <Box
       className={'flex-1 bg-background-0'}
       style={{ paddingTop: insets.top }}
     >
       {header}
-      <Box className={containerClass}>{content}</Box>
-    </KeyboardAvoidingView>
+      <Box
+        className={clsx(
+          'flex-1 bg-background-0',
+          !noPadding && 'px-6',
+          extraClasses?.contentView
+        )}
+      >
+        {scrollable ? (
+          <KeyboardAwareScrollView
+            className={clsx(extraClasses?.scrollableView)}
+            contentContainerStyle={{ paddingBottom: insets.bottom + 20 }}
+            automaticallyAdjustKeyboardInsets={true}
+            keyboardDismissMode={'on-drag'}
+            refreshControl={refreshControl}
+          >
+            {children}
+          </KeyboardAwareScrollView>
+        ) : (
+          <Box
+            className={clsx('flex-1', extraClasses?.scrollableView)}
+            style={{ paddingBottom: insets.bottom }}
+          >
+            {children}
+          </Box>
+        )}
+      </Box>
+    </Box>
   );
 };

@@ -9,6 +9,7 @@ import { MaintenanceScreen } from '@/components/layout/Maintenance';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useInitialTheme } from '@/hooks/useInitialTheme';
 import { validateEnvironment } from '@/lib/env-validator';
+import { KeyboardProvider } from 'react-native-keyboard-controller';
 
 const queryClient = new QueryClient();
 
@@ -57,15 +58,17 @@ export default function RootLayout() {
 
   return (
     <SafeAreaProvider>
-      <GestureHandlerRootView className={'flex-1'}>
-        <GluestackUIProvider mode={theme}>
-          <QueryClientProvider client={queryClient}>
-            <AuthProvider>
-              <AppLayout />
-            </AuthProvider>
-          </QueryClientProvider>
-        </GluestackUIProvider>
-      </GestureHandlerRootView>
+      <KeyboardProvider>
+        <GestureHandlerRootView>
+          <GluestackUIProvider mode={theme}>
+            <QueryClientProvider client={queryClient}>
+              <AuthProvider>
+                <AppLayout />
+              </AuthProvider>
+            </QueryClientProvider>
+          </GluestackUIProvider>
+        </GestureHandlerRootView>
+      </KeyboardProvider>
     </SafeAreaProvider>
   );
 }

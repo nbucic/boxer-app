@@ -1,5 +1,17 @@
-import React, { forwardRef, useEffect, useImperativeHandle, useState, } from 'react';
-import { FlatList, KeyboardAvoidingView, Modal, Platform, TouchableOpacity, View, } from 'react-native';
+import React, {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useState,
+} from 'react';
+import {
+  FlatList,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { Text } from '@/components/ui/text';
 import { ChevronDownIcon, SearchIcon, XIcon } from 'lucide-react-native';
 import { VStack } from '@/components/ui/vstack';
@@ -12,6 +24,13 @@ import { clsx } from 'clsx';
 import { Input, InputField, InputIcon, InputSlot } from '@/components/ui/input';
 import { DataLoader } from '@/components/layout/DataLoader';
 import { FilterProp, OptionsProp } from '@/services/base';
+import {
+  Actionsheet,
+  ActionsheetBackdrop,
+  ActionsheetContent,
+  ActionsheetDragIndicator,
+  ActionsheetDragIndicatorWrapper,
+} from '@/components/ui/select/select-actionsheet';
 
 const INITIAL_BOXES_SHOWN = 5;
 
@@ -80,7 +99,55 @@ export const SearchSelectBase = forwardRef<
       setModalVisible(false);
     };
 
-    return (
+    let a = 1;
+    // a = 2;
+    return a !== 1 ? (
+      <>
+        <TouchableOpacity
+          activeOpacity={0.7}
+          className={clsx(
+            'border-outline-100 bg-background-0',
+            'border-background-300 flex-row overflow-hidden content-center items-center',
+            'h-11 rounded border px-3',
+            modalVisible && 'border-primary-500 shadow-soft-1',
+            disabled && 'opacity-50 bg-background-50'
+          )}
+          onPress={() => {
+            setModalVisible(true);
+          }}
+          disabled={disabled}
+        >
+          <Text
+            className={clsx(
+              'flex-1 text-lg web:outline-0',
+              value ? 'text-typography-900' : 'text-typography-400',
+              'web:data-[disabled=true]:cursor-not-allowed overflow-hidden overflow-ellipsis whitespace-nowrap'
+            )}
+            {...(Platform.OS === 'android' && {
+              numberOfLines: 1,
+              ellipsizeMode: 'tail',
+            })}
+          >
+            {value || placeholder}
+          </Text>
+          {!disabled && (
+            <ChevronDownIcon size={20} className={'text-typography-400'} />
+          )}
+        </TouchableOpacity>
+
+        <Actionsheet
+          isOpen={modalVisible}
+          onClose={() => setModalVisible(false)}
+        >
+          <ActionsheetBackdrop />
+          <ActionsheetContent>
+            <ActionsheetDragIndicatorWrapper>
+              <ActionsheetDragIndicator />
+            </ActionsheetDragIndicatorWrapper>
+          </ActionsheetContent>
+        </Actionsheet>
+      </>
+    ) : (
       <>
         <TouchableOpacity
           activeOpacity={0.7}
