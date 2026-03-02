@@ -15,9 +15,7 @@ final class ConferenceController extends AbstractController
     #[Route('/', name: 'homepage')]
     public function index(ConferenceRepository $conferenceRepository): Response
     {
-        return $this->render('conference/index.html.twig', [
-            'conferences' => $conferenceRepository->findAll(),
-        ]);
+        return $this->render('conference/index.html.twig');
     }
 
     #[Route('/conference/{id}', name: 'conference')]
